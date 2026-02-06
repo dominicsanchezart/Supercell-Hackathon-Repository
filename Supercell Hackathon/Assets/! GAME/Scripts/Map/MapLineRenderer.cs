@@ -8,8 +8,13 @@ public class MapLineRenderer : MonoBehaviour
 	public Color activeColor = new Color(1f, 1f, 1f, 0.8f);
 	public Color dimmedColor = new Color(0.4f, 0.4f, 0.4f, 0.3f);
 
+	[Header("Pulse (active lines only)")]
+	public float pulseSpeed = 2f;
+	public float pulseMin = 0.4f;
+	public float pulseMax = 1f;
+
 	LineRenderer lr;
-	Color targetColor;
+	bool isActive;
 
 	void Awake()
 	{
@@ -36,12 +41,31 @@ public class MapLineRenderer : MonoBehaviour
 
 	public void SetActivePath(bool active)
 	{
-		targetColor = active ? activeColor : dimmedColor;
+		isActive = active;
 
-		if (lr != null)
+		if (!active)
 		{
-			lr.startColor = targetColor;
-			lr.endColor = targetColor;
+			// Dimmed lines get static color, no pulse
+			if (lr != null)
+			{
+				lr.startColor = dimmedColor;
+				lr.endColor = dimmedColor;
+			}
 		}
+	}
+
+	void Update()
+	{
+		if (!isActive || lr == null) return;
+
+		// Pulse brightness between pulseMin and pulseMax
+		float t = (Mathf.Sin(Time.time * pulseSpeed) + 1f) * 0.5f; // 0..1
+		float intensity = Mathf.Lerp(pulseMin, pulseMax, t);
+
+		Color pulsed = activeColor * intensity;
+		pulsed.a = Mathf.Lerp(activeColor.a * pulseMin, activeColor.a, t);
+
+		lr.startColor = pulsed;
+		lr.endColor = pulsed;
 	}
 }

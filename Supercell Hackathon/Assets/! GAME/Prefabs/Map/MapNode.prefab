@@ -86,9 +86,12 @@ MonoBehaviour:
   smoothSpeed: 12
   iconRenderer: {fileID: 7564597137266130762}
   backgroundRenderer: {fileID: 8090425376855040641}
-  availableColor: {r: 1, g: 1, b: 1, a: 1}
-  unavailableColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.7}
-  completedColor: {r: 0.3, g: 0.3, b: 0.3, a: 0.5}
+  bgAvailableColor: {r: 1, g: 1, b: 1, a: 1}
+  bgUnavailableColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  bgCompletedColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
+  iconAvailableColor: {r: 0.15, g: 0.15, b: 0.15, a: 1}
+  iconUnavailableColor: {r: 0.35, g: 0.35, b: 0.35, a: 0.78431374}
+  iconCompletedColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.78431374}
   pulsateSpeed: 2
   pulsateAmount: 0.15
   owner: {fileID: 0}

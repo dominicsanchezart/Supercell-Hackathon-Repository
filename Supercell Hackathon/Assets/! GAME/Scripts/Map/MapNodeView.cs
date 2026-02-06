@@ -10,15 +10,15 @@ public class MapNodeView : MonoBehaviour
 	[SerializeField] SpriteRenderer iconRenderer;
 	[SerializeField] SpriteRenderer backgroundRenderer;
 
-	[Header("Background Colors")]
+	[Header("Background Colors (keep alpha=1 to hide lines)")]
 	public Color bgAvailableColor = Color.white;
-	public Color bgUnavailableColor = new Color(0.5f, 0.5f, 0.5f, 0.7f);
-	public Color bgCompletedColor = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+	public Color bgUnavailableColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+	public Color bgCompletedColor = new Color(0.35f, 0.35f, 0.35f, 1f);
 
 	[Header("Icon Colors")]
 	public Color iconAvailableColor = new Color(0.15f, 0.15f, 0.15f, 1f);
-	public Color iconUnavailableColor = new Color(0.35f, 0.35f, 0.35f, 0.5f);
-	public Color iconCompletedColor = new Color(0.2f, 0.2f, 0.2f, 0.35f);
+	public Color iconUnavailableColor = new Color(0.4f, 0.4f, 0.4f, 0.7f);
+	public Color iconCompletedColor = new Color(0.25f, 0.25f, 0.25f, 0.5f);
 
 	[Header("Pulsate")]
 	public float pulsateSpeed = 2f;
@@ -114,6 +114,11 @@ public class MapNodeView : MonoBehaviour
 	{
 		if (owner != null)
 			owner.OnNodeClicked(this);
+	}
+
+	public void UpdateBaseScale(float newScale)
+	{
+		baseScale = Vector3.one * newScale;
 	}
 
 	public MapNodeData GetNodeData()

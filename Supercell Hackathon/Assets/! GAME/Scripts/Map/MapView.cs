@@ -9,20 +9,33 @@ public class MapView : MonoBehaviour
 	public GameObject nodeViewPrefab;
 	public GameObject linePrefab;
 	public MapIconSet iconSet;
+	public Camera mapCamera;
 
 	[Header("Layout")]
 	public float rowSpacing = 1.5f;
 	public float laneSpacing = 2.0f;
 	public float mapCenterX = 0f;
 
+	[Header("Node Size")]
+	[Range(0.2f, 3f)] public float nodeScale = 1f;
+
 	[Header("Scrolling")]
 	public float scrollSpeed = 5f;
 	public float scrollSmooth = 8f;
 	public float scrollDragSpeed = 0.01f;
 
+	[Header("Zoom")]
+	[Range(1f, 20f)] public float zoomLevel = 5f;
+	public float zoomSpeed = 1f;
+	public float zoomMin = 2f;
+	public float zoomMax = 15f;
+
 	MapData mapData;
 	readonly Dictionary<string, MapNodeView> nodeViews = new();
 	readonly List<MapLineRenderer> lines = new();
+
+	// When false, disables node clicks and scroll/zoom input
+	[HideInInspector] public bool interactable = true;
 
 	float targetScrollY;
 	float currentScrollY;
@@ -31,6 +44,7 @@ public class MapView : MonoBehaviour
 
 	bool isDragging;
 	float lastDragY;
+	float lastNodeScale;
 
 	public void Initialize(MapData data)
 	{
@@ -41,6 +55,8 @@ public class MapView : MonoBehaviour
 		SpawnLines();
 		RefreshAvailability();
 
+		lastNodeScale = nodeScale;
+
 		// Calculate scroll bounds
 		float mapHeight = mapData.totalRows * rowSpacing;
 		maxScrollY = 0f;
@@ -50,6 +66,10 @@ public class MapView : MonoBehaviour
 		targetScrollY = maxScrollY;
 		currentScrollY = maxScrollY;
 		ApplyScroll();
+
+		// Apply initial zoom
+		if (mapCamera != null)
+			mapCamera.orthographicSize = zoomLevel;
 
 		// If player has progressed, scroll to their position
 		if (!string.IsNullOrEmpty(mapData.currentNodeId))
@@ -88,6 +108,7 @@ public class MapView : MonoBehaviour
 
 			GameObject obj = Instantiate(nodeViewPrefab, nodeContainer);
 			obj.transform.localPosition = localPos;
+			obj.transform.localScale = Vector3.one * nodeScale;
 			obj.name = $"Node_{nodeData.nodeId}";
 
 			MapNodeView view = obj.GetComponent<MapNodeView>();
@@ -115,8 +136,6 @@ public class MapView : MonoBehaviour
 				MapNodeData targetNode = mapData.GetNode(targetId);
 				if (targetNode == null) continue;
 
-				// Lines use local space (useWorldSpace = false)
-				// so positions are relative to lineContainer
 				Vector3 startPos = GetNodeLocalPosition(sourceNode);
 				Vector3 endPos = GetNodeLocalPosition(targetNode);
 
@@ -136,11 +155,23 @@ public class MapView : MonoBehaviour
 
 	Vector3 GetNodeLocalPosition(MapNodeData node)
 	{
-		// Lane 1 = center, lane 0 = left, lane 2 = right
-		// Sub-lanes: -1 = far left, 3 = far right
-		float x = mapCenterX + (node.lane - 1) * laneSpacing + node.offsetX;
+		// Center the grid: offset by half the total column count so middle column sits at mapCenterX
+		float centerOffset = (mapData != null) ? (mapData.totalRows > 0 ? GetColumnCount() : 1f) : 1f;
+		float x = mapCenterX + (node.lane - centerOffset * 0.5f + 0.5f) * laneSpacing + node.offsetX;
 		float y = node.row * rowSpacing + node.offsetY;
 		return new Vector3(x, y, 0f);
+	}
+
+	int GetColumnCount()
+	{
+		// Determine max column from the actual node data
+		int maxCol = 0;
+		for (int i = 0; i < mapData.nodes.Count; i++)
+		{
+			if (mapData.nodes[i].lane > maxCol)
+				maxCol = mapData.nodes[i].lane;
+		}
+		return maxCol + 1;
 	}
 
 	public void RefreshAvailability()
@@ -161,15 +192,17 @@ public class MapView : MonoBehaviour
 
 	bool IsConnectionOnAvailablePath(MapNodeData source, MapNodeData target)
 	{
-		// A connection is "active" if source is completed and target is available,
-		// or if source is available (pre-first-move starting connections)
-		if (source.isCompleted && target.isAvailable) return true;
-		if (source.isAvailable && !source.isCompleted) return true;
-		return false;
+		// Only highlight lines from the current node to its available children
+		if (mapData == null || string.IsNullOrEmpty(mapData.currentNodeId))
+			return false;
+
+		return source.nodeId == mapData.currentNodeId && target.isAvailable;
 	}
 
 	public void OnNodeClicked(MapNodeView nodeView)
 	{
+		if (!interactable) return;
+
 		MapNodeData data = nodeView.GetNodeData();
 		if (data == null || !data.isAvailable) return;
 
@@ -179,7 +212,6 @@ public class MapView : MonoBehaviour
 		}
 		else
 		{
-			// Debug mode: just mark as completed and refresh
 			Debug.Log($"Node selected: {data.nodeId} ({data.encounterType})");
 			data.isCompleted = true;
 			mapData.currentNodeId = data.nodeId;
@@ -188,7 +220,7 @@ public class MapView : MonoBehaviour
 		}
 	}
 
-	void RebuildLines()
+	public void RebuildLines()
 	{
 		for (int i = 0; i < lines.Count; i++)
 		{
@@ -202,14 +234,21 @@ public class MapView : MonoBehaviour
 	void Update()
 	{
 		HandleScrollInput();
+		HandleZoomInput();
 		SmoothScroll();
+		UpdateNodeScaleIfChanged();
 	}
 
 	void HandleScrollInput()
 	{
-		// Mouse wheel scroll — scroll up (positive delta) moves the map DOWN
-		// to reveal higher rows, which means subtracting from Y offset
+		if (!interactable) return;
+
 		float scroll = Input.mouseScrollDelta.y;
+
+		// If holding Ctrl, zoom instead of scroll
+		if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+			return;
+
 		if (Mathf.Abs(scroll) > 0.01f)
 		{
 			targetScrollY -= scroll * scrollSpeed;
@@ -237,10 +276,43 @@ public class MapView : MonoBehaviour
 		}
 	}
 
+	void HandleZoomInput()
+	{
+		if (!interactable) return;
+
+		// Ctrl + scroll to zoom
+		if (!(Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+			return;
+
+		float scroll = Input.mouseScrollDelta.y;
+		if (Mathf.Abs(scroll) > 0.01f)
+		{
+			zoomLevel -= scroll * zoomSpeed;
+			zoomLevel = Mathf.Clamp(zoomLevel, zoomMin, zoomMax);
+		}
+
+		if (mapCamera != null)
+			mapCamera.orthographicSize = Mathf.Lerp(mapCamera.orthographicSize, zoomLevel, Time.deltaTime * scrollSmooth);
+	}
+
+	void UpdateNodeScaleIfChanged()
+	{
+		if (Mathf.Approximately(nodeScale, lastNodeScale)) return;
+
+		lastNodeScale = nodeScale;
+		foreach (var kvp in nodeViews)
+		{
+			if (kvp.Value != null)
+			{
+				kvp.Value.transform.localScale = Vector3.one * nodeScale;
+				kvp.Value.UpdateBaseScale(nodeScale);
+			}
+		}
+	}
+
 	bool IsOverNode()
 	{
-		// Simple check: cast ray from mouse to see if we hit a node collider
-		Camera cam = Camera.main;
+		Camera cam = mapCamera != null ? mapCamera : Camera.main;
 		if (cam == null) return false;
 
 		Vector2 mouseWorld = cam.ScreenToWorldPoint(Input.mousePosition);
@@ -252,6 +324,10 @@ public class MapView : MonoBehaviour
 	{
 		currentScrollY = Mathf.Lerp(currentScrollY, targetScrollY, Time.deltaTime * scrollSmooth);
 		ApplyScroll();
+
+		// Smooth zoom
+		if (mapCamera != null)
+			mapCamera.orthographicSize = Mathf.Lerp(mapCamera.orthographicSize, zoomLevel, Time.deltaTime * scrollSmooth);
 	}
 
 	void ApplyScroll()

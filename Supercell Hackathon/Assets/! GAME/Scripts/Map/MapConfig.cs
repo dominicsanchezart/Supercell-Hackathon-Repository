@@ -3,23 +3,37 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Map Config", menuName = "Scriptable Objects/Map Config")]
 public class MapConfig : ScriptableObject
 {
-	[Header("Map Dimensions")]
+	[Header("Grid Dimensions")]
+	[Tooltip("Total floors (rows) including start and boss")]
 	public int totalRows = 15;
-	public int baseLanes = 3;
+	[Tooltip("Number of columns in the grid")]
+	public int columns = 5;
 
-	[Header("Encounter Weights")]
+	[Header("Path Generation")]
+	[Tooltip("Number of independent paths traced through the grid (StS uses 6)")]
+	public int pathCount = 6;
+
+	[Header("Encounter Weights (for open floors)")]
 	public float battleMinionWeight = 45f;
+	public float eliteWeight = 8f;
 	public float eventWeight = 22f;
-	public float campWeight = 15f;
-	public float shopWeight = 12f;
+	public float campWeight = 12f;
+	public float shopWeight = 10f;
 
-	[Header("Structure Rules")]
-	[Range(0f, 0.5f)] public float laneSplitChance = 0.15f;
-	[Range(0f, 0.5f)] public float laneConvergeChance = 0.10f;
-	[Range(0f, 1f)] public float adjacentConnectionChance = 0.30f;
-	[Range(0f, 0.5f)] public float nodeSkipChance = 0.15f;
-
-	[Header("Guaranteed Rows")]
-	[Tooltip("Number of rows before boss that are forced to Camp")]
+	[Header("Floor Rules")]
+	[Tooltip("Rows where encounter type is forced to Camp (e.g. mid-run rest)")]
+	public int[] guaranteedCampRows = { 7 };
+	[Tooltip("Number of rows before boss forced to Camp")]
 	public int campRowsBeforeBoss = 1;
+	[Tooltip("Minimum row before elites/camps/shops can appear")]
+	public int minRowForAdvancedTypes = 4;
+
+	[Header("Constraint Rules")]
+	[Tooltip("Max consecutive BattleMinion encounters along a path")]
+	public int maxConsecutiveBattles = 3;
+	[Tooltip("Max shops per row")]
+	public int maxShopsPerRow = 1;
+
+	// --- Legacy compatibility (baseLanes used by MapView for centering) ---
+	[HideInInspector] public int baseLanes => columns;
 }

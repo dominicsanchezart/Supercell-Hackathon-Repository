@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -17,6 +18,9 @@ public class RunManager : MonoBehaviour
 	public string eventSceneName = "LVL_Event";
 
 	public RunState State { get; private set; }
+
+	// Track which encounter scene is currently loaded additively
+	string loadedEncounterScene;
 
 	void Awake()
 	{
@@ -68,12 +72,73 @@ public class RunManager : MonoBehaviour
 			_ => mapSceneName
 		};
 
-		SceneManager.LoadScene(sceneName);
+		StartCoroutine(LoadEncounterAdditive(sceneName));
 	}
 
 	public void OnEncounterComplete()
 	{
-		LoadMapScene();
+		StartCoroutine(UnloadEncounterScene());
+	}
+
+	MapSceneController FindMapController()
+	{
+		return Object.FindAnyObjectByType<MapSceneController>();
+	}
+
+	void SetMapInteractable(bool value)
+	{
+		MapView mapView = Object.FindAnyObjectByType<MapView>();
+		if (mapView != null)
+			mapView.interactable = value;
+	}
+
+	IEnumerator LoadEncounterAdditive(string sceneName)
+	{
+		// Disable map interaction and hide map visuals
+		SetMapInteractable(false);
+		MapSceneController mapController = FindMapController();
+		if (mapController != null)
+			mapController.SetVisualsActive(false);
+
+		// Load encounter scene on top of map
+		AsyncOperation load = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+		yield return load;
+
+		loadedEncounterScene = sceneName;
+
+		// Set the encounter scene as the active scene
+		Scene encounterScene = SceneManager.GetSceneByName(sceneName);
+		if (encounterScene.IsValid())
+			SceneManager.SetActiveScene(encounterScene);
+	}
+
+	IEnumerator UnloadEncounterScene()
+	{
+		if (!string.IsNullOrEmpty(loadedEncounterScene))
+		{
+			Scene scene = SceneManager.GetSceneByName(loadedEncounterScene);
+			if (scene.IsValid() && scene.isLoaded)
+			{
+				AsyncOperation unload = SceneManager.UnloadSceneAsync(loadedEncounterScene);
+				yield return unload;
+			}
+			loadedEncounterScene = null;
+		}
+
+		// Re-activate the map scene
+		Scene mapScene = SceneManager.GetSceneByName(mapSceneName);
+		if (mapScene.IsValid())
+			SceneManager.SetActiveScene(mapScene);
+
+		// Show map visuals and re-enable interaction
+		MapSceneController mapController = FindMapController();
+		if (mapController != null)
+		{
+			mapController.SetVisualsActive(true);
+			mapController.RefreshMap();
+		}
+
+		SetMapInteractable(true);
 	}
 
 	void LoadMapScene()

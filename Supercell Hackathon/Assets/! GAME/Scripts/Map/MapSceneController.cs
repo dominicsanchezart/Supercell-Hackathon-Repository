@@ -3,18 +3,18 @@ using UnityEngine;
 public class MapSceneController : MonoBehaviour
 {
 	[SerializeField] MapView mapView;
+	[Tooltip("Parent GameObject containing all map visuals. Disabled when an encounter scene loads.")]
+	public GameObject mapVisuals;
 
 	void Start()
 	{
 		if (RunManager.Instance == null)
 		{
-			// No RunManager at all: generate a throwaway test map
 			Debug.LogWarning("RunManager not found. Generating test map.");
 			GenerateTestMap();
 			return;
 		}
 
-		// RunManager exists but no run started yet: auto-start one without reloading
 		if (RunManager.Instance.State == null || RunManager.Instance.State.mapData == null)
 		{
 			Debug.Log("No active run. Auto-starting a new run.");
@@ -24,12 +24,28 @@ public class MapSceneController : MonoBehaviour
 		mapView.Initialize(RunManager.Instance.State.mapData);
 	}
 
+	public void SetVisualsActive(bool active)
+	{
+		if (mapVisuals != null)
+			mapVisuals.SetActive(active);
+	}
+
+	// Called by RunManager when returning from an encounter scene
+	public void RefreshMap()
+	{
+		if (RunManager.Instance != null && RunManager.Instance.State != null)
+		{
+			mapView.RefreshAvailability();
+			mapView.RebuildLines();
+		}
+	}
+
 	void GenerateTestMap()
 	{
-		// For testing the map scene standalone without RunManager
 		MapConfig testConfig = ScriptableObject.CreateInstance<MapConfig>();
 		testConfig.totalRows = 15;
-		testConfig.baseLanes = 3;
+		testConfig.columns = 5;
+		testConfig.pathCount = 6;
 
 		MapData testMap = MapGenerator.Generate(testConfig, Random.Range(0, int.MaxValue));
 		mapView.Initialize(testMap);
