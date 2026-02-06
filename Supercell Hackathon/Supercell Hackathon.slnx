@@ -1,4 +1,5 @@
 ﻿<Solution>
   <Project Path="VFolders.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="VInspector.csproj" />
 </Solution>
