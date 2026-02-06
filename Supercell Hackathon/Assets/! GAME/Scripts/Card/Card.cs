@@ -53,6 +53,14 @@ public class Card : MonoBehaviour
 		SetupText();
 	}
 
+	public void SetCardData(CardData data)
+	{
+		cardData = data;
+		SetupVisuals();
+		SetupBorder();
+		SetupText();
+	}
+
 	private void SetupBorder()
 	{
 		// if borders are the same then use single border, otherwise split

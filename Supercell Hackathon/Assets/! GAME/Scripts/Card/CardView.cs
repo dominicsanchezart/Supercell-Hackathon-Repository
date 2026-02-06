@@ -5,9 +5,6 @@ public class CardView : MonoBehaviour
 {
     public float smoothSpeed = 12f;
 
-    Vector3 targetPos;
-    Vector3 targetScale = Vector3.one;
-
     [HideInInspector] public Hand owner;
 
     SpriteRenderer[] sprites;
@@ -19,7 +16,7 @@ public class CardView : MonoBehaviour
 	[SerializeField] private Canvas canvas;
 
     int[] relativeOrders;
-	int baseSortingOrder = 6;
+	int canvasSortingLayer = 20;
 
 
 
@@ -34,27 +31,6 @@ public class CardView : MonoBehaviour
         }
     }
 
-    void Update()
-    {
-        transform.localPosition = Vector3.Lerp(
-            transform.localPosition,
-            targetPos,
-            Time.deltaTime * smoothSpeed
-        );
-
-        transform.localScale = Vector3.Lerp(
-            transform.localScale,
-            targetScale,
-            Time.deltaTime * smoothSpeed
-        );
-    }
-
-    public void SetTarget(Vector3 pos, Vector3 scale)
-    {
-        targetPos = pos;
-        targetScale = scale;
-    }
-
     public void SetSortingOrder(int baseOrder)
     {
         for (int i = 0; i < sprites.Length; i++)
@@ -62,7 +38,7 @@ public class CardView : MonoBehaviour
             sprites[i].sortingOrder = baseOrder + relativeOrders[i];
         }
 
-		canvas.sortingOrder = baseSortingOrder + baseOrder;
+		canvas.sortingOrder = canvasSortingLayer + baseOrder;
     }
 
 	public void SetMasked(bool enabled)

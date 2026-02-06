@@ -3,11 +3,17 @@ using UnityEngine;
 
 public class Hand : MonoBehaviour
 {
+	public CharacterInfo characterInfo;
     public List<CardData> cardsInHand = new();
     public List<CardData> drawPile = new();
     public List<CardData> discardPile = new();
+    public List<CardData> exhaustPile = new();
 
 
+	[Header("Prefabs")]
+	[SerializeField] private GameObject cardPrefab;
+	[SerializeField] private bool isPlayer;
+	[SerializeField] private Arena arena;
 
 	[Header("Bounds")]
 	public float maxHandWidth = 10f;
@@ -15,16 +21,15 @@ public class Hand : MonoBehaviour
 	[Header("Curve Shape")]
 	public float sideLift = 0.6f;
 	public float curveExponent = 1.6f;
+	public float smoothSpeed = 12f;
 
     [Header("Layout")]
     public float spacing = 1.5f;
-    public float curveAmount = 0.4f;
     public float depthSpacing = 0.01f;
 
     [Header("Selection")]
     public float selectedLift = 1.2f;
     public float selectedScale = 1.3f;
-    public float scrollCooldown = 0.1f;
 
 	[Header("Selection Rotation")]
 	public float maxLookRotation = 15f;
@@ -34,16 +39,11 @@ public class Hand : MonoBehaviour
 
     readonly List<CardView> cards = new();
     int selectedIndex = 0;
-    float lastScrollTime;
 	public int selectedSortingBoost = 1000;
 	float scrollIndex;
+	const int SORTING_STRIDE = 100;
 
 
-
-	private void OnValidate()
-	{
-		RefreshLayout();
-	}
 
     void Awake()
     {
@@ -63,14 +63,175 @@ public class Hand : MonoBehaviour
 
         selectedIndex = cards.Count > 0 ? cards.Count / 2 : 0;
 		scrollIndex = selectedIndex;
-        RefreshLayout();
     }
+
+	private void Start()
+	{
+		StartBattle();
+	}
 
 	void Update()
 	{
 		HandleScroll();
 		UpdateSelectedCardRotation();
+		RefreshLayout();
 	}
+
+	public void StartBattle()
+	{
+		drawPile.Clear();
+		discardPile.Clear();
+		exhaustPile.Clear();
+		cardsInHand.Clear();
+
+		foreach (CardData card in characterInfo.GetInventory().deck)
+			drawPile.Add(card);
+	}
+
+	[ContextMenu("Test Draw Hand")]
+	public void StartTurn()
+	{
+		characterInfo.ResetEnergy();
+		DrawNewHand();
+	}
+
+	[ContextMenu("Test Discard Hand")]
+	public void EndTurn()
+	{
+		DiscardHand();
+	}
+
+	#region Card Logic
+
+	public void DrawCardFromDeck()
+	{
+		if (drawPile.Count == 0)
+		{
+			if (discardPile.Count == 0)
+				return;
+
+			ReshuffleDiscardIntoDraw();
+		}
+
+		CardData data = drawPile[0];
+		drawPile.RemoveAt(0);
+		cardsInHand.Add(data);
+
+		SpawnCardView(data);
+	}
+
+	public void UseCard()
+	{
+		if (selectedIndex < 0 || selectedIndex >= cards.Count)
+			return;
+
+		CardView view = cards[selectedIndex];
+		Card card = view.GetComponent<Card>();
+		CardData data = card.cardData;
+
+		if (characterInfo.GetEnergy() < data.baseEnergyCost) return;
+
+		characterInfo.SpendEnergy(data.baseEnergyCost);
+
+		ResolveCardActions(data);
+
+		cardsInHand.Remove(data);
+		discardPile.Add(data);
+
+		RemoveCard(view);
+	}
+
+	void ResolveCardActions(CardData data)
+	{
+		arena.ResolveAction(data.actionType1, data.action1Value, isPlayer);
+
+		if (data.actionType2 != CardActionType.None)
+			arena.ResolveAction(data.actionType2, data.action2Value, isPlayer);
+
+		if (data.actionType3 != CardActionType.None)
+			arena.ResolveAction(data.actionType2, data.action2Value, isPlayer);
+	}
+
+	public void DrawNewHand()
+	{
+		int cardsToDraw = characterInfo._data.baseDrawSize;
+
+		while (cardsToDraw > 0)
+		{
+			if (drawPile.Count == 0)
+			{
+				if (discardPile.Count == 0)
+					break;
+
+				ReshuffleDiscardIntoDraw();
+			}
+
+			DrawCardFromDeck();
+			cardsToDraw--;
+		}
+	}
+
+	public void DiscardHand()
+	{
+		for (int i = cards.Count - 1; i >= 0; i--)
+		{
+			CardView view = cards[i];
+			Card card = view.GetComponent<Card>();
+
+			discardPile.Add(card.cardData);
+
+			RemoveCard(view);
+		}
+
+		cardsInHand.Clear();
+	}
+
+	public void RemoveRandomCard()
+	{
+		if (cards.Count == 0)
+			return;
+
+		int index = Random.Range(0, cards.Count);
+		CardView view = cards[index];
+		Card card = view.GetComponent<Card>();
+
+		cardsInHand.Remove(card.cardData);
+		discardPile.Add(card.cardData);
+
+		RemoveCard(view);
+	}
+
+	public void ExhaustCard()
+	{
+		// cardsInHand.Remove(card);
+		// exhaustPile.Add(card);
+	}
+
+	public void ReshuffleDiscardIntoDraw()
+	{
+		for (int i = 0; i < discardPile.Count; i++)
+			drawPile.Add(discardPile[i]);
+
+		discardPile.Clear();
+
+		for (int i = drawPile.Count - 1; i > 0; i--)
+		{
+			int j = Random.Range(0, i + 1);
+			(drawPile[i], drawPile[j]) = (drawPile[j], drawPile[i]);
+		}
+	}
+
+	void SpawnCardView(CardData data)
+	{
+		GameObject go = Instantiate(cardPrefab, handRoot);
+		CardView view = go.GetComponent<CardView>();
+		Card card = go.GetComponent<Card>();
+
+		card.SetCardData(data);
+		AddCard(view);
+	}
+
+	#endregion
 
 	void UpdateSelectedCardRotation()
 	{
@@ -83,7 +244,6 @@ public class Hand : MonoBehaviour
 		if (!cam) return;
 
 		Vector3 mouseWorld = cam.ScreenToWorldPoint(Input.mousePosition);
-		// mouseWorld.z = card.transform.position.z;
 
 		Vector3 localOffset = mouseWorld - card.transform.position;
 
@@ -112,23 +272,17 @@ public class Hand : MonoBehaviour
 		if (Mathf.Abs(scrollDelta) < 0.001f)
 			return;
 
-		// Accumulate scroll into continuous index
 		scrollIndex -= scrollDelta;
 
-		// Clamp to valid range
 		scrollIndex = Mathf.Clamp(scrollIndex, 0f, cards.Count - 1);
 
-		// Snap to nearest index WITHOUT skipping
 		int newIndex = Mathf.FloorToInt(scrollIndex + 0.5f);
 
 		if (newIndex != selectedIndex)
 		{
 			selectedIndex = newIndex;
-			RefreshLayout();
 		}
 	}
-
-    // ---- PUBLIC API ----
 
     public void AddCard(CardView card)
     {
@@ -137,7 +291,6 @@ public class Hand : MonoBehaviour
         cards.Add(card);
 
         selectedIndex = cards.Count - 1;
-        RefreshLayout();
     }
 
     public void RemoveCard(CardView card)
@@ -149,7 +302,6 @@ public class Hand : MonoBehaviour
         Destroy(card.gameObject);
 
         selectedIndex = Mathf.Clamp(selectedIndex, 0, cards.Count - 1);
-        RefreshLayout();
     }
 
 	// public void OnCardClicked(CardView card)
@@ -190,11 +342,9 @@ public class Hand : MonoBehaviour
 
 		float halfWidth = maxHandWidth * 0.5f;
 
-		// Count cards on each side of selected
 		int leftCount = selectedIndex;
 		int rightCount = count - selectedIndex - 1;
 
-		// Compute spacing per side (clamped)
 		float leftSpacing = leftCount > 0
 			? Mathf.Min(spacing, halfWidth / leftCount)
 			: spacing;
@@ -209,21 +359,14 @@ public class Hand : MonoBehaviour
 		{
 			CardView card = cards[i];
 
-			card.transform.rotation = Quaternion.identity;
-
 			int visualIndex = i - selectedIndex;
 			int distance = Mathf.Abs(visualIndex);
 
-			// Choose spacing based on side
 			float sideSpacing = visualIndex < 0 ? leftSpacing : rightSpacing;
 
-			// Normalized distance for curve
 			float t = maxDistance > 0 ? (float)distance / maxDistance : 0f;
-
-			// Curve profile
 			float curveY = Mathf.Pow(t, curveExponent) * sideLift;
 
-			// Position
 			float x = visualIndex * sideSpacing;
 			float y = curveY;
 			float z = -distance * depthSpacing;
@@ -231,12 +374,10 @@ public class Hand : MonoBehaviour
 			Vector3 pos = new Vector3(x, y, z);
 			Vector3 scale = Vector3.one;
 
-			// Sorting: closer to center above farther
-			int baseOrder = (count - distance) * 10;
+			// ---- SORTING ----
+			int baseOrder = (count - distance) * SORTING_STRIDE;
 
-			// Selected card override
 			bool isSelected = (i == selectedIndex);
-
 			if (isSelected)
 			{
 				pos.y += selectedLift;
@@ -246,18 +387,18 @@ public class Hand : MonoBehaviour
 
 			card.SetMasked(isSelected);
 
-			// Card cardData = card.GetComponent<Card>() 
-			// 	?? card.GetComponentOrInChildren<Card>();
+			card.transform.localPosition = Vector3.Lerp(
+				card.transform.localPosition,
+				pos,
+				Time.deltaTime * smoothSpeed
+			);
 
-			// if (cardData != null)
-			// {
-			// 	if (isSelected)
-			// 		cardData.EnableMask();
-			// 	else
-			// 		cardData.DisableMask();
-			// }
+			card.transform.localScale = Vector3.Lerp(
+				card.transform.localScale,
+				scale,
+				Time.deltaTime * smoothSpeed
+			);
 
-			card.SetTarget(pos, scale);
 			card.SetSortingOrder(baseOrder);
 		}
 	}
