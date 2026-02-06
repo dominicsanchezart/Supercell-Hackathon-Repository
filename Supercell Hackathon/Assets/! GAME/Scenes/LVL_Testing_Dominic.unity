@@ -869,6 +869,7 @@ MonoBehaviour:
   _burn: 0
   _poison: 0
   _weaken: 0
+  _gold: 0
 --- !u!4 &1117344994
 Transform:
   m_ObjectHideFlags: 0
@@ -1506,6 +1507,7 @@ MonoBehaviour:
   _burn: 0
   _poison: 0
   _weaken: 0
+  _gold: 0
 --- !u!4 &1950661066
 Transform:
   m_ObjectHideFlags: 0

@@ -1587,6 +1587,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Card
   <cardData>k__BackingField: {fileID: 11400000, guid: 697277dddc2cc284caca1eedb45265e5, type: 2}
+  <cardBorderData>k__BackingField: {fileID: 11400000, guid: 2e2b7f92dfc2ee64d8f6ede7911e63ab, type: 2}
   mask: {fileID: 8041646275476474134}
   layer0: {fileID: 6435553886711843668}
   layer1: {fileID: 4076863028634733467}
@@ -1595,15 +1596,6 @@ MonoBehaviour:
   borderFull: {fileID: 8580885124172854751}
   borderTop: {fileID: 8033301007730983434}
   borderBottom: {fileID: 2091101120130821751}
-  borderWrath: {fileID: 21300000, guid: 9ca89b781f0471e42b95c5170affd009, type: 3}
-  borderWrathTop: {fileID: 21300000, guid: 07b0bcb25e16bd84bbd588bbc1456156, type: 3}
-  borderWrathBottom: {fileID: 21300000, guid: 3fbb617ffc14969458d39303287981bc, type: 3}
-  borderPride: {fileID: 21300000, guid: ec1797edf61c30e4299b3f2815aa8ce0, type: 3}
-  borderPrideTop: {fileID: 21300000, guid: bdcd8777e4971164ca54134df93b65f1, type: 3}
-  borderPrideBottom: {fileID: 21300000, guid: 06fe9c40b2908da40b79760d439f9ace, type: 3}
-  borderRuin: {fileID: 21300000, guid: a7616ae3981d1b54abfb97bec9c0a518, type: 3}
-  borderRuinTop: {fileID: 21300000, guid: b27eb39d169947346be161919a595ecf, type: 3}
-  borderRuinBottom: {fileID: 21300000, guid: 22ab65600fbc4bc4b852c036dd184009, type: 3}
   nameText: {fileID: 4406473529902211701}
   typeText: {fileID: 7779254867734039582}
   action1Text: {fileID: 1271827033682361136}
@@ -1619,13 +1611,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 025662958c6b58e4ab676b9aa74e9b9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardView
-  smoothSpeed: 12
   owner: {fileID: 0}
   mask: {fileID: 8041646275476474134}
-  layer0: {fileID: 6435553886711843668}
-  layer1: {fileID: 4076863028634733467}
-  layer2: {fileID: 2623451049388692685}
-  gradient: {fileID: 3557431568355492795}
+  masedSprites:
+  - {fileID: 3557431568355492795}
+  - {fileID: 6435553886711843668}
+  - {fileID: 4076863028634733467}
+  - {fileID: 2623451049388692685}
   canvas: {fileID: 8203837499549994799}
 --- !u!50 &8491896059289085414
 Rigidbody2D:

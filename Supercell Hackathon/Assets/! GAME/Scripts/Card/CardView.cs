@@ -3,16 +3,11 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public class CardView : MonoBehaviour
 {
-    public float smoothSpeed = 12f;
-
     [HideInInspector] public Hand owner;
 
     SpriteRenderer[] sprites;
 	[SerializeField] GameObject mask;
-	[SerializeField] private SpriteRenderer layer0;
-	[SerializeField] private SpriteRenderer layer1;
-	[SerializeField] private SpriteRenderer layer2;
-	[SerializeField] private SpriteRenderer gradient;
+	[SerializeField] private SpriteRenderer[] masedSprites;
 	[SerializeField] private Canvas canvas;
 
     int[] relativeOrders;
@@ -43,15 +38,10 @@ public class CardView : MonoBehaviour
 
 	public void SetMasked(bool enabled)
 	{
-		layer0.maskInteraction = enabled ? SpriteMaskInteraction.VisibleInsideMask : SpriteMaskInteraction.None;
-		layer1.maskInteraction = enabled ? SpriteMaskInteraction.VisibleInsideMask : SpriteMaskInteraction.None;
-		layer2.maskInteraction = enabled ? SpriteMaskInteraction.VisibleInsideMask : SpriteMaskInteraction.None;
-		gradient.maskInteraction = enabled ? SpriteMaskInteraction.VisibleInsideMask : SpriteMaskInteraction.None;
+		foreach (var sprite in masedSprites)
+		{
+			sprite.maskInteraction = enabled ? SpriteMaskInteraction.VisibleInsideMask : SpriteMaskInteraction.None;
+		}
 		mask.SetActive(enabled);
 	}
-
-    // void OnMouseDown()
-    // {
-    //     owner.OnCardClicked(this);
-    // }
 }

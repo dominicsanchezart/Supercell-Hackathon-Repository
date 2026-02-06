@@ -4,6 +4,7 @@ using UnityEngine;
 public class Card : MonoBehaviour
 {
     [field: SerializeField] public CardData cardData { get; private set; }
+    [field: SerializeField] public CardBorderData cardBorderData { get; private set; }
 	[SerializeField] private GameObject mask;
 
 
@@ -18,15 +19,6 @@ public class Card : MonoBehaviour
 	[SerializeField] private SpriteRenderer borderFull;
 	[SerializeField] private SpriteRenderer borderTop;
 	[SerializeField] private SpriteRenderer borderBottom;
-	[SerializeField] private Sprite borderWrath;
-	[SerializeField] private Sprite borderWrathTop;
-	[SerializeField] private Sprite borderWrathBottom;
-	[SerializeField] private Sprite borderPride;
-	[SerializeField] private Sprite borderPrideTop;
-	[SerializeField] private Sprite borderPrideBottom;
-	[SerializeField] private Sprite borderRuin;
-	[SerializeField] private Sprite borderRuinTop;
-	[SerializeField] private Sprite borderRuinBottom;
 
 
 	[Header("Text")]
@@ -35,23 +27,6 @@ public class Card : MonoBehaviour
 	[SerializeField] private TextMeshProUGUI action1Text;
 
 
-
-	public void EnableMask()
-	{
-		mask.SetActive(true);
-	}
-
-	public void DisableMask()
-	{
-		mask.SetActive(false);
-	}
-
-	private void Start()
-	{
-		SetupVisuals();
-		SetupBorder();
-		SetupText();
-	}
 
 	public void SetCardData(CardData data)
 	{
@@ -63,26 +38,22 @@ public class Card : MonoBehaviour
 
 	private void SetupBorder()
 	{
-		// if borders are the same then use single border, otherwise split
+		if (cardData.cardFaciton1 == CardFaction.None)
+		{
+			borderFull.gameObject.SetActive(true);
+			borderTop.gameObject.SetActive(false);
+			borderBottom.gameObject.SetActive(false);
+			borderFull.sprite = cardBorderData.borderneautral;
+			return;
+		}
+
 		if (cardData.cardFaciton1 == cardData.cardFaciton2)
 		{
 			borderFull.gameObject.SetActive(true);
 			borderTop.gameObject.SetActive(false);
 			borderBottom.gameObject.SetActive(false);
 
-
-			switch (cardData.cardFaciton1)
-			{
-				case CardFaction.Wrath:
-					borderFull.sprite = borderWrath;
-					break;
-				case CardFaction.Pride:
-					borderFull.sprite = borderPride;
-					break;
-				case CardFaction.Ruin:
-					borderFull.sprite = borderRuin;
-					break;
-			}
+			borderFull.sprite = cardBorderData.GetFullBorder(cardData.cardFaciton1);
 		}
 		else
 		{
@@ -90,31 +61,8 @@ public class Card : MonoBehaviour
 			borderTop.gameObject.SetActive(true);
 			borderBottom.gameObject.SetActive(true);
 
-			switch (cardData.cardFaciton1)
-			{
-				case CardFaction.Wrath:
-					borderTop.sprite = borderWrathTop;
-					break;
-				case CardFaction.Pride:
-					borderTop.sprite = borderPrideTop;
-					break;
-				case CardFaction.Ruin:
-					borderTop.sprite = borderRuinTop;
-					break;
-			}
-
-			switch (cardData.cardFaciton2)
-			{
-				case CardFaction.Wrath:
-					borderBottom.sprite = borderWrathBottom;
-					break;
-				case CardFaction.Pride:
-					borderBottom.sprite = borderPrideBottom;
-					break;
-				case CardFaction.Ruin:
-					borderBottom.sprite = borderRuinBottom;
-					break;
-			}
+			borderTop.sprite = cardBorderData.GetTopBorder(cardData.cardFaciton1);
+			borderBottom.sprite = cardBorderData.GetBottomBorder(cardData.cardFaciton2);
 		}
 	}
 

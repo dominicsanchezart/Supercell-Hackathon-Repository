@@ -3,170 +3,170 @@ using UnityEngine;
 
 public class CardViewer : MonoBehaviour
 {
-	[SerializeField] private CardData[] cardPrefabs;
     [Header("Setup")]
+    [SerializeField] private CardData[] cardPrefabs;
     [SerializeField] private GameObject cardPrefab;
     [SerializeField] private Transform cardRoot;
 
     [Header("Layout")]
-	[SerializeField] private int cardsPerRow = 4;
+    [SerializeField] private int cardsPerRow = 4;
     [SerializeField] private float verticalSpacing = 1.2f;
-    [SerializeField] private float horizontalSpacing = 1.0f;
+    [SerializeField] private float horizontalSpacing = 1f;
 
     [Header("Scrolling")]
-	[SerializeField] private float scrollSpeed = 5f;
-	private float verticalScroll;
+    [SerializeField] private float scrollSpeed = 5f;
+    [SerializeField] private float minScroll = 2f;
+    [SerializeField] private float maxScroll = 50f;
 
-	[Header("Hover")]
-	[SerializeField] private float hoverScale = 1.35f;
-	[SerializeField] private float hoverSmooth = 15f;
-	[SerializeField] private LayerMask cardLayer;
-	[SerializeField] private int hoverSortingBoost = 1000;
+    [Header("Hover")]
+    [SerializeField] private float hoverScale = 1.35f;
+    [SerializeField] private float hoverSmooth = 15f;
+    [SerializeField] private LayerMask cardLayer;
+    [SerializeField] private int hoverSortingBoost = 1000;
 
-	private Camera cam;
-	private Transform hoveredCard;
-	private Vector3 hoveredOriginalScale;
-	private int hoveredOriginalSorting;
+    private Camera cam;
+    private Transform hoveredCard;
+    private Vector3 hoveredOriginalScale;
+    private int hoveredOriginalSorting;
+    private float verticalScroll;
 
     private readonly List<GameObject> spawnedCards = new();
 
+    #region Unity Methods
 
+    private void Awake() => cam = Camera.main;
 
-	private void Awake()
-	{
-		cam = Camera.main;
-	}
+    private void Start() => DisplayCards(cardPrefabs);
 
-	private void Start()
-	{
-		DisplayCards(cardPrefabs);
-	}
+    private void Update()
+    {
+        ScrollCards();
+        HandleHover();
+    }
 
-	[ContextMenu("Reset Display")]
-	private void ResetDisplay()
-	{
-		DisplayCards(cardPrefabs);
-	}
+    #endregion
 
-	private void Update()
-	{
-		ScrollCards();
-		HandleHover();
-	}
+    #region Card Display
 
-	private void HandleHover()
-	{
-		Vector3 mouseWorld = cam.ScreenToWorldPoint(Input.mousePosition);
-		mouseWorld.z = 0f;
+    [ContextMenu("Reset Display")]
+    private void ResetDisplay() => DisplayCards(cardPrefabs);
 
-		Collider2D hit = Physics2D.OverlapPoint(mouseWorld, cardLayer);
+    public void DisplayCards(CardData[] cards)
+    {
+        HideCards();
 
-		if (hit)
-		{
-			Transform card = hit.transform;
-			if (hoveredCard != card)
-				BeginHover(card);
-		}
-		else
-		{
-			EndHover();
-		}
+        for (int i = 0; i < cards.Length; i++)
+        {
+            GameObject cardObj = Instantiate(cardPrefab, cardRoot);
+            spawnedCards.Add(cardObj);
 
-		if (hoveredCard)
-			UpdateHoveredCard();
-	}
+            cardObj.GetComponent<Card>().SetCardData(cards[i]);
 
-	private void BeginHover(Transform card)
-	{
-		EndHover();
+            int row = i / cardsPerRow;
+            int column = i % cardsPerRow;
 
-		hoveredCard = card;
-		hoveredOriginalScale = card.localScale;
+            cardObj.transform.localPosition = new Vector3(
+                column * horizontalSpacing,
+                -row * verticalSpacing,
+                0f
+            );
+        }
 
-		SpriteRenderer sr = card.GetComponentInChildren<SpriteRenderer>();
-		hoveredOriginalSorting = sr.sortingOrder;
-		sr.sortingOrder += hoverSortingBoost;
-	}
+        CenterGridHorizontally(cards.Length);
+    }
 
-	private void UpdateHoveredCard()
-	{
-		hoveredCard.localScale = Vector3.Lerp(
-			hoveredCard.localScale,
-			hoveredOriginalScale * hoverScale,
-			Time.deltaTime * hoverSmooth
-		);
-	}
+    private void CenterGridHorizontally(int cardCount)
+    {
+        int columnsUsed = Mathf.Min(cardsPerRow, cardCount);
+        if (columnsUsed <= 1) return;
 
-	private void EndHover()
-	{
-		if (!hoveredCard)
-			return;
+        float xOffset = (columnsUsed - 1) * horizontalSpacing * 0.5f;
 
-		hoveredCard.localScale = hoveredOriginalScale;
+        foreach (var card in spawnedCards)
+        {
+            Vector3 p = card.transform.localPosition;
+            p.x -= xOffset;
+            card.transform.localPosition = p;
+        }
+    }
 
-		SpriteRenderer sr = hoveredCard.GetComponentInChildren<SpriteRenderer>();
-		sr.sortingOrder = hoveredOriginalSorting;
+    public void HideCards()
+    {
+        foreach (var card in spawnedCards)
+            Destroy(card);
 
-		hoveredCard = null;
-	}
-	
-	public void DisplayCards(CardData[] cards)
-	{
-		HideCards();
+        spawnedCards.Clear();
+        cardRoot.localPosition = Vector3.zero;
+    }
 
-		for (int i = 0; i < cards.Length; i++)
-		{
-			GameObject card = Instantiate(cardPrefab, cardRoot);
-			spawnedCards.Add(card);
+    #endregion
 
-			card.GetComponent<Card>().SetCardData(cards[i]);
+    #region Scrolling
 
-			int row    = i / cardsPerRow;
-			int column = i % cardsPerRow;
+    private void ScrollCards()
+    {
+        float input = -Input.mouseScrollDelta.y;
+        if (Mathf.Abs(input) < 0.01f) return;
 
-			card.transform.localPosition = new Vector3(
-				column * horizontalSpacing,
-				-row * verticalSpacing,
-				0f
-			);
-		}
+        verticalScroll = Mathf.Clamp(verticalScroll + input * scrollSpeed, minScroll, maxScroll);
+        cardRoot.localPosition = new Vector3(0f, verticalScroll, 0f);
+    }
 
-		CenterGridHorizontally(cards.Length);
-	}
+    #endregion
 
-	private void CenterGridHorizontally(int cardCount)
-	{
-		int columnsUsed = Mathf.Min(cardsPerRow, cardCount);
-		if (columnsUsed <= 1)
-			return;
+    #region Hover
 
-		float totalWidth = (columnsUsed - 1) * horizontalSpacing;
-		float xOffset = totalWidth * 0.5f;
+    private void HandleHover()
+    {
+        if (!cam) return;
 
-		for (int i = 0; i < spawnedCards.Count; i++)
-		{
-			Vector3 p = spawnedCards[i].transform.localPosition;
-			p.x -= xOffset;
-			spawnedCards[i].transform.localPosition = p;
-		}
-	}
+        Vector3 mouseWorld = cam.ScreenToWorldPoint(Input.mousePosition);
+        mouseWorld.z = 0f;
 
-	public void HideCards()
-	{
-		foreach (var card in spawnedCards)
-			Destroy(card);
+        Collider2D hit = Physics2D.OverlapPoint(mouseWorld, cardLayer);
 
-		spawnedCards.Clear();
-		cardRoot.localPosition = Vector3.zero;
-	}
+        if (hit)
+        {
+            Transform card = hit.transform;
+            if (hoveredCard != card) BeginHover(card);
+        }
+        else EndHover();
 
-	private void ScrollCards()
-	{
-		float input = -Input.mouseScrollDelta.y;
-		if (Mathf.Abs(input) < 0.01f) return;
+        if (hoveredCard) UpdateHoveredCard();
+    }
 
-		verticalScroll += input * scrollSpeed;
-		verticalScroll = Mathf.Clamp(verticalScroll, 2f, 50f);
-		cardRoot.localPosition = new Vector3(0f, verticalScroll, 0f);
-	}
+    private void BeginHover(Transform card)
+    {
+        EndHover();
+
+        hoveredCard = card;
+        hoveredOriginalScale = card.localScale;
+
+        SpriteRenderer sr = card.GetComponentInChildren<SpriteRenderer>();
+        hoveredOriginalSorting = sr.sortingOrder;
+        sr.sortingOrder += hoverSortingBoost;
+    }
+
+    private void UpdateHoveredCard()
+    {
+        hoveredCard.localScale = Vector3.Lerp(
+            hoveredCard.localScale,
+            hoveredOriginalScale * hoverScale,
+            Time.deltaTime * hoverSmooth
+        );
+    }
+
+    private void EndHover()
+    {
+        if (!hoveredCard) return;
+
+        hoveredCard.localScale = hoveredOriginalScale;
+
+        SpriteRenderer sr = hoveredCard.GetComponentInChildren<SpriteRenderer>();
+        sr.sortingOrder = hoveredOriginalSorting;
+
+        hoveredCard = null;
+    }
+
+    #endregion
 }

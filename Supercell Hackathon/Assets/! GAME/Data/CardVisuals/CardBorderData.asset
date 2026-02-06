@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00a88c861ce7e8643bb95b4825abb30b, type: 3}
+  m_Name: CardBorderData
+  m_EditorClassIdentifier: Assembly-CSharp::CardBorderData
+  borderneautral: {fileID: 0}
+  borderWrath: {fileID: 21300000, guid: 9ca89b781f0471e42b95c5170affd009, type: 3}
+  borderWrathTop: {fileID: 21300000, guid: 07b0bcb25e16bd84bbd588bbc1456156, type: 3}
+  borderWrathBottom: {fileID: 21300000, guid: 3fbb617ffc14969458d39303287981bc, type: 3}
+  borderPride: {fileID: 21300000, guid: ec1797edf61c30e4299b3f2815aa8ce0, type: 3}
+  borderPrideTop: {fileID: 21300000, guid: bdcd8777e4971164ca54134df93b65f1, type: 3}
+  borderPrideBottom: {fileID: 21300000, guid: 06fe9c40b2908da40b79760d439f9ace, type: 3}
+  borderRuin: {fileID: 21300000, guid: a7616ae3981d1b54abfb97bec9c0a518, type: 3}
+  borderRuinTop: {fileID: 21300000, guid: b27eb39d169947346be161919a595ecf, type: 3}
+  borderRuinBottom: {fileID: 21300000, guid: 22ab65600fbc4bc4b852c036dd184009, type: 3}
