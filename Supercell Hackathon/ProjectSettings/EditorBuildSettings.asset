@@ -5,9 +5,24 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/! GAME/Scenes/Map Encounters/LVL_Map_Master.unity
+    guid: 15bf4d0b598842641b1511484638ed15
+  - enabled: 1
+    path: Assets/! GAME/Scenes/Map Encounters/LVL_Battle.unity
+    guid: 5ed8c818b46de574aa3ce9283211a450
+  - enabled: 1
+    path: Assets/! GAME/Scenes/Map Encounters/LVL_Camp.unity
+    guid: a9d5d0b5380148140a552b1b42566dd2
+  - enabled: 1
+    path: Assets/! GAME/Scenes/Map Encounters/LVL_Event.unity
+    guid: 14fa212c1de4360409a0f02759979cd0
+  - enabled: 1
+    path: Assets/! GAME/Scenes/Map Encounters/LVL_Shop.unity
+    guid: 411932d2325b3df4f92c4e2e0e2edbff
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
