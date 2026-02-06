@@ -8,9 +8,11 @@ public enum CardActionType
 	Heal,
 	Guard,
 	Empower,
-	StatusEffect,
 	DrawCard,
 	RemoveCard,
 	ExhaustCard,
-	SpendGold
+	SpendGold,
+	Burn,
+	Poison,
+	Weaken
 }

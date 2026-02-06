@@ -16,10 +16,10 @@ public class CardView : MonoBehaviour
 	[SerializeField] private SpriteRenderer layer1;
 	[SerializeField] private SpriteRenderer layer2;
 	[SerializeField] private SpriteRenderer gradient;
-
-
+	[SerializeField] private Canvas canvas;
 
     int[] relativeOrders;
+	int baseSortingOrder = 6;
 
 
 
@@ -61,6 +61,8 @@ public class CardView : MonoBehaviour
         {
             sprites[i].sortingOrder = baseOrder + relativeOrders[i];
         }
+
+		canvas.sortingOrder = baseSortingOrder + baseOrder;
     }
 
 	public void SetMasked(bool enabled)
