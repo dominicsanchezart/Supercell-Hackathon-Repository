@@ -10,6 +10,7 @@ public class MapView : MonoBehaviour
 	public GameObject linePrefab;
 	public MapIconSet iconSet;
 	public Camera mapCamera;
+	public MapTransition mapTransition;
 
 	[Header("Layout")]
 	public float rowSpacing = 1.5f;
@@ -42,8 +43,18 @@ public class MapView : MonoBehaviour
 	float minScrollY;
 	float maxScrollY;
 
+	float targetScrollX;
+	float currentScrollX;
+	float minScrollX;
+	float maxScrollX;
+
 	bool isDragging;
 	float lastDragY;
+
+	bool isPanning;
+	float lastPanX;
+	float lastPanY;
+
 	float lastNodeScale;
 
 	public void Initialize(MapData data)
@@ -61,6 +72,13 @@ public class MapView : MonoBehaviour
 		float mapHeight = mapData.totalRows * rowSpacing;
 		maxScrollY = 0f;
 		minScrollY = -(mapHeight) + 5f;
+
+		// Horizontal scroll bounds based on grid width
+		float halfWidth = GetColumnCount() * laneSpacing * 0.5f + 2f;
+		minScrollX = -halfWidth;
+		maxScrollX = halfWidth;
+		targetScrollX = 0f;
+		currentScrollX = 0f;
 
 		// Start scroll at bottom (showing row 0)
 		targetScrollY = maxScrollY;
@@ -202,22 +220,60 @@ public class MapView : MonoBehaviour
 	public void OnNodeClicked(MapNodeView nodeView)
 	{
 		if (!interactable) return;
+		if (mapTransition != null && mapTransition.IsTransitioning) return;
 
 		MapNodeData data = nodeView.GetNodeData();
 		if (data == null || !data.isAvailable) return;
 
-		if (RunManager.Instance != null)
+		// Disable further input immediately
+		interactable = false;
+
+		if (mapTransition != null)
 		{
-			RunManager.Instance.OnEncounterSelected(data);
+			// Play pop + fade, then load scene
+			mapTransition.PlayTransition(nodeView.transform, () =>
+			{
+				if (RunManager.Instance != null)
+				{
+					RunManager.Instance.OnEncounterSelected(data);
+				}
+				else
+				{
+					Debug.Log($"Node selected: {data.nodeId} ({data.encounterType})");
+					data.isCompleted = true;
+					mapData.currentNodeId = data.nodeId;
+					RefreshAvailability();
+					RebuildLines();
+					interactable = true;
+				}
+			});
 		}
 		else
 		{
-			Debug.Log($"Node selected: {data.nodeId} ({data.encounterType})");
-			data.isCompleted = true;
-			mapData.currentNodeId = data.nodeId;
-			RefreshAvailability();
-			RebuildLines();
+			// No transition — immediate
+			if (RunManager.Instance != null)
+			{
+				RunManager.Instance.OnEncounterSelected(data);
+			}
+			else
+			{
+				Debug.Log($"Node selected: {data.nodeId} ({data.encounterType})");
+				data.isCompleted = true;
+				mapData.currentNodeId = data.nodeId;
+				RefreshAvailability();
+				RebuildLines();
+				interactable = true;
+			}
 		}
+	}
+
+	/// <summary>
+	/// Called by MapSceneController when returning from an encounter to fade back in.
+	/// </summary>
+	public void PlayFadeIn()
+	{
+		if (mapTransition != null)
+			mapTransition.FadeIn();
 	}
 
 	public void RebuildLines()
@@ -249,13 +305,14 @@ public class MapView : MonoBehaviour
 		if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
 			return;
 
+		// Mouse wheel: vertical scroll
 		if (Mathf.Abs(scroll) > 0.01f)
 		{
 			targetScrollY -= scroll * scrollSpeed;
 			targetScrollY = Mathf.Clamp(targetScrollY, minScrollY, maxScrollY);
 		}
 
-		// Mouse drag scroll
+		// Left mouse drag: vertical scroll only
 		if (Input.GetMouseButtonDown(0) && !IsOverNode())
 		{
 			isDragging = true;
@@ -273,6 +330,34 @@ public class MapView : MonoBehaviour
 			targetScrollY += dragDelta * scrollDragSpeed;
 			targetScrollY = Mathf.Clamp(targetScrollY, minScrollY, maxScrollY);
 			lastDragY = Input.mousePosition.y;
+		}
+
+		// Middle mouse drag: pan both X and Y
+		if (Input.GetMouseButtonDown(2))
+		{
+			isPanning = true;
+			lastPanX = Input.mousePosition.x;
+			lastPanY = Input.mousePosition.y;
+		}
+
+		if (Input.GetMouseButtonUp(2))
+		{
+			isPanning = false;
+		}
+
+		if (isPanning)
+		{
+			float panDeltaX = Input.mousePosition.x - lastPanX;
+			float panDeltaY = Input.mousePosition.y - lastPanY;
+
+			targetScrollX += panDeltaX * scrollDragSpeed;
+			targetScrollY += panDeltaY * scrollDragSpeed;
+
+			targetScrollX = Mathf.Clamp(targetScrollX, minScrollX, maxScrollX);
+			targetScrollY = Mathf.Clamp(targetScrollY, minScrollY, maxScrollY);
+
+			lastPanX = Input.mousePosition.x;
+			lastPanY = Input.mousePosition.y;
 		}
 	}
 
@@ -323,6 +408,7 @@ public class MapView : MonoBehaviour
 	void SmoothScroll()
 	{
 		currentScrollY = Mathf.Lerp(currentScrollY, targetScrollY, Time.deltaTime * scrollSmooth);
+		currentScrollX = Mathf.Lerp(currentScrollX, targetScrollX, Time.deltaTime * scrollSmooth);
 		ApplyScroll();
 
 		// Smooth zoom
@@ -333,9 +419,9 @@ public class MapView : MonoBehaviour
 	void ApplyScroll()
 	{
 		if (nodeContainer != null)
-			nodeContainer.localPosition = new Vector3(0f, currentScrollY, 0f);
+			nodeContainer.localPosition = new Vector3(currentScrollX, currentScrollY, 0f);
 		if (lineContainer != null)
-			lineContainer.localPosition = new Vector3(0f, currentScrollY, 0f);
+			lineContainer.localPosition = new Vector3(currentScrollX, currentScrollY, 0f);
 	}
 
 	public void ScrollToRow(int row)

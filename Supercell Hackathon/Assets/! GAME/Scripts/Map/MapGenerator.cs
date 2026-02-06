@@ -128,20 +128,13 @@ public static class MapGenerator
 	static long CellKey(int row, int col) => ((long)row << 16) | (long)(ushort)col;
 
 	/// <summary>
-	/// Returns exactly 3 evenly spaced starting columns.
-	/// For 5 cols: [1, 2, 3]. For 7 cols: [1, 3, 5]. Always centered.
+	/// Returns exactly 3 adjacent columns in the center of the grid.
+	/// For 5 cols: [1, 2, 3]. For 7 cols: [2, 3, 4]. Always the middle 3.
 	/// </summary>
 	static int[] GetFixedStartColumns(int cols)
 	{
-		if (cols <= 3) return new int[] { 0, 1, 2 };
-
 		int mid = cols / 2;
-		// Space them out but keep them off the extreme edges
-		int step = Mathf.Max(1, (cols - 2) / 2);
-		int left = Mathf.Max(1, mid - step);
-		int right = Mathf.Min(cols - 2, mid + step);
-
-		return new int[] { left, mid, right };
+		return new int[] { mid - 1, mid, mid + 1 };
 	}
 
 	static void TracePath(

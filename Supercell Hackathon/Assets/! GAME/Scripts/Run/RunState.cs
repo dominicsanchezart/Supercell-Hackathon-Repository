@@ -15,6 +15,11 @@ public class RunState
 	[Header("Map")]
 	public MapData mapData;
 
+	[Header("Patron")]
+	public CardFaction patronFaction;
+
 	[Header("Meta")]
 	public int seed;
+	public int shopVisitCount;
+	public int cardRemoveCount;
 }
