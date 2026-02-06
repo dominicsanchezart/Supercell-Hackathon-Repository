@@ -74,8 +74,8 @@ public class CardView : MonoBehaviour
 		mask.SetActive(enabled);
 	}
 
-    void OnMouseDown()
-    {
-        owner.OnCardClicked(this);
-    }
+    // void OnMouseDown()
+    // {
+    //     owner.OnCardClicked(this);
+    // }
 }

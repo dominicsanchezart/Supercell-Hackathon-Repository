@@ -61,7 +61,7 @@ public class Hand : MonoBehaviour
             cards.Add(card);
         }
 
-        selectedIndex = Mathf.Clamp(selectedIndex, 0, cards.Count - 1);
+        selectedIndex = cards.Count > 0 ? cards.Count / 2 : 0;
 		scrollIndex = selectedIndex;
         RefreshLayout();
     }
@@ -103,13 +103,17 @@ public class Hand : MonoBehaviour
 			return;
 
 		float scrollDelta = Input.mouseScrollDelta.y;
+		
+		if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+			scrollDelta = 1f;
+		else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+			scrollDelta = -1f;
+
 		if (Mathf.Abs(scrollDelta) < 0.001f)
 			return;
 
-		const float scrollSensitivity = 1.0f;
-
 		// Accumulate scroll into continuous index
-		scrollIndex -= scrollDelta * scrollSensitivity;
+		scrollIndex -= scrollDelta;
 
 		// Clamp to valid range
 		scrollIndex = Mathf.Clamp(scrollIndex, 0f, cards.Count - 1);
@@ -148,33 +152,33 @@ public class Hand : MonoBehaviour
         RefreshLayout();
     }
 
-	public void OnCardClicked(CardView card)
-	{
-		int index = cards.IndexOf(card);
-		if (index == -1)
-			return;
+	// public void OnCardClicked(CardView card)
+	// {
+	// 	int index = cards.IndexOf(card);
+	// 	if (index == -1)
+	// 		return;
 
-		// If this card is not selected, just select it
-		if (index != selectedIndex)
-		{
-			selectedIndex = index;
-			scrollIndex = selectedIndex; // keep scroll in sync
-			RefreshLayout();
-			return;
-		}
+	// 	// If this card is not selected, just select it
+	// 	if (index != selectedIndex)
+	// 	{
+	// 		selectedIndex = index;
+	// 		scrollIndex = selectedIndex; // keep scroll in sync
+	// 		RefreshLayout();
+	// 		return;
+	// 	}
 
-		// Card is already selected — confirm/use (optional)
-		OnCardConfirmed(card);
-	}
+	// 	// Card is already selected — confirm/use (optional)
+	// 	OnCardConfirmed(card);
+	// }
 
-	void OnCardConfirmed(CardView card) // change to draw later on
-	{
-		// Placeholder for "play card" logic
-		Debug.Log("Confirmed card: " + card.name);
+	// void OnCardConfirmed(CardView card) // change to draw later on
+	// {
+	// 	// Placeholder for "play card" logic
+	// 	Debug.Log("Confirmed card: " + card.name);
 
-		// Example behavior (remove when ready):
-		// RemoveCard(card);
-	}
+	// 	// Example behavior (remove when ready):
+	// 	// RemoveCard(card);
+	// }
 
     // ---- LAYOUT ----
 

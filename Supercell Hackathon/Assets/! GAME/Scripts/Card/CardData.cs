@@ -19,13 +19,25 @@ public class CardData : ScriptableObject
 
 	[Header("Card Actions")]
 	[Range(0, 7)] public int baseEnergyCost;
-	public CardActionType actionType1;
-	public int action1Value;
-	public CardActionType actionType2;
-	public int action2Value;
-	public CardActionType actionType3;
-	public int action3Value;
 	[TextArea] public string actionDescription;
+
+
+	[Header("Action 1: Mandatory")]
+	public CardActionType actionType1;
+	public ActionTarget actionTarget1;
+	[Min(0)] public int action1Value;
+
+
+	[Header("Action 2: Optional")]
+	public CardActionType actionType2;
+	public ActionTarget actionTarget2;
+	[Min(0)] public int action2Value;
+
+
+	[Header("Action 3: Optional")]
+	public CardActionType actionType3;
+	public ActionTarget actionTarget3;
+	[Min(0)] public int action3Value;
 
 
 	[Header("Upgrades")]
