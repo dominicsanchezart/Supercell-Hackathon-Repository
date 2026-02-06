@@ -1,0 +1,4 @@
+﻿<Solution>
+  <Project Path="VFolders.csproj" />
+  <Project Path="VInspector.csproj" />
+</Solution>

@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adb9c12a8c6c949f7af83a3d238359d0, type: 3}
+  m_Name: vFolders Data
+  m_EditorClassIdentifier: VFolders::VFolders.VFoldersData
+  folderDatas_byGuid:
+    keys:
+    - d21060f37c5932d409503e9b422af60b
+    - 3dc2cec363e5cd641a49bff5892e200c
+    - d542deb494be469458218f4e723d8a7c
+    - d4b65ad6a45ba9345b4e9d6cea067e74
+    - 3259387da6f637b4099531e3839e780f
+    - 6ac0f82b2727bd94d9bd635650decfef
+    - 2bb7d7fd3edd2334baa8b7b3e03a3c70
+    - 32e1ef9c6b409c64792c378252c1211b
+    - 4603c7981f943024dabb4d040c418ede
+    values:
+    - iconNameOrGuid: 
+      colorIndex: 1
+      isIconRecursive: 0
+      isColorRecursive: 0
+    - iconNameOrGuid: ScriptableObject Icon
+      colorIndex: 0
+      isIconRecursive: 0
+      isColorRecursive: 0
+    - iconNameOrGuid: SceneAsset Icon
+      colorIndex: 0
+      isIconRecursive: 0
+      isColorRecursive: 0
+    - iconNameOrGuid: cs Script Icon
+      colorIndex: 0
+      isIconRecursive: 0
+      isColorRecursive: 0
+    - iconNameOrGuid: Prefab Icon
+      colorIndex: 0
+      isIconRecursive: 0
+      isColorRecursive: 0
+    - iconNameOrGuid: Material Icon
+      colorIndex: 0
+      isIconRecursive: 0
+      isColorRecursive: 0
+    - iconNameOrGuid: RawImage Icon
+      colorIndex: 0
+      isIconRecursive: 0
+      isColorRecursive: 0
+    - iconNameOrGuid: Texture Icon
+      colorIndex: 0
+      isIconRecursive: 0
+      isColorRecursive: 0
+    - iconNameOrGuid: Mesh Icon
+      colorIndex: 0
+      isIconRecursive: 0
+      isColorRecursive: 0
+  bookmarks:
+  - guid: d4b65ad6a45ba9345b4e9d6cea067e74
+  - guid: d542deb494be469458218f4e723d8a7c
+  - guid: 3259387da6f637b4099531e3839e780f
+  - guid: 6ac0f82b2727bd94d9bd635650decfef
+  - guid: 3dc2cec363e5cd641a49bff5892e200c
+  - guid: 2bb7d7fd3edd2334baa8b7b3e03a3c70
