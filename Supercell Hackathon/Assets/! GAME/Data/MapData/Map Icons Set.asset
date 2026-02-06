@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d78cd065def97c648b599ffa46f91ba6, type: 3}
+  m_Name: Map Icons Set
+  m_EditorClassIdentifier: Assembly-CSharp::MapIconSet
+  battleMinionIcon: {fileID: 21300000, guid: d3676acb8a6181749bf8d748b95a14bd, type: 3}
+  battleBossIcon: {fileID: 21300000, guid: cef53fb982cd00740a6d7e7395ba2a3b, type: 3}
+  shopIcon: {fileID: 21300000, guid: efeb6209bb550b440833f41f6c48bdd2, type: 3}
+  campIcon: {fileID: 21300000, guid: d75f749c3fe650f41af84b7963c6e78a, type: 3}
+  eventIcon: {fileID: 21300000, guid: b5e86db71100f0748920862450a6d82d, type: 3}
+  nodeBackground: {fileID: 21300000, guid: b5e86db71100f0748920862450a6d82d, type: 3}
