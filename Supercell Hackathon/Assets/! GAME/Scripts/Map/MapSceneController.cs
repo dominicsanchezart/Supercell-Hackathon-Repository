@@ -37,6 +37,7 @@ public class MapSceneController : MonoBehaviour
 		{
 			mapView.RefreshAvailability();
 			mapView.RebuildLines();
+			mapView.PlayFadeIn();
 		}
 	}
 

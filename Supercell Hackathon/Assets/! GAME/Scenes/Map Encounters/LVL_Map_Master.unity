@@ -715,12 +715,13 @@ MonoBehaviour:
   linePrefab: {fileID: 5674506451993224751, guid: f096e3f8297a5e148a9f0113f55e9405, type: 3}
   iconSet: {fileID: 11400000, guid: 785d58a94ba4e454fac61a4f38b22572, type: 2}
   mapCamera: {fileID: 470480376}
+  mapTransition: {fileID: 0}
   rowSpacing: 2
   laneSpacing: 2.5
   mapCenterX: 0
   nodeScale: 0.75
   scrollSpeed: 0.95
-  scrollSmooth: 2.75
+  scrollSmooth: 3.5
   scrollDragSpeed: 0.01
   zoomLevel: 5
   zoomSpeed: 0.65
