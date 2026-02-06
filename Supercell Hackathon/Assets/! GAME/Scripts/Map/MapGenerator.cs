@@ -1,513 +1,604 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// StS-inspired map generator using path tracing.
+/// 1. Define a grid of potential node positions (columns × rows)
+/// 2. Trace N independent paths from row 0 to the boss row
+/// 3. Only nodes touched by at least one path survive
+/// 4. Assign encounter types AFTER the graph structure is built
+/// 5. Apply constraint rules (no consecutive same-type, floor restrictions, etc.)
+/// </summary>
 public static class MapGenerator
 {
+	// ─────────────────────────────────────────────
+	// PUBLIC API (unchanged signature)
+	// ─────────────────────────────────────────────
+
 	public static MapData Generate(MapConfig config, int seed)
 	{
 		System.Random rng = new System.Random(seed);
+
+		int rows = config.totalRows;
+		int cols = config.columns;
+		int lastRow = rows - 1;
+
+		// Fixed starting columns: always exactly 3, evenly spaced across grid
+		// e.g. for 5 cols: [1, 2, 3] — centered, skipping edges
+		int[] startCols = GetFixedStartColumns(cols);
+
+		// Phase 1: Trace paths through the grid
+		HashSet<long> aliveCells = new();
+		Dictionary<long, HashSet<long>> edges = new();
+
+		// Pre-place the 3 starting cells so they always exist
+		for (int i = 0; i < startCols.Length; i++)
+			aliveCells.Add(CellKey(0, startCols[i]));
+
+		for (int p = 0; p < config.pathCount; p++)
+		{
+			TracePath(rng, config, p, rows, cols, lastRow, aliveCells, edges, startCols);
+		}
+
+		// Prune any row-0 cells that aren't in the fixed 3 (shouldn't happen, but safety)
+		HashSet<long> validStarts = new();
+		for (int i = 0; i < startCols.Length; i++)
+			validStarts.Add(CellKey(0, startCols[i]));
+		aliveCells.RemoveWhere(key => (int)(key >> 16) == 0 && !validStarts.Contains(key));
+
+		// Phase 2: Build MapData from alive cells and edges
 		MapData map = new MapData();
-		map.totalRows = config.totalRows;
+		map.totalRows = rows;
 
-		int lastRow = config.totalRows - 1;
+		Dictionary<long, MapNodeData> cellToNode = new();
 
-		// Track active split sub-lanes: key = lane index (-1 or 3), value = rows remaining
-		Dictionary<int, int> activeSplits = new();
+		// Sort alive cells so node order is deterministic (row then col)
+		List<long> sortedCells = new(aliveCells);
+		sortedCells.Sort();
 
-		// --- ROW 0: Starting nodes (always 3 BattleMinion) ---
-		for (int lane = 0; lane < config.baseLanes; lane++)
+		for (int i = 0; i < sortedCells.Count; i++)
 		{
-			MapNodeData node = CreateNode(0, lane, EncounterType.BattleMinion, rng);
+			long cellKey = sortedCells[i];
+			int row = (int)(cellKey >> 16);
+			int col = (int)(cellKey & 0xFFFF);
+
+			// Jitter for organic feel (not on first row or boss row)
+			float ox = 0f, oy = 0f;
+			if (row > 0 && row < lastRow)
+			{
+				ox = ((float)rng.NextDouble() - 0.5f) * 0.7f;
+				oy = ((float)rng.NextDouble() - 0.5f) * 0.4f;
+			}
+
+			MapNodeData node = new MapNodeData
+			{
+				nodeId = $"r{row}_c{col}",
+				row = row,
+				lane = col,
+				encounterType = EncounterType.BattleMinion, // placeholder, assigned in Phase 3
+				isCompleted = false,
+				isAvailable = false,
+				connectedNodeIds = new List<string>(),
+				offsetX = ox,
+				offsetY = oy
+			};
+
+			cellToNode[cellKey] = node;
 			map.nodes.Add(node);
-			map.startingNodeIds.Add(node.nodeId);
+
+			if (row == 0)
+				map.startingNodeIds.Add(node.nodeId);
 		}
 
-		// --- MIDDLE ROWS ---
-		for (int row = 1; row < lastRow; row++)
+		// Wire up connections from edges
+		foreach (var kvp in edges)
 		{
-			bool isCampRow = row >= lastRow - config.campRowsBeforeBoss;
+			if (!cellToNode.TryGetValue(kvp.Key, out MapNodeData sourceNode))
+				continue;
 
-			// Determine active lane positions for this row
-			List<int> lanePositions = new List<int>();
-			for (int lane = 0; lane < config.baseLanes; lane++)
-				lanePositions.Add(lane);
-
-			// Update existing splits
-			List<int> expiredSplits = new();
-			foreach (var kvp in activeSplits)
+			foreach (long destKey in kvp.Value)
 			{
-				if (kvp.Value > 0)
-					lanePositions.Add(kvp.Key);
-			}
-
-			// Decay splits
-			List<int> splitKeys = new List<int>(activeSplits.Keys);
-			for (int i = 0; i < splitKeys.Count; i++)
-			{
-				int key = splitKeys[i];
-				activeSplits[key] = activeSplits[key] - 1;
-				if (activeSplits[key] <= 0)
-					expiredSplits.Add(key);
-			}
-			for (int i = 0; i < expiredSplits.Count; i++)
-				activeSplits.Remove(expiredSplits[i]);
-
-			// Try to create new splits on outer lanes
-			if (!isCampRow && row > 1 && row < lastRow - 2)
-			{
-				// Left split (lane 0 -> sub-lane -1)
-				if (!activeSplits.ContainsKey(-1) && rng.NextDouble() < config.laneSplitChance)
+				if (cellToNode.TryGetValue(destKey, out MapNodeData destNode))
 				{
-					int duration = 2 + rng.Next(2); // 2-3 rows
-					activeSplits[-1] = duration;
-					lanePositions.Add(-1);
+					if (!sourceNode.connectedNodeIds.Contains(destNode.nodeId))
+						sourceNode.connectedNodeIds.Add(destNode.nodeId);
 				}
-
-				// Right split (lane 2 -> sub-lane 3)
-				if (!activeSplits.ContainsKey(3) && rng.NextDouble() < config.laneSplitChance)
-				{
-					int duration = 2 + rng.Next(2);
-					activeSplits[3] = duration;
-					lanePositions.Add(3);
-				}
-			}
-
-			lanePositions.Sort();
-
-			// Track which lanes converge this row
-			HashSet<int> convergedLanes = new();
-
-			// Try lane convergence (two adjacent base lanes share a node)
-			if (!isCampRow && row > 2 && rng.NextDouble() < config.laneConvergeChance)
-			{
-				// Pick two adjacent base lanes to converge
-				int convergeLane = rng.Next(config.baseLanes - 1); // 0 or 1
-				convergedLanes.Add(convergeLane + 1); // the right lane gets absorbed
-			}
-
-			// Place nodes
-			bool shopPlacedThisRow = false;
-
-			for (int i = 0; i < lanePositions.Count; i++)
-			{
-				int lane = lanePositions[i];
-
-				// Skip if this lane is absorbed by convergence
-				if (convergedLanes.Contains(lane))
-					continue;
-
-				// Node skip chance (but not for base lanes on early rows or camp rows)
-				if (!isCampRow && row > 2 && lane >= 0 && lane < config.baseLanes)
-				{
-					if (rng.NextDouble() < config.nodeSkipChance)
-					{
-						// Only skip if there are still nodes in adjacent lanes to connect through
-						continue;
-					}
-				}
-
-				// Determine encounter type
-				EncounterType encounterType;
-				if (isCampRow)
-				{
-					encounterType = EncounterType.Camp;
-				}
-				else if (row <= 1)
-				{
-					// Early rows: only BattleMinion or Event
-					encounterType = rng.NextDouble() < 0.7f
-						? EncounterType.BattleMinion
-						: EncounterType.Event;
-				}
-				else
-				{
-					encounterType = RollEncounterType(rng, config, shopPlacedThisRow);
-					if (encounterType == EncounterType.Shop)
-						shopPlacedThisRow = true;
-				}
-
-				MapNodeData node = CreateNode(row, lane, encounterType, rng);
-				map.nodes.Add(node);
 			}
 		}
 
-		// --- FINAL ROW: Boss node ---
-		{
-			MapNodeData bossNode = CreateNode(lastRow, 1, EncounterType.BattleBoss, null);
-			map.nodes.Add(bossNode);
-		}
+		// Ensure all pre-boss nodes connect to the boss
+		EnsureBossConnections(map, lastRow);
 
-		// --- CONNECTIONS ---
-		GenerateConnections(map, config, rng);
+		// Phase 3: Assign encounter types based on floor rules
+		AssignEncounterTypes(map, config, rng, lastRow);
 
-		// --- ENFORCE NO CROSSING ---
-		EnforceNoCrossing(map);
+		// Phase 4: Apply constraint rules
+		EnforceConstraints(map, config, rng, lastRow);
 
-		// --- VERIFY & PATCH REACHABILITY ---
-		VerifyAndPatchReachability(map);
-
-		// --- ENFORCE NO 3+ CONSECUTIVE BATTLES ---
-		FixConsecutiveBattles(map, rng, config);
-
-		// --- CLEAN UP: remove any backward or same-row connections ---
-		CleanBackwardConnections(map);
-
-		// --- SET INITIAL AVAILABILITY ---
+		// Phase 5: Set initial availability
 		map.UpdateAvailability();
 
 		return map;
 	}
 
-	static MapNodeData CreateNode(int row, int lane, EncounterType encounterType, System.Random rng = null)
-	{
-		float ox = 0f;
-		float oy = 0f;
+	// ─────────────────────────────────────────────
+	// PHASE 1: PATH TRACING
+	// ─────────────────────────────────────────────
 
-		// Add jitter for organic feel (skip row 0 and boss row)
-		if (rng != null && row > 0)
+	static long CellKey(int row, int col) => ((long)row << 16) | (long)(ushort)col;
+
+	/// <summary>
+	/// Returns exactly 3 evenly spaced starting columns.
+	/// For 5 cols: [1, 2, 3]. For 7 cols: [1, 3, 5]. Always centered.
+	/// </summary>
+	static int[] GetFixedStartColumns(int cols)
+	{
+		if (cols <= 3) return new int[] { 0, 1, 2 };
+
+		int mid = cols / 2;
+		// Space them out but keep them off the extreme edges
+		int step = Mathf.Max(1, (cols - 2) / 2);
+		int left = Mathf.Max(1, mid - step);
+		int right = Mathf.Min(cols - 2, mid + step);
+
+		return new int[] { left, mid, right };
+	}
+
+	static void TracePath(
+		System.Random rng, MapConfig config, int pathIndex,
+		int rows, int cols, int lastRow,
+		HashSet<long> aliveCells,
+		Dictionary<long, HashSet<long>> edges,
+		int[] fixedStartCols)
+	{
+		// Pick starting column: always one of the 3 fixed starts
+		int startCol;
+		if (pathIndex < fixedStartCols.Length)
 		{
-			ox = ((float)rng.NextDouble() - 0.5f) * 0.7f; // +/- 0.35 units
-			oy = ((float)rng.NextDouble() - 0.5f) * 0.4f; // +/- 0.2 units
+			// First 3 paths each get a unique fixed start
+			startCol = fixedStartCols[pathIndex];
+		}
+		else
+		{
+			// Additional paths pick randomly from the 3 fixed starts
+			startCol = fixedStartCols[rng.Next(fixedStartCols.Length)];
 		}
 
-		return new MapNodeData
+		int currentCol = startCol;
+		long currentKey = CellKey(0, currentCol);
+		aliveCells.Add(currentKey);
+
+		float centerCol = (cols - 1) * 0.5f;
+
+		// Trace upward from row 0 to lastRow
+		for (int row = 1; row <= lastRow; row++)
 		{
-			nodeId = $"r{row}_l{lane}",
-			row = row,
-			lane = lane,
-			encounterType = encounterType,
-			isCompleted = false,
-			isAvailable = false,
-			connectedNodeIds = new List<string>(),
-			offsetX = ox,
-			offsetY = oy
-		};
-	}
+			int nextCol;
 
-	static EncounterType RollEncounterType(System.Random rng, MapConfig config, bool shopAlreadyInRow)
-	{
-		float totalWeight = config.battleMinionWeight + config.eventWeight + config.campWeight;
-		if (!shopAlreadyInRow)
-			totalWeight += config.shopWeight;
-
-		float roll = (float)(rng.NextDouble() * totalWeight);
-
-		roll -= config.battleMinionWeight;
-		if (roll <= 0) return EncounterType.BattleMinion;
-
-		roll -= config.eventWeight;
-		if (roll <= 0) return EncounterType.Event;
-
-		roll -= config.campWeight;
-		if (roll <= 0) return EncounterType.Camp;
-
-		if (!shopAlreadyInRow)
-			return EncounterType.Shop;
-
-		return EncounterType.BattleMinion;
-	}
-
-	static void GenerateConnections(MapData map, MapConfig config, System.Random rng)
-	{
-		int lastRow = map.totalRows - 1;
-
-		for (int row = 0; row < lastRow; row++)
-		{
-			List<MapNodeData> currentRowNodes = map.GetNodesInRow(row);
-			List<MapNodeData> nextRowNodes = map.GetNodesInRow(row + 1);
-
-			if (nextRowNodes.Count == 0)
-				continue;
-
-			for (int i = 0; i < currentRowNodes.Count; i++)
+			if (row == lastRow)
 			{
-				MapNodeData node = currentRowNodes[i];
-				bool connected = false;
-
-				// Primary connection: same lane in next row
-				MapNodeData sameLaneNext = FindNodeInLane(nextRowNodes, node.lane);
-				if (sameLaneNext != null)
-				{
-					node.connectedNodeIds.Add(sameLaneNext.nodeId);
-					connected = true;
-				}
-
-				// Secondary connection: adjacent lane in next row
-				if (rng.NextDouble() < config.adjacentConnectionChance || !connected)
-				{
-					MapNodeData adjacent = FindNearestAdjacentNode(nextRowNodes, node.lane, sameLaneNext);
-					if (adjacent != null)
-					{
-						node.connectedNodeIds.Add(adjacent.nodeId);
-						connected = true;
-					}
-				}
-
-				// Fallback: if still not connected, connect to nearest node in next row
-				if (!connected && nextRowNodes.Count > 0)
-				{
-					MapNodeData nearest = FindNearestNode(nextRowNodes, node.lane);
-					if (nearest != null)
-						node.connectedNodeIds.Add(nearest.nodeId);
-				}
+				// Boss row: always go to the middle column
+				nextCol = cols / 2;
 			}
-		}
-	}
-
-	static MapNodeData FindNodeInLane(List<MapNodeData> nodes, int lane)
-	{
-		for (int i = 0; i < nodes.Count; i++)
-		{
-			if (nodes[i].lane == lane)
-				return nodes[i];
-		}
-		return null;
-	}
-
-	static MapNodeData FindNearestAdjacentNode(List<MapNodeData> nextRowNodes, int currentLane, MapNodeData exclude)
-	{
-		MapNodeData best = null;
-		int bestDist = int.MaxValue;
-
-		for (int i = 0; i < nextRowNodes.Count; i++)
-		{
-			MapNodeData candidate = nextRowNodes[i];
-			if (candidate == exclude) continue;
-			if (candidate.lane == currentLane) continue;
-
-			int dist = Mathf.Abs(candidate.lane - currentLane);
-			if (dist < bestDist)
+			else
 			{
-				bestDist = dist;
-				best = candidate;
-			}
-		}
-		return best;
-	}
+				// Calculate center bias: increases as we approach the top
+				// 0.0 at bottom rows → ~0.35 at the top rows
+				float progress = (float)row / lastRow;
+				float centerBias = progress * 0.35f;
 
-	static MapNodeData FindNearestNode(List<MapNodeData> nodes, int lane)
-	{
-		MapNodeData best = null;
-		int bestDist = int.MaxValue;
-
-		for (int i = 0; i < nodes.Count; i++)
-		{
-			int dist = Mathf.Abs(nodes[i].lane - lane);
-			if (dist < bestDist)
-			{
-				bestDist = dist;
-				best = nodes[i];
-			}
-		}
-		return best;
-	}
-
-	static void EnforceNoCrossing(MapData map)
-	{
-		int lastRow = map.totalRows - 1;
-
-		for (int row = 0; row < lastRow; row++)
-		{
-			List<MapNodeData> currentRowNodes = map.GetNodesInRow(row);
-			currentRowNodes.Sort((a, b) => a.lane.CompareTo(b.lane));
-
-			// Collect all edges: (sourceLane, targetLane, sourceNode, targetNodeId)
-			List<(int srcLane, int dstLane, MapNodeData src, string dstId)> edges = new();
-
-			for (int i = 0; i < currentRowNodes.Count; i++)
-			{
-				MapNodeData src = currentRowNodes[i];
-				for (int j = 0; j < src.connectedNodeIds.Count; j++)
-				{
-					MapNodeData dst = map.GetNode(src.connectedNodeIds[j]);
-					if (dst != null && dst.row == row + 1)
-					{
-						edges.Add((src.lane, dst.lane, src, dst.nodeId));
-					}
-				}
+				nextCol = PickNextColumn(rng, currentCol, cols, row, aliveCells, edges, currentKey, centerCol, centerBias);
 			}
 
-			// Sort edges by source lane, then by target lane
-			edges.Sort((a, b) =>
-			{
-				int cmp = a.srcLane.CompareTo(b.srcLane);
-				if (cmp != 0) return cmp;
-				return a.dstLane.CompareTo(b.dstLane);
-			});
+			long nextKey = CellKey(row, nextCol);
+			aliveCells.Add(nextKey);
 
-			// Check for crossings: two edges cross if src1 < src2 but dst1 > dst2
-			for (int i = 0; i < edges.Count; i++)
-			{
-				for (int j = i + 1; j < edges.Count; j++)
-				{
-					if (edges[i].srcLane <= edges[j].srcLane && edges[i].dstLane > edges[j].dstLane)
-					{
-						// Crossing detected: remove the secondary connection (the one farther from same-lane)
-						var edgeToRemove = edges[j];
-						if (Mathf.Abs(edges[i].srcLane - edges[i].dstLane) > Mathf.Abs(edges[j].srcLane - edges[j].dstLane))
-							edgeToRemove = edges[i];
+			if (!edges.ContainsKey(currentKey))
+				edges[currentKey] = new HashSet<long>();
+			edges[currentKey].Add(nextKey);
 
-						edgeToRemove.src.connectedNodeIds.Remove(edgeToRemove.dstId);
-						edges.RemoveAt(edges.IndexOf(edgeToRemove));
-						j--;
-					}
-				}
-			}
+			currentCol = nextCol;
+			currentKey = nextKey;
 		}
 	}
 
-	static void VerifyAndPatchReachability(MapData map)
+	static int PickNextColumn(
+		System.Random rng, int currentCol, int cols,
+		int nextRow, HashSet<long> aliveCells,
+		Dictionary<long, HashSet<long>> edges, long sourceKey,
+		float centerCol, float centerBias)
 	{
-		int lastRow = map.totalRows - 1;
+		// Candidates: current col, col-1, col+1 (clamped to grid)
+		List<int> candidates = new();
+		for (int dc = -1; dc <= 1; dc++)
+		{
+			int c = currentCol + dc;
+			if (c >= 0 && c < cols)
+				candidates.Add(c);
+		}
+
+		// Sort candidates by distance to center (closest first), with randomness
+		// centerBias controls how strongly we prefer center (0 = pure random, 1 = always center)
+		candidates.Sort((a, b) =>
+		{
+			float distA = Mathf.Abs(a - centerCol);
+			float distB = Mathf.Abs(b - centerCol);
+			return distA.CompareTo(distB);
+		});
+
+		// With (1 - centerBias) probability, shuffle to add randomness
+		if ((float)rng.NextDouble() > centerBias)
+		{
+			// Shuffle for randomness
+			for (int i = candidates.Count - 1; i > 0; i--)
+			{
+				int j = rng.Next(i + 1);
+				(candidates[i], candidates[j]) = (candidates[j], candidates[i]);
+			}
+		}
+
+		// Pick first candidate that doesn't cause a crossing
+		int sourceRow = (int)(sourceKey >> 16);
+
+		foreach (int c in candidates)
+		{
+			if (!WouldCross(currentCol, c, sourceRow, edges, aliveCells, nextRow))
+				return c;
+		}
+
+		// Fallback: straight up
+		return Mathf.Clamp(currentCol, 0, cols - 1);
+	}
+
+	/// <summary>
+	/// Checks if connecting (sourceCol → destCol) on rows (sourceRow → sourceRow+1)
+	/// would cross any existing edge in the same row transition.
+	/// Two edges cross if: src1.col < src2.col but dst1.col > dst2.col (or vice versa).
+	/// </summary>
+	static bool WouldCross(
+		int srcCol, int dstCol, int srcRow,
+		Dictionary<long, HashSet<long>> edges,
+		HashSet<long> aliveCells, int dstRow)
+	{
+		// Check all existing edges from srcRow to dstRow
+		// We need to iterate all alive cells in srcRow that have edges to dstRow
+		foreach (var kvp in edges)
+		{
+			int existingSrcRow = (int)(kvp.Key >> 16);
+			if (existingSrcRow != srcRow) continue;
+
+			int existingSrcCol = (int)(kvp.Key & 0xFFFF);
+
+			foreach (long destKey in kvp.Value)
+			{
+				int existingDstRow = (int)(destKey >> 16);
+				if (existingDstRow != dstRow) continue;
+
+				int existingDstCol = (int)(destKey & 0xFFFF);
+
+				// Check for crossing: one goes left-to-right while other goes right-to-left
+				if (existingSrcCol < srcCol && existingDstCol > dstCol) return true;
+				if (existingSrcCol > srcCol && existingDstCol < dstCol) return true;
+
+				// Also prevent two edges from sharing the same destination if they came from different
+				// sides (this creates visual overlaps, not strictly "crossing" but looks bad)
+				// Actually this is fine — shared nodes are intentional merges
+			}
+		}
+
+		return false;
+	}
+
+	// ─────────────────────────────────────────────
+	// PHASE 2 HELPERS: BOSS CONNECTIONS
+	// ─────────────────────────────────────────────
+
+	static void EnsureBossConnections(MapData map, int lastRow)
+	{
 		List<MapNodeData> bossNodes = map.GetNodesInRow(lastRow);
 		if (bossNodes.Count == 0) return;
 
 		string bossId = bossNodes[0].nodeId;
 
-		// BFS from each starting node to verify it can reach the boss
-		for (int s = 0; s < map.startingNodeIds.Count; s++)
-		{
-			if (CanReach(map, map.startingNodeIds[s], bossId))
-				continue;
-
-			// Path is broken: walk forward from this start and patch
-			PatchPathForward(map, map.startingNodeIds[s]);
-		}
-
-		// Also verify all nodes in second-to-last row connect to boss
 		List<MapNodeData> preBossRow = map.GetNodesInRow(lastRow - 1);
 		for (int i = 0; i < preBossRow.Count; i++)
 		{
 			if (!preBossRow[i].connectedNodeIds.Contains(bossId))
-			{
 				preBossRow[i].connectedNodeIds.Add(bossId);
-			}
 		}
 	}
 
-	static bool CanReach(MapData map, string fromId, string toId)
+	// ─────────────────────────────────────────────
+	// PHASE 3: ASSIGN ENCOUNTER TYPES
+	// ─────────────────────────────────────────────
+
+	static void AssignEncounterTypes(MapData map, MapConfig config, System.Random rng, int lastRow)
 	{
-		HashSet<string> visited = new();
-		Queue<string> queue = new();
-		queue.Enqueue(fromId);
-		visited.Add(fromId);
-
-		while (queue.Count > 0)
+		// Build set of guaranteed camp rows
+		HashSet<int> campRows = new();
+		if (config.guaranteedCampRows != null)
 		{
-			string currentId = queue.Dequeue();
-			if (currentId == toId) return true;
+			for (int i = 0; i < config.guaranteedCampRows.Length; i++)
+				campRows.Add(config.guaranteedCampRows[i]);
+		}
+		// Camp rows before boss
+		for (int r = lastRow - config.campRowsBeforeBoss; r < lastRow; r++)
+			campRows.Add(r);
 
-			MapNodeData current = map.GetNode(currentId);
-			if (current == null) continue;
+		// Assign per-row
+		for (int row = 0; row <= lastRow; row++)
+		{
+			List<MapNodeData> rowNodes = map.GetNodesInRow(row);
 
-			for (int i = 0; i < current.connectedNodeIds.Count; i++)
+			if (row == 0)
 			{
-				string nextId = current.connectedNodeIds[i];
-				if (!visited.Contains(nextId))
+				// Floor 0: always BattleMinion
+				for (int i = 0; i < rowNodes.Count; i++)
+					rowNodes[i].encounterType = EncounterType.BattleMinion;
+			}
+			else if (row == lastRow)
+			{
+				// Boss floor
+				for (int i = 0; i < rowNodes.Count; i++)
+					rowNodes[i].encounterType = EncounterType.BattleBoss;
+			}
+			else if (campRows.Contains(row))
+			{
+				// Guaranteed camp floors
+				for (int i = 0; i < rowNodes.Count; i++)
+					rowNodes[i].encounterType = EncounterType.Camp;
+			}
+			else if (row <= 1)
+			{
+				// Early floors: only BattleMinion or Event
+				for (int i = 0; i < rowNodes.Count; i++)
 				{
-					visited.Add(nextId);
-					queue.Enqueue(nextId);
+					rowNodes[i].encounterType = rng.NextDouble() < 0.7
+						? EncounterType.BattleMinion
+						: EncounterType.Event;
 				}
-			}
-		}
-		return false;
-	}
-
-	static void PatchPathForward(MapData map, string startId)
-	{
-		MapNodeData current = map.GetNode(startId);
-		if (current == null) return;
-
-		int maxRow = map.totalRows - 1;
-
-		while (current.row < maxRow)
-		{
-			if (current.connectedNodeIds.Count > 0)
-			{
-				// Follow first connection
-				current = map.GetNode(current.connectedNodeIds[0]);
-				if (current == null) return;
-				continue;
-			}
-
-			// No connections: find nearest node in next row and connect
-			List<MapNodeData> nextRow = map.GetNodesInRow(current.row + 1);
-			if (nextRow.Count == 0)
-			{
-				// No nodes in next row at all: create one
-				MapNodeData bridge = CreateNode(current.row + 1, current.lane, EncounterType.BattleMinion, null);
-				map.nodes.Add(bridge);
-				current.connectedNodeIds.Add(bridge.nodeId);
-				current = bridge;
 			}
 			else
 			{
-				MapNodeData nearest = FindNearestNode(nextRow, current.lane);
-				if (nearest != null)
+				// Open floors: weighted roll with floor restrictions
+				bool isEarlyFloor = row < config.minRowForAdvancedTypes;
+				int shopsThisRow = 0;
+
+				for (int i = 0; i < rowNodes.Count; i++)
 				{
-					current.connectedNodeIds.Add(nearest.nodeId);
-					current = nearest;
-				}
-				else
-				{
-					break;
+					bool shopAllowed = shopsThisRow < config.maxShopsPerRow;
+					rowNodes[i].encounterType = RollEncounterType(rng, config, isEarlyFloor, shopAllowed);
+					if (rowNodes[i].encounterType == EncounterType.Shop)
+						shopsThisRow++;
 				}
 			}
 		}
 	}
 
-	static void FixConsecutiveBattles(MapData map, System.Random rng, MapConfig config)
+	static EncounterType RollEncounterType(System.Random rng, MapConfig config, bool isEarlyFloor, bool shopAllowed)
 	{
-		// For each starting node, walk all paths and check for 3+ consecutive battles
+		// Build weight table based on restrictions
+		float battleW = config.battleMinionWeight;
+		float eventW = config.eventWeight;
+		float campW = isEarlyFloor ? 0f : config.campWeight;
+		float shopW = (isEarlyFloor || !shopAllowed) ? 0f : config.shopWeight;
+		float eliteW = isEarlyFloor ? 0f : config.eliteWeight;
+
+		float total = battleW + eventW + campW + shopW + eliteW;
+		float roll = (float)(rng.NextDouble() * total);
+
+		roll -= battleW;
+		if (roll <= 0) return EncounterType.BattleMinion;
+
+		roll -= eventW;
+		if (roll <= 0) return EncounterType.Event;
+
+		roll -= campW;
+		if (roll <= 0) return EncounterType.Camp;
+
+		roll -= shopW;
+		if (roll <= 0) return EncounterType.Shop;
+
+		roll -= eliteW;
+		if (roll <= 0) return EncounterType.BattleMinion; // elite mapped to BattleMinion for now (no Elite enum)
+
+		return EncounterType.BattleMinion;
+	}
+
+	// ─────────────────────────────────────────────
+	// PHASE 4: ENFORCE CONSTRAINTS
+	// ─────────────────────────────────────────────
+
+	static void EnforceConstraints(MapData map, MapConfig config, System.Random rng, int lastRow)
+	{
+		// Constraint 1: No consecutive same-type (except BattleMinion and BattleBoss)
+		// Walk each path from starting nodes and check
+		FixConsecutiveSameType(map, config, rng);
+
+		// Constraint 2: If a node has 2+ outgoing connections, try to make destinations different types
+		DiversifyBranches(map, rng, config);
+
+		// Constraint 3: No camp→camp connections (extra safety beyond same-type rule)
+		FixConsecutiveCamps(map, rng);
+	}
+
+	static void FixConsecutiveSameType(MapData map, MapConfig config, System.Random rng)
+	{
+		// For each node, check all children: if the child is the same non-battle type,
+		// re-roll the child's type
+		int lastRow = map.totalRows - 1;
+
+		for (int row = 0; row < lastRow; row++)
+		{
+			List<MapNodeData> rowNodes = map.GetNodesInRow(row);
+			for (int i = 0; i < rowNodes.Count; i++)
+			{
+				MapNodeData parent = rowNodes[i];
+				if (parent.encounterType == EncounterType.BattleMinion) continue;
+				if (parent.encounterType == EncounterType.BattleBoss) continue;
+
+				for (int j = 0; j < parent.connectedNodeIds.Count; j++)
+				{
+					MapNodeData child = map.GetNode(parent.connectedNodeIds[j]);
+					if (child == null) continue;
+					if (child.encounterType == EncounterType.BattleBoss) continue;
+
+					// Check if forced row — don't change guaranteed types
+					if (IsGuaranteedRow(child.row, config, lastRow)) continue;
+
+					if (child.encounterType == parent.encounterType)
+					{
+						// Re-roll the child to something different
+						child.encounterType = GetDifferentType(rng, config, parent.encounterType, child.row, lastRow);
+					}
+				}
+			}
+		}
+
+		// Also enforce max consecutive battles along paths
 		for (int s = 0; s < map.startingNodeIds.Count; s++)
 		{
-			CheckPathForConsecutiveBattles(map, map.startingNodeIds[s], 0, rng, config);
+			FixConsecutiveBattlesAlongPath(map, map.startingNodeIds[s], 0, config, rng, new HashSet<string>());
 		}
 	}
 
-	static void CheckPathForConsecutiveBattles(MapData map, string nodeId, int consecutiveBattles, System.Random rng, MapConfig config)
+	static void FixConsecutiveBattlesAlongPath(MapData map, string nodeId, int streak, MapConfig config, System.Random rng, HashSet<string> visited)
 	{
+		if (!visited.Add(nodeId)) return;
+
 		MapNodeData node = map.GetNode(nodeId);
 		if (node == null) return;
 
+		int lastRow = map.totalRows - 1;
 		bool isBattle = node.encounterType == EncounterType.BattleMinion;
-		int newCount = isBattle ? consecutiveBattles + 1 : 0;
+		int newStreak = isBattle ? streak + 1 : 0;
 
-		// If 3+ consecutive battles, swap this one to Event or Camp
-		if (newCount >= 3)
+		if (newStreak >= config.maxConsecutiveBattles && !IsGuaranteedRow(node.row, config, lastRow))
 		{
-			node.encounterType = rng.NextDouble() < 0.6 ? EncounterType.Event : EncounterType.Camp;
-			newCount = 0;
+			node.encounterType = rng.NextDouble() < 0.6 ? EncounterType.Event : EncounterType.Shop;
+			newStreak = 0;
 		}
 
 		for (int i = 0; i < node.connectedNodeIds.Count; i++)
-		{
-			CheckPathForConsecutiveBattles(map, node.connectedNodeIds[i], newCount, rng, config);
-		}
+			FixConsecutiveBattlesAlongPath(map, node.connectedNodeIds[i], newStreak, config, rng, visited);
 	}
 
-	static void CleanBackwardConnections(MapData map)
+	static void DiversifyBranches(MapData map, System.Random rng, MapConfig config)
 	{
+		int lastRow = map.totalRows - 1;
+
 		for (int i = 0; i < map.nodes.Count; i++)
 		{
 			MapNodeData node = map.nodes[i];
-			for (int j = node.connectedNodeIds.Count - 1; j >= 0; j--)
+			if (node.connectedNodeIds.Count < 2) continue;
+
+			// Collect children types
+			List<MapNodeData> children = new();
+			for (int j = 0; j < node.connectedNodeIds.Count; j++)
 			{
-				MapNodeData target = map.GetNode(node.connectedNodeIds[j]);
-				// Remove if target doesn't exist, is in same row, or is in a previous row
-				if (target == null || target.row <= node.row)
-				{
-					node.connectedNodeIds.RemoveAt(j);
-				}
+				MapNodeData child = map.GetNode(node.connectedNodeIds[j]);
+				if (child != null) children.Add(child);
 			}
 
-			// Remove duplicate connections
-			HashSet<string> seen = new();
-			for (int j = node.connectedNodeIds.Count - 1; j >= 0; j--)
+			// If all children same type and more than 1, diversify
+			HashSet<EncounterType> types = new();
+			for (int j = 0; j < children.Count; j++)
+				types.Add(children[j].encounterType);
+
+			if (types.Count < children.Count && children.Count > 1)
 			{
-				if (!seen.Add(node.connectedNodeIds[j]))
-					node.connectedNodeIds.RemoveAt(j);
+				for (int j = 1; j < children.Count; j++)
+				{
+					if (IsGuaranteedRow(children[j].row, config, lastRow)) continue;
+					if (children[j].encounterType == EncounterType.BattleBoss) continue;
+
+					// Check if this type is already used by a sibling
+					bool duplicate = false;
+					for (int k = 0; k < j; k++)
+					{
+						if (children[k].encounterType == children[j].encounterType)
+						{
+							duplicate = true;
+							break;
+						}
+					}
+
+					if (duplicate)
+					{
+						children[j].encounterType = GetDifferentType(rng, config, children[j].encounterType, children[j].row, lastRow);
+					}
+				}
 			}
 		}
+	}
+
+	static void FixConsecutiveCamps(MapData map, System.Random rng)
+	{
+		for (int row = 0; row < map.totalRows; row++)
+		{
+			List<MapNodeData> rowNodes = map.GetNodesInRow(row);
+			for (int i = 0; i < rowNodes.Count; i++)
+			{
+				MapNodeData node = rowNodes[i];
+				if (node.encounterType != EncounterType.Camp) continue;
+
+				for (int j = 0; j < node.connectedNodeIds.Count; j++)
+				{
+					MapNodeData child = map.GetNode(node.connectedNodeIds[j]);
+					if (child == null) continue;
+					if (child.encounterType == EncounterType.BattleBoss) continue;
+
+					if (child.encounterType == EncounterType.Camp)
+					{
+						child.encounterType = rng.NextDouble() < 0.5
+							? EncounterType.Event
+							: EncounterType.BattleMinion;
+					}
+				}
+			}
+		}
+	}
+
+	// ─────────────────────────────────────────────
+	// HELPERS
+	// ─────────────────────────────────────────────
+
+	static bool IsGuaranteedRow(int row, MapConfig config, int lastRow)
+	{
+		if (row == 0) return true;
+		if (row == lastRow) return true;
+
+		// Camp rows before boss
+		if (row >= lastRow - config.campRowsBeforeBoss) return true;
+
+		// Guaranteed camp rows
+		if (config.guaranteedCampRows != null)
+		{
+			for (int i = 0; i < config.guaranteedCampRows.Length; i++)
+			{
+				if (config.guaranteedCampRows[i] == row) return true;
+			}
+		}
+
+		return false;
+	}
+
+	static EncounterType GetDifferentType(System.Random rng, MapConfig config, EncounterType avoid, int row, int lastRow)
+	{
+		bool isEarly = row < config.minRowForAdvancedTypes;
+
+		List<EncounterType> options = new() { EncounterType.BattleMinion, EncounterType.Event };
+
+		if (!isEarly)
+		{
+			options.Add(EncounterType.Camp);
+			options.Add(EncounterType.Shop);
+		}
+
+		// Remove the type we want to avoid
+		options.Remove(avoid);
+
+		if (options.Count == 0) return EncounterType.BattleMinion;
+		return options[rng.Next(options.Count)];
 	}
 }

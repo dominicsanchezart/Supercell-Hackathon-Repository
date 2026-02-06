@@ -16,5 +16,5 @@ MonoBehaviour:
   battleBossIcon: {fileID: 21300000, guid: cef53fb982cd00740a6d7e7395ba2a3b, type: 3}
   shopIcon: {fileID: 21300000, guid: efeb6209bb550b440833f41f6c48bdd2, type: 3}
   campIcon: {fileID: 21300000, guid: d75f749c3fe650f41af84b7963c6e78a, type: 3}
-  eventIcon: {fileID: 21300000, guid: b5e86db71100f0748920862450a6d82d, type: 3}
+  eventIcon: {fileID: 21300000, guid: a5cd0437296d01e4b896e724fab3a003, type: 3}
   nodeBackground: {fileID: 21300000, guid: b5e86db71100f0748920862450a6d82d, type: 3}

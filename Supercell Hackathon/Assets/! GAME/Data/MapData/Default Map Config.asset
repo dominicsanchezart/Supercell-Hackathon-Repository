@@ -12,14 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d91aef1294191b744ab5316877e87a57, type: 3}
   m_Name: Default Map Config
   m_EditorClassIdentifier: Assembly-CSharp::MapConfig
-  totalRows: 8
-  baseLanes: 3
-  battleMinionWeight: 45
+  totalRows: 14
+  columns: 6
+  pathCount: 6
+  battleMinionWeight: 50
+  eliteWeight: 0
   eventWeight: 15
   campWeight: 20
   shopWeight: 20
-  laneSplitChance: 0.3
-  laneConvergeChance: 0.2
-  adjacentConnectionChance: 0.3
-  nodeSkipChance: 0.15
+  guaranteedCampRows: 06000000
   campRowsBeforeBoss: 1
+  minRowForAdvancedTypes: 4
+  maxConsecutiveBattles: 3
+  maxShopsPerRow: 3
