@@ -867,14 +867,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuController
   playButton: {fileID: 152418010}
-  optionsButton: {fileID: 0}
   quitButton: {fileID: 1979546274}
-  optionsPanel: {fileID: 0}
-  mapConfig: {fileID: 11400000, guid: 3d489766a86d3cd438a26e8b19b2d0f3, type: 2}
-  startingHP: 100
-  startingGold: 50
-  starterDeck: []
-  patron: 1
+  defaultPatron: {fileID: 11400000, guid: 381a099f843c64c4dbe801f0410ee238, type: 2}
   mapSceneName: LVL_Map_Master
 --- !u!4 &1073567088
 Transform:

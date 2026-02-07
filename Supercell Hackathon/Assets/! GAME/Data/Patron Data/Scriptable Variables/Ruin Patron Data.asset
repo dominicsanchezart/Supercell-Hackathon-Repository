@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b7531fcca5ab774595b7e7bb7e8ce93, type: 3}
+  m_Name: Ruin Patron Data
+  m_EditorClassIdentifier: Assembly-CSharp::PatronData
+  patronName: Stitch Prophet
+  faction: 3
+  pactTitle: Pact of Ruin
+  passiveDescription: Pact of Ruin placeholder
+  portrait: {fileID: 0}
+  patronColor: {r: 0.59255135, g: 0.14509802, b: 0.8392157, a: 1}
+  characterData: {fileID: 11400000, guid: 267a18bd39a2aa741a76a0e4e857706c, type: 2}
+  starterDeck: {fileID: 11400000, guid: 0d838f99842fc314ba4fd3715248693d, type: 2}
+  startingGold: 50

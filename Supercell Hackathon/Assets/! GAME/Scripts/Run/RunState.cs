@@ -16,6 +16,7 @@ public class RunState
 	public MapData mapData;
 
 	[Header("Patron")]
+	public PatronData patronData;
 	public CardFaction patronFaction;
 
 	[Header("Meta")]
