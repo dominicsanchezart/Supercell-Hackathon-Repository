@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00a88c861ce7e8643bb95b4825abb30b, type: 3}
   m_Name: CardBorderData
   m_EditorClassIdentifier: Assembly-CSharp::CardBorderData
-  borderneautral: {fileID: 0}
+  borderneautral: {fileID: 21300000, guid: a562a1bcede6d4f469c2f0fd3d7ac12b, type: 3}
   borderWrath: {fileID: 21300000, guid: 9ca89b781f0471e42b95c5170affd009, type: 3}
   borderWrathTop: {fileID: 21300000, guid: 07b0bcb25e16bd84bbd588bbc1456156, type: 3}
   borderWrathBottom: {fileID: 21300000, guid: 3fbb617ffc14969458d39303287981bc, type: 3}
