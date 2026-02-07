@@ -719,7 +719,7 @@ MonoBehaviour:
   rowSpacing: 2
   laneSpacing: 2.5
   mapCenterX: 0
-  nodeScale: 0.75
+  nodeScale: 0.5
   scrollSpeed: 0.95
   scrollSmooth: 3.5
   scrollDragSpeed: 0.01

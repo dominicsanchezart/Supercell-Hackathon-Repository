@@ -22,6 +22,12 @@ public class RunManager : MonoBehaviour
 	// Track which encounter scene is currently loaded additively
 	string loadedEncounterScene;
 
+	/// <summary>
+	/// Pending run configuration set by MainMenuController before loading the map scene.
+	/// The map scene's RunManager picks this up in Awake and starts the run.
+	/// </summary>
+	public static System.Action<RunManager> PendingRunSetup;
+
 	void Awake()
 	{
 		if (Instance != null && Instance != this)
@@ -31,6 +37,13 @@ public class RunManager : MonoBehaviour
 		}
 		Instance = this;
 		DontDestroyOnLoad(gameObject);
+
+		// If the main menu queued a run config, apply it now
+		if (PendingRunSetup != null)
+		{
+			PendingRunSetup.Invoke(this);
+			PendingRunSetup = null;
+		}
 	}
 
 	public void StartNewRun(int seed, int startingHP, List<CardData> starterDeck, bool loadScene = true)

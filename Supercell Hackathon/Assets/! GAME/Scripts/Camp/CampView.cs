@@ -50,7 +50,7 @@ public class CampView : MonoBehaviour
 		hasActed = false;
 		isUpgradeOpen = false;
 
-		// Skin the option cards
+		// Skin the option cards using CampData text (same placeholder pattern as CardData)
 		RunState state = RunManager.Instance?.State;
 		int healAmount = 0;
 		if (state != null)
@@ -58,9 +58,13 @@ public class CampView : MonoBehaviour
 
 		if (restOption != null)
 		{
+			string restTitle = campData != null ? campData.restTitle : "Rest";
+			string restDesc = campData != null ? campData.restDescription : "Heal {healAmount} HP.";
+			restDesc = restDesc.Replace("{healAmount}", healAmount.ToString());
+
 			restOption.Setup(
-				"Rest",
-				$"Heal {healAmount} HP\n({Mathf.RoundToInt(healPercent * 100)}% of max).",
+				restTitle,
+				restDesc,
 				campData != null ? campData.restIcon : null
 			);
 			restOption.onClicked += OnOptionClicked;
@@ -68,9 +72,12 @@ public class CampView : MonoBehaviour
 
 		if (upgradeOption != null)
 		{
+			string upgradeTitle = campData != null ? campData.upgradeTitle : "Upgrade";
+			string upgradeDesc = campData != null ? campData.upgradeDescription : "Upgrade one card\nin your deck.";
+
 			upgradeOption.Setup(
-				"Upgrade",
-				"Upgrade one card\nin your deck.",
+				upgradeTitle,
+				upgradeDesc,
 				campData != null ? campData.upgradeIcon : null
 			);
 			upgradeOption.onClicked += OnOptionClicked;

@@ -55,12 +55,6 @@ public class MainMenuController : MonoBehaviour
 		if (RunManager.Instance != null)
 			Destroy(RunManager.Instance.gameObject);
 
-		// Create a fresh RunManager
-		GameObject rmObj = new GameObject("RunManager");
-		RunManager rm = rmObj.AddComponent<RunManager>();
-		rm.mapConfig = mapConfig;
-		rm.mapSceneName = mapSceneName;
-
 		// Build starter deck
 		List<CardData> deck = new List<CardData>();
 		if (starterDeck != null)
@@ -72,13 +66,23 @@ public class MainMenuController : MonoBehaviour
 			}
 		}
 
-		// Start the run
+		// Capture config for the closure
+		int hp = startingHP;
+		int gold = startingGold;
 		int seed = Random.Range(0, int.MaxValue);
-		rm.StartNewRun(seed, startingHP, deck);
+		CardFaction faction = patron;
+		List<CardData> deckCopy = new List<CardData>(deck);
 
-		// Set patron and starting gold
-		rm.State.patronFaction = patron;
-		rm.State.gold = startingGold;
+		// Queue run setup — the map scene's RunManager will pick this up in Awake
+		RunManager.PendingRunSetup = (rm) =>
+		{
+			rm.StartNewRun(seed, hp, deckCopy, false);
+			rm.State.patronFaction = faction;
+			rm.State.gold = gold;
+		};
+
+		// Load the map scene (its RunManager will handle the rest)
+		UnityEngine.SceneManagement.SceneManager.LoadScene(mapSceneName);
 	}
 
 	void OnOptions()
