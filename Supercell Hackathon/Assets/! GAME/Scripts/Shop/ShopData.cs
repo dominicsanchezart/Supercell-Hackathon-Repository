@@ -15,11 +15,11 @@ public class ShopData : ScriptableObject
 
 	[Header("Shop Layout")]
 	[Tooltip("Number of patron-specific cards offered")]
-	public int patronCardCount = 3;
+	public int patronCardCount = 6;
 	[Tooltip("Number of neutral cards offered")]
-	public int neutralCardCount = 1;
+	public int neutralCardCount = 0;
 	[Tooltip("Number of item cards offered")]
-	public int itemCardCount = 1;
+	public int itemCardCount = 2;
 
 	[Header("Pricing")]
 	public int commonMinPrice = 35;

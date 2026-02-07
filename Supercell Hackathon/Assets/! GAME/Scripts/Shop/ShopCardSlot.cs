@@ -5,6 +5,7 @@ using TMPro;
 /// <summary>
 /// A single slot in the shop. Spawns the real Card.prefab to display visuals,
 /// then overlays price / sale / sold UI on top.
+/// Handles its own hover via OnMouseEnter/OnMouseExit (Collider2D).
 /// </summary>
 public class ShopCardSlot : MonoBehaviour
 {
@@ -30,6 +31,10 @@ public class ShopCardSlot : MonoBehaviour
 	[Header("Interaction")]
 	public Collider2D slotCollider;
 
+	[Header("Hover")]
+	public float hoverScale = 1.1f;
+	public float hoverSmooth = 12f;
+
 	[Header("Colors")]
 	public Color affordableColor = Color.white;
 	public Color tooExpensiveColor = new Color(0.7f, 0.3f, 0.3f, 1f);
@@ -39,10 +44,15 @@ public class ShopCardSlot : MonoBehaviour
 	ShopView shopView;
 	GameObject spawnedCard;
 
+	// Hover state
+	bool isHovered;
+	Vector3 baseScale;
+
 	public void Initialize(ShopItem item, ShopView owner)
 	{
 		shopItem = item;
 		shopView = owner;
+		baseScale = transform.localScale;
 
 		if (item.slotType == ShopItem.SlotType.CardRemoval)
 			SetupAsRemoval(item);
@@ -58,15 +68,20 @@ public class ShopCardSlot : MonoBehaviour
 		RefreshPriceDisplay();
 	}
 
+	void Update()
+	{
+		// Smooth hover scale
+		Vector3 target = isHovered ? baseScale * hoverScale : baseScale;
+		transform.localScale = Vector3.Lerp(transform.localScale, target, Time.deltaTime * hoverSmooth);
+	}
+
 	void SetupAsCard(ShopItem item)
 	{
-		// Hide the removal fallback display
 		if (removalDisplay != null)
 			removalDisplay.SetActive(false);
 
 		if (item.card == null) return;
 
-		// Spawn the real Card.prefab for full visual display
 		if (cardPrefab != null && cardAnchor != null)
 		{
 			spawnedCard = Object.Instantiate(cardPrefab, cardAnchor);
@@ -74,17 +89,14 @@ public class ShopCardSlot : MonoBehaviour
 			spawnedCard.transform.localRotation = Quaternion.identity;
 			spawnedCard.transform.localScale = Vector3.one * cardScale;
 
-			// Set the card data — this triggers border, layers, and text setup
 			Card card = spawnedCard.GetComponent<Card>();
 			if (card != null)
 				card.SetCardData(item.card);
 
-			// Disable the CardView's collider so it doesn't interfere with shop input
 			Collider2D cardCol = spawnedCard.GetComponent<Collider2D>();
 			if (cardCol != null)
 				cardCol.enabled = false;
 
-			// Disable CardView component (we don't need hand sorting logic)
 			CardView cardView = spawnedCard.GetComponent<CardView>();
 			if (cardView != null)
 				cardView.enabled = false;
@@ -93,7 +105,6 @@ public class ShopCardSlot : MonoBehaviour
 
 	void SetupAsRemoval(ShopItem item)
 	{
-		// Show the text-only removal display
 		if (removalDisplay != null)
 			removalDisplay.SetActive(true);
 
@@ -125,9 +136,26 @@ public class ShopCardSlot : MonoBehaviour
 		}
 	}
 
-	/// <summary>
-	/// Called by ShopView when this slot's collider is clicked via OnMouseDown.
-	/// </summary>
+	// ─── Input ────────────────────────────────────────────────────
+
+	void OnMouseEnter()
+	{
+		if (shopView != null && shopView.IsBlocked) return;
+		if (shopItem != null && shopItem.isSold) return;
+		isHovered = true;
+	}
+
+	void OnMouseExit()
+	{
+		isHovered = false;
+	}
+
+	void OnMouseDown()
+	{
+		if (shopView != null && shopView.IsBlocked) return;
+		OnClicked();
+	}
+
 	public void OnClicked()
 	{
 		if (shopItem == null || shopItem.isSold) return;
@@ -135,19 +163,14 @@ public class ShopCardSlot : MonoBehaviour
 			shopView.OnSlotClicked(this, shopItem);
 	}
 
-	void OnMouseDown()
-	{
-		OnClicked();
-	}
-
 	public void MarkSold()
 	{
 		shopItem.isSold = true;
+		isHovered = false;
 
 		if (soldOverlay != null)
 			soldOverlay.SetActive(true);
 
-		// Dim the spawned card
 		if (spawnedCard != null)
 		{
 			SpriteRenderer[] renderers = spawnedCard.GetComponentsInChildren<SpriteRenderer>();
@@ -159,7 +182,6 @@ public class ShopCardSlot : MonoBehaviour
 			}
 		}
 
-		// Disable the collider so sold slots can't be clicked
 		if (slotCollider != null)
 			slotCollider.enabled = false;
 	}

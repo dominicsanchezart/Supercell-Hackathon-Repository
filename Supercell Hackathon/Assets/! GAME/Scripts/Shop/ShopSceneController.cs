@@ -5,6 +5,9 @@ using UnityEngine;
 /// Bootstrap for the Shop scene (LVL_Shop).
 /// Reads RunState, generates shop inventory, and wires up the ShopView.
 /// Has a standalone test mode for testing outside the full run flow.
+///
+/// Includes a fallback camera for standalone testing — automatically
+/// destroyed when the scene loads additively (map camera already exists).
 /// </summary>
 public class ShopSceneController : MonoBehaviour
 {
@@ -21,8 +24,14 @@ public class ShopSceneController : MonoBehaviour
 	[Tooltip("Patron faction for test mode.")]
 	[SerializeField] CardFaction testFaction = CardFaction.Wrath;
 
+	[Header("Fallback Camera")]
+	[Tooltip("Camera used only for standalone testing. Destroyed when loaded additively.")]
+	[SerializeField] Camera fallbackCamera;
+
 	void Start()
 	{
+		HandleFallbackCamera();
+
 		// If no RunManager exists and test mode is on, bootstrap a fake run
 		if ((RunManager.Instance == null || RunManager.Instance.State == null) && testMode)
 		{
@@ -45,6 +54,20 @@ public class ShopSceneController : MonoBehaviour
 
 		// Initialize shop UI
 		shopView.Initialize(items);
+	}
+
+	void HandleFallbackCamera()
+	{
+		if (fallbackCamera == null) return;
+
+		// If a RunManager exists, we loaded additively — the map camera is active
+		// Destroy the fallback so we don't have two cameras rendering
+		if (RunManager.Instance != null)
+		{
+			Destroy(fallbackCamera.gameObject);
+			fallbackCamera = null;
+		}
+		// Otherwise we're in standalone mode — keep it
 	}
 
 	void SetupTestRun()
