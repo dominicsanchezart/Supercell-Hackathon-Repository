@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class CharacterInfo : MonoBehaviour
@@ -16,6 +17,11 @@ public class CharacterInfo : MonoBehaviour
 	[SerializeField] private int _dodge;
 	[SerializeField] private int _gold;
 
+	/// <summary>
+	/// Fired whenever any stat changes. HUD subscribes to this.
+	/// </summary>
+	public event Action OnStatsChanged;
+
 
 
 	private void Awake()
@@ -27,6 +33,12 @@ public class CharacterInfo : MonoBehaviour
 	{
 		_health = _data.baseHealth;
 		_energy = _data.baseEnergy;
+		NotifyStatsChanged();
+	}
+
+	private void NotifyStatsChanged()
+	{
+		OnStatsChanged?.Invoke();
 	}
 
 	public void TakeDamage(int amount)
@@ -40,6 +52,7 @@ public class CharacterInfo : MonoBehaviour
 
 		_health = Mathf.Max(_health - amount, 0);
 		Debug.Log($"{_data.name} takes {amount} damage. HP: {_health}/{_data.baseHealth} Block: {_block}");
+		NotifyStatsChanged();
 		if (_health == 0)
 			HandleDeath();
 	}
@@ -47,6 +60,7 @@ public class CharacterInfo : MonoBehaviour
 	public void Heal(int amount)
 	{
 		_health = Mathf.Min(_health + amount, _data.baseHealth);
+		NotifyStatsChanged();
 	}
 
 	public int GetHealth()
@@ -57,16 +71,19 @@ public class CharacterInfo : MonoBehaviour
 	public void SpendEnergy(int amount)
 	{
 		_energy = Mathf.Max(_energy - amount, 0);
+		NotifyStatsChanged();
 	}
 
 	public void GainEnergy(int amount)
 	{
 		_energy = Mathf.Min(_energy + amount, _data.baseEnergy);
+		NotifyStatsChanged();
 	}
 
 	public void ResetEnergy()
 	{
 		_energy = _data.baseEnergy;
+		NotifyStatsChanged();
 	}
 
 	public int GetEnergy()
@@ -88,58 +105,84 @@ public class CharacterInfo : MonoBehaviour
 	{
 		_block += amount;
 		Debug.Log($"{_data.name} gains {amount} block. Total block: {_block}");
+		NotifyStatsChanged();
 	}
 
 	public void RemoveBlock(int amount)
 	{
 		_block = Mathf.Max(_block - amount, 0);
+		NotifyStatsChanged();
 	}
 
 	public void Empower(int amount)
 	{
 		_empower += amount;
 		Debug.Log($"{_data.name} gains {amount} empower. Total empower: {_empower}");
+		NotifyStatsChanged();
+	}
+
+	public int GetEmpower()
+	{
+		return _empower;
 	}
 
 	public void ApplyBurn(int amount)
 	{
 		_burn += amount;
+		NotifyStatsChanged();
 	}
 
 	public void RemoveBurn(int amount)
 	{
 		_burn = Mathf.Max(_burn - amount, 0);
+		NotifyStatsChanged();
 	}
 
 	public void ApplyPoison(int amount)
 	{
 		_poison += amount;
+		NotifyStatsChanged();
 	}
 
 	public void RemovePoison(int amount)
 	{
 		_poison = Mathf.Max(_poison - amount, 0);
+		NotifyStatsChanged();
+	}
+
+	public int GetPoison()
+	{
+		return _poison;
 	}
 
 	public void ApplyWeaken(int amount)
 	{
 		_weaken += amount;
+		NotifyStatsChanged();
 	}
 
 	public void RemoveWeaken(int amount)
 	{
 		_weaken = Mathf.Max(_weaken - amount, 0);
+		NotifyStatsChanged();
+	}
+
+	public int GetWeaken()
+	{
+		return _weaken;
 	}
 
 	public void ApplyFury(int amount)
 	{
 		_fury += amount;
 		Debug.Log($"{_data.name} gains {amount} fury. Total fury: {_fury}");
+		NotifyStatsChanged();
 	}
 
 	public void RemoveFury(int amount)
 	{
 		_fury = Mathf.Max(_fury - amount, 0);
+		NotifyStatsChanged();
 	}
 
 	public int GetFury()
@@ -152,6 +195,7 @@ public class CharacterInfo : MonoBehaviour
 		_energized += amount;
 		_energy += amount;
 		Debug.Log($"{_data.name} gains {amount} energized. Energy: {_energy}, Energized stacks: {_energized}");
+		NotifyStatsChanged();
 	}
 
 	public int GetEnergized()
@@ -163,11 +207,13 @@ public class CharacterInfo : MonoBehaviour
 	{
 		_dodge += amount;
 		Debug.Log($"{_data.name} gains {amount} dodge. Total dodge: {_dodge}");
+		NotifyStatsChanged();
 	}
 
 	public void RemoveDodge(int amount)
 	{
 		_dodge = Mathf.Max(_dodge - amount, 0);
+		NotifyStatsChanged();
 	}
 
 	public int GetDodge()
@@ -183,6 +229,7 @@ public class CharacterInfo : MonoBehaviour
 	public void GainGold(int amount)
 	{
 		_gold += amount;
+		NotifyStatsChanged();
 	}
 
 	public bool TrySpendGold(int amount)
@@ -191,6 +238,7 @@ public class CharacterInfo : MonoBehaviour
 			return false;
 		
 		_gold = Mathf.Max(_gold - amount, 0);
+		NotifyStatsChanged();
 		return true;
 	}
 
@@ -217,6 +265,7 @@ public class CharacterInfo : MonoBehaviour
 	public void ResetBlock()
 	{
 		_block = 0;
+		NotifyStatsChanged();
 	}
 
 	public void ProcessStartOfTurnEffects()
@@ -257,6 +306,8 @@ public class CharacterInfo : MonoBehaviour
 
 		// Dodge resets at end of turn
 		_dodge = 0;
+
+		NotifyStatsChanged();
 	}
 
 	public int GetBurn()
@@ -273,6 +324,7 @@ public class CharacterInfo : MonoBehaviour
 		int consumed = Mathf.Min(_burn, maxCards);
 		_burn -= consumed;
 		Debug.Log($"{_data.name} burn ignites {consumed} cards. Burn remaining: {_burn}");
+		NotifyStatsChanged();
 		return consumed;
 	}
 }

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f97e38131f531d4687ac777cf8ab2e4, type: 3}
+  m_Name: StatusEffectData
+  m_EditorClassIdentifier: Assembly-CSharp::StatusEffectData
+  statusVisuals:
+  - status: 0
+    icon: {fileID: 21300000, guid: 89184f35b4bfb7c459de3e28333329aa, type: 3}
+    tint: {r: 1, g: 0.4713461, b: 0, a: 0}
+  - status: 1
+    icon: {fileID: 21300000, guid: 2ea37f70c110dae4b90584e0ff07f4ee, type: 3}
+    tint: {r: 0.21219626, g: 0.6603774, b: 0.12771448, a: 0}
+  - status: 2
+    icon: {fileID: 21300000, guid: b36b71b785b3f6a4196996ff3074ba23, type: 3}
+    tint: {r: 0.5, g: 0.3042453, b: 0.4831441, a: 0}
+  - status: 3
+    icon: {fileID: 21300000, guid: 56d2569fe1c9ad94b9d2b17f2d540b39, type: 3}
+    tint: {r: 0.9622642, g: 0.26779994, b: 0.26779994, a: 0}
+  - status: 4
+    icon: {fileID: 0}
+    tint: {r: 0.94509804, g: 0.75919145, b: 0.14509803, a: 0}
+  - status: 5
+    icon: {fileID: 21300000, guid: 5da7c2f9cf97c9f4990bcd4124e6f8e1, type: 3}
+    tint: {r: 0.27803493, g: 0.50098884, b: 0.8301887, a: 0}
+  empowerIcon: {fileID: 21300000, guid: 588b91b4b3c80eb4a9bae068fd30d447, type: 3}
+  empowerTint: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
