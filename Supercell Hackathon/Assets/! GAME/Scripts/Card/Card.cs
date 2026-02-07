@@ -82,4 +82,13 @@ public class Card : MonoBehaviour
 		typeText.text = cardData.cardType.ToString();
 		action1Text.text = cardData.GetDescription();
 	}
+
+	/// <summary>
+	/// Refreshes only the description text using modifier-colored values.
+	/// Call this whenever the caster's buffs/debuffs change.
+	/// </summary>
+	public void RefreshDescription(CharacterInfo caster)
+	{
+		action1Text.text = CardModifiers.GetColoredDescription(cardData, caster);
+	}
 }

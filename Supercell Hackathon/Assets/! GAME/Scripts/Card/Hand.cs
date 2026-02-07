@@ -127,6 +127,7 @@ public class Hand : MonoBehaviour
         characterInfo.ResetEnergy();
         DrawNewHand();
         ApplyBurnToCards();
+        RefreshCardDescriptions();
     }
 
     [ContextMenu("Test Discard Hand")]
@@ -187,17 +188,38 @@ public class Hand : MonoBehaviour
 		cardsInHand.Remove(data);
 		discardPile.Add(data);
 		RemoveCard(view);
+
+		// Refresh remaining cards since buffs may have changed
+		RefreshCardDescriptions();
 	}
 
     private void ResolveCardActions(CardData data)
     {
-        arena.ResolveAction(data.actionType1, data.action1Value, data.actionTarget1, isPlayer);
+        // Use CardModifiers to get final values with buffs/debuffs applied
+        CardModifiers.GetModifiedValues(data, characterInfo, out int mod1, out int mod2, out int mod3);
+
+        arena.ResolveAction(data.actionType1, mod1, data.actionTarget1, isPlayer);
 
         if (data.actionType2 != CardActionType.None)
-            arena.ResolveAction(data.actionType2, data.action2Value, data.actionTarget2, isPlayer);
+            arena.ResolveAction(data.actionType2, mod2, data.actionTarget2, isPlayer);
 
         if (data.actionType3 != CardActionType.None)
-            arena.ResolveAction(data.actionType3, data.action3Value, data.actionTarget3, isPlayer);
+            arena.ResolveAction(data.actionType3, mod3, data.actionTarget3, isPlayer);
+    }
+
+    /// <summary>
+    /// Refreshes the description text on all cards in hand to reflect current buffs.
+    /// </summary>
+    public void RefreshCardDescriptions()
+    {
+        if (!showCardVisuals) return;
+
+        foreach (var view in cards)
+        {
+            var card = view.GetComponent<Card>();
+            if (card != null)
+                card.RefreshDescription(characterInfo);
+        }
     }
 
     public void DiscardHand()
@@ -242,6 +264,25 @@ public class Hand : MonoBehaviour
 
         if (index < cards.Count)
             RemoveCard(cards[index]);
+    }
+
+    /// <summary>
+    /// Destroys a random card from hand permanently (removed from the run entirely).
+    /// </summary>
+    public void DestroyCard()
+    {
+        if (cardsInHand.Count == 0) return;
+
+        int index = Random.Range(0, cardsInHand.Count);
+        CardData data = cardsInHand[index];
+
+        cardsInHand.RemoveAt(index);
+        // Card is NOT added to discard or exhaust — it's gone forever
+
+        if (index < cards.Count)
+            RemoveCard(cards[index]);
+
+        Debug.Log($"Card '{data.cardName}' was destroyed permanently!");
     }
 
     /// <summary>

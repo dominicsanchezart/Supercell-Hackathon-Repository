@@ -147,11 +147,7 @@ public class Arena : MonoBehaviour
 
 	private void ApplyAction(CardActionType type, int value, CharacterInfo target, Hand targetHand, CharacterInfo source)
 	{
-		// Apply empower/weaken modifiers for damage actions
-		int modifiedValue = value;
-		if (type == CardActionType.Damage || type == CardActionType.DamageAll)
-			modifiedValue = source.GetModifiedDamage(value);
-
+		// Values arrive pre-modified by CardModifiers (empower, weaken, dodge, etc.)
 		switch (type)
 		{
 			case CardActionType.None:
@@ -159,7 +155,7 @@ public class Arena : MonoBehaviour
 
 			case CardActionType.Damage:
 			case CardActionType.DamageAll:
-				target.TakeDamage(modifiedValue);
+				target.TakeDamage(value);
 				break;
 
 			case CardActionType.Heal:
@@ -201,6 +197,22 @@ public class Arena : MonoBehaviour
 
 			case CardActionType.Weaken:
 				target.ApplyWeaken(value);
+				break;
+
+			case CardActionType.Fury:
+				target.ApplyFury(value);
+				break;
+
+			case CardActionType.Energize:
+				target.ApplyEnergized(value);
+				break;
+
+			case CardActionType.Dodge:
+				target.ApplyDodge(value);
+				break;
+
+			case CardActionType.DestroyCard:
+				targetHand.DestroyCard();
 				break;
 
 			default:

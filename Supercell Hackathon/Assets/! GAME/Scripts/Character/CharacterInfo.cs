@@ -11,6 +11,9 @@ public class CharacterInfo : MonoBehaviour
 	[SerializeField] private int _poison;
 	[SerializeField] private int _weaken;
 	[SerializeField] private int _empower;
+	[SerializeField] private int _fury;
+	[SerializeField] private int _energized;
+	[SerializeField] private int _dodge;
 	[SerializeField] private int _gold;
 
 
@@ -128,6 +131,55 @@ public class CharacterInfo : MonoBehaviour
 		_weaken = Mathf.Max(_weaken - amount, 0);
 	}
 
+	public void ApplyFury(int amount)
+	{
+		_fury += amount;
+		Debug.Log($"{_data.name} gains {amount} fury. Total fury: {_fury}");
+	}
+
+	public void RemoveFury(int amount)
+	{
+		_fury = Mathf.Max(_fury - amount, 0);
+	}
+
+	public int GetFury()
+	{
+		return _fury;
+	}
+
+	public void ApplyEnergized(int amount)
+	{
+		_energized += amount;
+		_energy += amount;
+		Debug.Log($"{_data.name} gains {amount} energized. Energy: {_energy}, Energized stacks: {_energized}");
+	}
+
+	public int GetEnergized()
+	{
+		return _energized;
+	}
+
+	public void ApplyDodge(int amount)
+	{
+		_dodge += amount;
+		Debug.Log($"{_data.name} gains {amount} dodge. Total dodge: {_dodge}");
+	}
+
+	public void RemoveDodge(int amount)
+	{
+		_dodge = Mathf.Max(_dodge - amount, 0);
+	}
+
+	public int GetDodge()
+	{
+		return _dodge;
+	}
+
+	public int GetModifiedBlock(int baseBlock)
+	{
+		return baseBlock + _dodge;
+	}
+
 	public void GainGold(int amount)
 	{
 		_gold += amount;
@@ -154,7 +206,7 @@ public class CharacterInfo : MonoBehaviour
 
 	public int GetModifiedDamage(int baseDamage)
 	{
-		int damage = baseDamage + _empower;
+		int damage = baseDamage + _empower + _fury;
 
 		if (_weaken > 0)
 			damage -= _weaken;
@@ -191,6 +243,20 @@ public class CharacterInfo : MonoBehaviour
 			_weaken = Mathf.Max(_weaken - 1, 0);
 
 		_empower = 0;
+
+		// Fury resets at end of turn
+		_fury = 0;
+
+		// Energized: remove bonus energy at end of turn
+		if (_energized > 0)
+		{
+			_energy = Mathf.Max(_energy - _energized, 0);
+			Debug.Log($"{_data.name} loses {_energized} energized energy. Energy: {_energy}");
+			_energized = 0;
+		}
+
+		// Dodge resets at end of turn
+		_dodge = 0;
 	}
 
 	public int GetBurn()

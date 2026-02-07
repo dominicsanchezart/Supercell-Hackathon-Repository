@@ -14,5 +14,9 @@ public enum CardActionType
 	SpendGold,
 	Burn,
 	Poison,
-	Weaken
+	Weaken,
+	Fury,
+	Energize,
+	Dodge,
+	DestroyCard
 }
