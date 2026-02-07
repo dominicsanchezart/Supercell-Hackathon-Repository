@@ -21,7 +21,7 @@ MonoBehaviour:
   layer2: {fileID: 0}
   layer3: {fileID: 0}
   baseEnergyCost: 0
-  actionDescription: 
+  actionDescription: DO NOT USE
   actionType1: 0
   actionTarget1: 0
   action1Value: 0

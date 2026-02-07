@@ -198,7 +198,8 @@ public class Arena : MonoBehaviour
 				break;
 
 			case CardActionType.RemoveCard:
-				targetHand.RemoveRandomCard();
+				// for (int i = 0; i < value; i++)
+					targetHand.RemoveRandomCard();
 				break;
 
 			case CardActionType.ExhaustCard:
@@ -253,6 +254,11 @@ public class Arena : MonoBehaviour
 
 			case CardActionType.GainGold:
 				target.GainGold(value);
+				break;
+
+			case CardActionType.HealPerStack:
+				// value already includes (stacks * base) (computed by CardModifiers)
+				target.Heal(value);
 				break;
 
 			default:

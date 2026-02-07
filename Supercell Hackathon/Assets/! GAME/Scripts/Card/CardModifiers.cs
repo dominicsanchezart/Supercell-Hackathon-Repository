@@ -34,6 +34,10 @@ public static class CardModifiers
 				int stacks = caster.GetStatusEffectStacks(statusEffect);
 				return caster.GetModifiedDamage(stacks * baseValue);
 
+			case CardActionType.HealPerStack:
+				int healStacks = caster.GetStatusEffectStacks(statusEffect);
+				return healStacks * baseValue;
+
 			case CardActionType.Guard:
 				return caster.GetModifiedBlock(baseValue);
 

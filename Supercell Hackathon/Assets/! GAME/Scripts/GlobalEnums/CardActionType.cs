@@ -32,5 +32,12 @@ public enum CardActionType
 	/// The status effect is chosen per-action slot on the CardData.
 	/// </summary>
 	DamagePerStack,
-	GainGold
+	GainGold,
+
+	/// <summary>
+	/// Heals equal to (status effect stacks * base value).
+	/// The status effect is chosen per-action slot on the CardData.
+	/// Consumes the stacks after use.
+	/// </summary>
+	HealPerStack
 }

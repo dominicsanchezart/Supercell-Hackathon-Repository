@@ -204,21 +204,21 @@ public class Hand : MonoBehaviour
         if (IsActionConditionMet(data.action1Condition))
         {
             arena.ResolveAction(data.actionType1, mod1, data.actionTarget1, isPlayer);
-            if (data.actionType1 == CardActionType.DamagePerStack)
+            if (data.actionType1 == CardActionType.DamagePerStack || data.actionType1 == CardActionType.HealPerStack)
                 characterInfo.ResetStatusEffect(data.action1StatusEffect);
         }
 
         if (data.actionType2 != CardActionType.None && IsActionConditionMet(data.action2Condition))
         {
             arena.ResolveAction(data.actionType2, mod2, data.actionTarget2, isPlayer);
-            if (data.actionType2 == CardActionType.DamagePerStack)
+            if (data.actionType2 == CardActionType.DamagePerStack || data.actionType2 == CardActionType.HealPerStack)
                 characterInfo.ResetStatusEffect(data.action2StatusEffect);
         }
 
         if (data.actionType3 != CardActionType.None && IsActionConditionMet(data.action3Condition))
         {
             arena.ResolveAction(data.actionType3, mod3, data.actionTarget3, isPlayer);
-            if (data.actionType3 == CardActionType.DamagePerStack)
+            if (data.actionType3 == CardActionType.DamagePerStack || data.actionType3 == CardActionType.HealPerStack)
                 characterInfo.ResetStatusEffect(data.action3StatusEffect);
         }
     }
