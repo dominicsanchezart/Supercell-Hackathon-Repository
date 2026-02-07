@@ -44,7 +44,8 @@ public class RunManager : MonoBehaviour
 			gold = 0
 		};
 
-		State.mapData = MapGenerator.Generate(mapConfig, seed);
+		if (mapConfig != null)
+			State.mapData = MapGenerator.Generate(mapConfig, seed);
 
 		if (loadScene)
 			LoadMapScene();

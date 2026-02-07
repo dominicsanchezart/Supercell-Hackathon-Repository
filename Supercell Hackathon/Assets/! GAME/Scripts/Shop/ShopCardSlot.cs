@@ -3,20 +3,32 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// UI slot for a single item in the shop.
-/// Displays card info, price, and handles buy interaction.
+/// A single slot in the shop. Spawns the real Card.prefab to display visuals,
+/// then overlays price / sale / sold UI on top.
 /// </summary>
 public class ShopCardSlot : MonoBehaviour
 {
-	[Header("UI References")]
-	public Image cardImage;
-	public TextMeshProUGUI cardNameText;
+	[Header("Card Display")]
+	[Tooltip("The actual Card.prefab used in battle — spawned here for visuals.")]
+	public GameObject cardPrefab;
+	[Tooltip("Child transform where the Card.prefab instance is parented.")]
+	public Transform cardAnchor;
+	[Tooltip("Scale applied to the spawned card (adjust to fit the slot).")]
+	public float cardScale = 1f;
+
+	[Header("Removal Fallback (no card to show)")]
+	[Tooltip("Root object for the text-only removal display. Disabled for card slots.")]
+	public GameObject removalDisplay;
+	public TextMeshProUGUI removalTitleText;
+	public TextMeshProUGUI removalDescText;
+
+	[Header("Price & Status")]
 	public TextMeshProUGUI priceText;
-	public TextMeshProUGUI descriptionText;
-	public TextMeshProUGUI energyCostText;
 	public GameObject saleTag;
 	public GameObject soldOverlay;
-	public Button buyButton;
+
+	[Header("Interaction")]
+	public Collider2D slotCollider;
 
 	[Header("Colors")]
 	public Color affordableColor = Color.white;
@@ -25,6 +37,7 @@ public class ShopCardSlot : MonoBehaviour
 
 	ShopItem shopItem;
 	ShopView shopView;
+	GameObject spawnedCard;
 
 	public void Initialize(ShopItem item, ShopView owner)
 	{
@@ -32,13 +45,9 @@ public class ShopCardSlot : MonoBehaviour
 		shopView = owner;
 
 		if (item.slotType == ShopItem.SlotType.CardRemoval)
-		{
 			SetupAsRemoval(item);
-		}
 		else
-		{
 			SetupAsCard(item);
-		}
 
 		if (soldOverlay != null)
 			soldOverlay.SetActive(false);
@@ -46,43 +55,53 @@ public class ShopCardSlot : MonoBehaviour
 		if (saleTag != null)
 			saleTag.SetActive(item.isOnSale);
 
-		if (buyButton != null)
-			buyButton.onClick.AddListener(OnBuyClicked);
-
 		RefreshPriceDisplay();
 	}
 
 	void SetupAsCard(ShopItem item)
 	{
+		// Hide the removal fallback display
+		if (removalDisplay != null)
+			removalDisplay.SetActive(false);
+
 		if (item.card == null) return;
 
-		if (cardNameText != null)
-			cardNameText.text = item.card.cardName;
+		// Spawn the real Card.prefab for full visual display
+		if (cardPrefab != null && cardAnchor != null)
+		{
+			spawnedCard = Object.Instantiate(cardPrefab, cardAnchor);
+			spawnedCard.transform.localPosition = Vector3.zero;
+			spawnedCard.transform.localRotation = Quaternion.identity;
+			spawnedCard.transform.localScale = Vector3.one * cardScale;
 
-		if (descriptionText != null)
-			descriptionText.text = item.card.GetDescription();
+			// Set the card data — this triggers border, layers, and text setup
+			Card card = spawnedCard.GetComponent<Card>();
+			if (card != null)
+				card.SetCardData(item.card);
 
-		if (energyCostText != null)
-			energyCostText.text = item.card.baseEnergyCost.ToString();
+			// Disable the CardView's collider so it doesn't interfere with shop input
+			Collider2D cardCol = spawnedCard.GetComponent<Collider2D>();
+			if (cardCol != null)
+				cardCol.enabled = false;
 
-		// Use card's first visual layer as display image
-		if (cardImage != null && item.card.layer0 != null)
-			cardImage.sprite = item.card.layer0;
+			// Disable CardView component (we don't need hand sorting logic)
+			CardView cardView = spawnedCard.GetComponent<CardView>();
+			if (cardView != null)
+				cardView.enabled = false;
+		}
 	}
 
 	void SetupAsRemoval(ShopItem item)
 	{
-		if (cardNameText != null)
-			cardNameText.text = "Remove a Card";
+		// Show the text-only removal display
+		if (removalDisplay != null)
+			removalDisplay.SetActive(true);
 
-		if (descriptionText != null)
-			descriptionText.text = "Remove one card from your deck permanently.";
+		if (removalTitleText != null)
+			removalTitleText.text = "Remove a Card";
 
-		if (energyCostText != null)
-			energyCostText.text = "";
-
-		if (cardImage != null)
-			cardImage.gameObject.SetActive(false);
+		if (removalDescText != null)
+			removalDescText.text = "Remove one card\nfrom your deck.";
 	}
 
 	public void RefreshPriceDisplay()
@@ -95,7 +114,6 @@ public class ShopCardSlot : MonoBehaviour
 		{
 			priceText.text = $"{displayPrice}g";
 
-			// Color based on affordability
 			int playerGold = RunManager.Instance != null ? RunManager.Instance.State.gold : 0;
 
 			if (shopItem.isOnSale)
@@ -107,11 +125,19 @@ public class ShopCardSlot : MonoBehaviour
 		}
 	}
 
-	void OnBuyClicked()
+	/// <summary>
+	/// Called by ShopView when this slot's collider is clicked via OnMouseDown.
+	/// </summary>
+	public void OnClicked()
 	{
 		if (shopItem == null || shopItem.isSold) return;
 		if (shopView != null)
 			shopView.OnSlotClicked(this, shopItem);
+	}
+
+	void OnMouseDown()
+	{
+		OnClicked();
 	}
 
 	public void MarkSold()
@@ -121,9 +147,28 @@ public class ShopCardSlot : MonoBehaviour
 		if (soldOverlay != null)
 			soldOverlay.SetActive(true);
 
-		if (buyButton != null)
-			buyButton.interactable = false;
+		// Dim the spawned card
+		if (spawnedCard != null)
+		{
+			SpriteRenderer[] renderers = spawnedCard.GetComponentsInChildren<SpriteRenderer>();
+			for (int i = 0; i < renderers.Length; i++)
+			{
+				Color c = renderers[i].color;
+				c.a = 0.35f;
+				renderers[i].color = c;
+			}
+		}
+
+		// Disable the collider so sold slots can't be clicked
+		if (slotCollider != null)
+			slotCollider.enabled = false;
 	}
 
 	public ShopItem GetShopItem() => shopItem;
+
+	void OnDestroy()
+	{
+		if (spawnedCard != null)
+			Destroy(spawnedCard);
+	}
 }

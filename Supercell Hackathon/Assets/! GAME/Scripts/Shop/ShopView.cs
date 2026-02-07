@@ -4,7 +4,9 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// Main shop UI controller. Spawns card slots, handles buy/remove flow.
+/// Main shop UI controller. Spawns card slots in a horizontal row,
+/// handles buy/remove flow, and manages the card removal deck picker.
+/// Uses the real Card.prefab for all card displays.
 /// </summary>
 public class ShopView : MonoBehaviour
 {
@@ -14,11 +16,28 @@ public class ShopView : MonoBehaviour
 	public TextMeshProUGUI goldDisplay;
 	public Button leaveButton;
 
+	[Header("Card Prefab (passed to slots)")]
+	[Tooltip("The actual Card.prefab — passed to each ShopCardSlot for spawning visuals.")]
+	public GameObject cardPrefab;
+
+	[Header("Slot Layout")]
+	[Tooltip("Horizontal distance between each shop slot.")]
+	public float slotSpacing = 2.2f;
+	[Tooltip("Vertical offset for the slot row.")]
+	public float slotRowY = 0f;
+
 	[Header("Card Removal")]
 	public GameObject removalPanel;
 	public Transform removalCardContainer;
+	[Tooltip("Card.prefab reference — removal panel also spawns real cards.")]
 	public GameObject removalCardPrefab;
 	public Button cancelRemovalButton;
+	[Tooltip("Spacing between cards in the removal grid.")]
+	public float removalSpacing = 2f;
+	[Tooltip("Cards per row in the removal grid.")]
+	public int removalCardsPerRow = 5;
+	[Tooltip("Vertical spacing between rows in the removal grid.")]
+	public float removalRowSpacing = 2.8f;
 
 	[Header("Confirmation")]
 	public GameObject confirmPanel;
@@ -26,10 +45,20 @@ public class ShopView : MonoBehaviour
 	public Button confirmYesButton;
 	public Button confirmNoButton;
 
+	[Header("Hover")]
+	[Tooltip("Scale multiplier when hovering a slot.")]
+	public float hoverScale = 1.1f;
+	public float hoverSmooth = 12f;
+	public LayerMask shopLayer;
+
 	List<ShopCardSlot> slots = new();
 	List<ShopItem> shopItems;
 	ShopItem pendingPurchase;
 	ShopCardSlot pendingSlot;
+
+	// Hover state
+	Transform hoveredSlot;
+	Vector3 hoveredOriginalScale;
 
 	public void Initialize(List<ShopItem> items)
 	{
@@ -57,6 +86,13 @@ public class ShopView : MonoBehaviour
 			removalPanel.SetActive(false);
 	}
 
+	void Update()
+	{
+		HandleHover();
+	}
+
+	// ─── Slot Spawning & Layout ───────────────────────────────────
+
 	void ClearSlots()
 	{
 		for (int i = 0; i < slots.Count; i++)
@@ -77,11 +113,89 @@ public class ShopView : MonoBehaviour
 			ShopCardSlot slot = obj.GetComponent<ShopCardSlot>();
 			if (slot != null)
 			{
+				// Pass the card prefab reference so the slot can spawn real cards
+				if (slot.cardPrefab == null)
+					slot.cardPrefab = cardPrefab;
+
 				slot.Initialize(shopItems[i], this);
 				slots.Add(slot);
 			}
 		}
+
+		// Position slots in a centered horizontal row
+		LayoutSlots();
 	}
+
+	void LayoutSlots()
+	{
+		int count = slots.Count;
+		if (count == 0) return;
+
+		float totalWidth = (count - 1) * slotSpacing;
+		float startX = -totalWidth * 0.5f;
+
+		for (int i = 0; i < count; i++)
+		{
+			slots[i].transform.localPosition = new Vector3(
+				startX + i * slotSpacing,
+				slotRowY,
+				0f
+			);
+		}
+	}
+
+	// ─── Hover ────────────────────────────────────────────────────
+
+	void HandleHover()
+	{
+		if (Camera.main == null) return;
+
+		Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+		mouseWorld.z = 0f;
+
+		Collider2D hit = Physics2D.OverlapPoint(mouseWorld, shopLayer);
+
+		if (hit != null)
+		{
+			ShopCardSlot slot = hit.GetComponentInParent<ShopCardSlot>();
+			if (slot != null)
+			{
+				Transform slotTransform = slot.transform;
+				if (hoveredSlot != slotTransform)
+				{
+					EndHover();
+					hoveredSlot = slotTransform;
+					hoveredOriginalScale = slotTransform.localScale;
+				}
+			}
+			else
+			{
+				EndHover();
+			}
+		}
+		else
+		{
+			EndHover();
+		}
+
+		if (hoveredSlot != null)
+		{
+			hoveredSlot.localScale = Vector3.Lerp(
+				hoveredSlot.localScale,
+				hoveredOriginalScale * hoverScale,
+				Time.deltaTime * hoverSmooth
+			);
+		}
+	}
+
+	void EndHover()
+	{
+		if (hoveredSlot == null) return;
+		hoveredSlot.localScale = hoveredOriginalScale;
+		hoveredSlot = null;
+	}
+
+	// ─── Buy Flow ─────────────────────────────────────────────────
 
 	public void OnSlotClicked(ShopCardSlot slot, ShopItem item)
 	{
@@ -157,7 +271,7 @@ public class ShopView : MonoBehaviour
 		RefreshAllPrices();
 	}
 
-	// --- Card Removal ---
+	// ─── Card Removal ─────────────────────────────────────────────
 
 	void ShowRemovalPanel()
 	{
@@ -165,7 +279,7 @@ public class ShopView : MonoBehaviour
 
 		removalPanel.SetActive(true);
 
-		// Clear existing
+		// Clear existing cards in the removal panel
 		if (removalCardContainer != null)
 		{
 			foreach (Transform child in removalCardContainer)
@@ -173,24 +287,68 @@ public class ShopView : MonoBehaviour
 		}
 
 		RunState state = RunManager.Instance?.State;
-		if (state == null || removalCardPrefab == null) return;
+		if (state == null) return;
 
-		// Spawn a button for each card in the deck
+		// Spawn a real Card.prefab for each card in the player's deck
 		for (int i = 0; i < state.deck.Count; i++)
 		{
-			CardData card = state.deck[i];
+			CardData cardData = state.deck[i];
 			int index = i;
 
-			GameObject obj = Instantiate(removalCardPrefab, removalCardContainer);
+			// Spawn the card visual
+			GameObject cardObj = null;
 
-			// Set up the card display
-			TextMeshProUGUI nameText = obj.GetComponentInChildren<TextMeshProUGUI>();
-			if (nameText != null)
-				nameText.text = card.cardName;
+			if (cardPrefab != null)
+			{
+				// Use real Card.prefab
+				cardObj = Instantiate(cardPrefab, removalCardContainer);
 
-			Button btn = obj.GetComponent<Button>();
-			if (btn != null)
-				btn.onClick.AddListener(() => OnRemoveCardSelected(index));
+				Card card = cardObj.GetComponent<Card>();
+				if (card != null)
+					card.SetCardData(cardData);
+
+				// Disable the hand-related CardView so it doesn't interfere
+				CardView cardView = cardObj.GetComponent<CardView>();
+				if (cardView != null)
+					cardView.enabled = false;
+
+				// Scale down slightly for the grid
+				cardObj.transform.localScale = Vector3.one * 0.75f;
+			}
+			else if (removalCardPrefab != null)
+			{
+				// Fallback: simple text button
+				cardObj = Instantiate(removalCardPrefab, removalCardContainer);
+
+				TextMeshProUGUI nameText = cardObj.GetComponentInChildren<TextMeshProUGUI>();
+				if (nameText != null)
+					nameText.text = cardData.cardName;
+			}
+
+			if (cardObj == null) continue;
+
+			// Position in a grid
+			int row = i / removalCardsPerRow;
+			int col = i % removalCardsPerRow;
+
+			int colsThisRow = Mathf.Min(removalCardsPerRow, state.deck.Count - row * removalCardsPerRow);
+			float rowWidth = (colsThisRow - 1) * removalSpacing;
+			float startX = -rowWidth * 0.5f;
+
+			cardObj.transform.localPosition = new Vector3(
+				startX + col * removalSpacing,
+				-row * removalRowSpacing,
+				0f
+			);
+
+			// Make clickable — use existing Collider2D on the Card.prefab, or add one
+			Collider2D col2d = cardObj.GetComponent<Collider2D>();
+			if (col2d != null)
+			{
+				// Add a RemovalCardClick helper to route the click
+				RemovalCardClick click = cardObj.AddComponent<RemovalCardClick>();
+				click.Initialize(this, index);
+			}
 		}
 	}
 
@@ -200,13 +358,16 @@ public class ShopView : MonoBehaviour
 			removalPanel.SetActive(false);
 	}
 
-	void OnRemoveCardSelected(int deckIndex)
+	/// <summary>
+	/// Called by RemovalCardClick when a card in the removal panel is clicked.
+	/// </summary>
+	public void OnRemoveCardSelected(int deckIndex)
 	{
 		RunState state = RunManager.Instance?.State;
 		if (state == null) return;
 		if (deckIndex < 0 || deckIndex >= state.deck.Count) return;
 
-		// Find the removal slot
+		// Find the removal shop slot
 		ShopItem removalItem = null;
 		ShopCardSlot removalSlot = null;
 		for (int i = 0; i < shopItems.Count; i++)
@@ -237,6 +398,8 @@ public class ShopView : MonoBehaviour
 		RefreshGoldDisplay();
 		RefreshAllPrices();
 	}
+
+	// ─── UI Helpers ───────────────────────────────────────────────
 
 	void RefreshGoldDisplay()
 	{
