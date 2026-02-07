@@ -24,24 +24,35 @@ public class CardViewer : MonoBehaviour
     [SerializeField] private LayerMask cardLayer;
     [SerializeField] private int hoverSortingBoost = 1000;
 
+    [Header("Sorting")]
+    [SerializeField] private int viewerBaseSortingOrder = 10000;
+
     private Camera cam;
     private Transform hoveredCard;
     private Vector3 hoveredOriginalScale;
     private int hoveredOriginalSorting;
+    private CardView hoveredCardView;
     private float verticalScroll;
 
     private readonly List<GameObject> spawnedCards = new();
+
+    public System.Action onHideCards;
 
     #region Unity Methods
 
     private void Awake() => cam = Camera.main;
 
-    private void Start() => DisplayCards(cardPrefabs);
+    // private void Start() => DisplayCards(cardPrefabs);
 
     private void Update()
     {
         ScrollCards();
         HandleHover();
+
+		if (Input.GetKeyDown(KeyCode.Escape))
+		{
+			HideCards();
+		}
     }
 
     #endregion
@@ -53,7 +64,7 @@ public class CardViewer : MonoBehaviour
 
     public void DisplayCards(CardData[] cards)
     {
-        HideCards();
+        ClearCards();
 
         for (int i = 0; i < cards.Length; i++)
         {
@@ -61,6 +72,11 @@ public class CardViewer : MonoBehaviour
             spawnedCards.Add(cardObj);
 
             cardObj.GetComponent<Card>().SetCardData(cards[i]);
+
+            // Set high sorting order so viewer cards render on top of everything
+            var cardView = cardObj.GetComponent<CardView>();
+            if (cardView != null)
+                cardView.SetSortingOrder(viewerBaseSortingOrder + i);
 
             int row = i / cardsPerRow;
             int column = i % cardsPerRow;
@@ -92,11 +108,20 @@ public class CardViewer : MonoBehaviour
 
     public void HideCards()
     {
+        ClearCards();
+        onHideCards?.Invoke();
+    }
+
+    private void ClearCards()
+    {
+        EndHover();
+
         foreach (var card in spawnedCards)
             Destroy(card);
 
         spawnedCards.Clear();
         cardRoot.localPosition = Vector3.zero;
+        verticalScroll = 0f;
     }
 
     #endregion
@@ -105,6 +130,8 @@ public class CardViewer : MonoBehaviour
 
     private void ScrollCards()
     {
+        if (spawnedCards.Count == 0) return;
+
         float input = -Input.mouseScrollDelta.y;
         if (Mathf.Abs(input) < 0.01f) return;
 
@@ -118,7 +145,7 @@ public class CardViewer : MonoBehaviour
 
     private void HandleHover()
     {
-        if (!cam) return;
+        if (!cam || spawnedCards.Count == 0) return;
 
         Vector3 mouseWorld = cam.ScreenToWorldPoint(Input.mousePosition);
         mouseWorld.z = 0f;
@@ -142,9 +169,17 @@ public class CardViewer : MonoBehaviour
         hoveredCard = card;
         hoveredOriginalScale = card.localScale;
 
-        SpriteRenderer sr = card.GetComponentInChildren<SpriteRenderer>();
-        hoveredOriginalSorting = sr.sortingOrder;
-        sr.sortingOrder += hoverSortingBoost;
+        hoveredCardView = card.GetComponent<CardView>();
+        if (hoveredCardView == null)
+            hoveredCardView = card.GetComponentInParent<CardView>();
+
+        if (hoveredCardView != null)
+        {
+            // Read current base order from first sprite to restore later
+            SpriteRenderer sr = card.GetComponentInChildren<SpriteRenderer>();
+            hoveredOriginalSorting = sr != null ? sr.sortingOrder : 0;
+            hoveredCardView.SetSortingOrder(hoveredOriginalSorting + hoverSortingBoost);
+        }
     }
 
     private void UpdateHoveredCard()
@@ -160,12 +195,17 @@ public class CardViewer : MonoBehaviour
     {
         if (!hoveredCard) return;
 
-        hoveredCard.localScale = hoveredOriginalScale;
+        // Guard against destroyed cards (e.g. HideCards called while hovering)
+        if (hoveredCard != null)
+        {
+            hoveredCard.localScale = hoveredOriginalScale;
 
-        SpriteRenderer sr = hoveredCard.GetComponentInChildren<SpriteRenderer>();
-        sr.sortingOrder = hoveredOriginalSorting;
+            if (hoveredCardView != null)
+                hoveredCardView.SetSortingOrder(hoveredOriginalSorting);
+        }
 
         hoveredCard = null;
+        hoveredCardView = null;
     }
 
     #endregion

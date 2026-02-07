@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CardData
   cardName: Empowered Fists
   cardType: 0
-  cardFaciton1: 1
-  cardFaciton2: 1
+  cardFaction1: 1
+  cardFaction2: 2
   layer0: {fileID: 21300000, guid: b036dcdf42d13644ab24eef3be3c2abd, type: 3}
   layer1: {fileID: 21300000, guid: b70c6b576232a7048aba80b3f1c39265, type: 3}
   layer2: {fileID: 21300000, guid: 4f1cd3e2e6baee446b731a01776d2f36, type: 3}
   layer3: {fileID: 21300000, guid: 01b0a29d772042049a4b71ccb89a03f2, type: 3}
-  baseEnergyCost: 3
+  baseEnergyCost: 2
   actionDescription: 'Deal {action1Value} damage to ALL enemies.
 
     Apply {action2Value}
@@ -30,10 +30,10 @@ MonoBehaviour:
   actionType1: 1
   actionTarget1: 1
   action1Value: 3
-  actionType2: 10
-  actionTarget2: 1
-  action2Value: 3
-  actionType3: 6
+  actionType2: 7
+  actionTarget2: 0
+  action2Value: 1
+  actionType3: 0
   actionTarget3: 0
   action3Value: 0
   canUpgrade: 0

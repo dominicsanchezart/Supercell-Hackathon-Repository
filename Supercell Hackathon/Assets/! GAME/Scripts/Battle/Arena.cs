@@ -7,21 +7,35 @@ public class Arena : MonoBehaviour
 	public Hand _character2;
 	public bool _isPlayerTurn = true;
 	private bool _battleOver = false;
+	public bool IsViewingCards { get; private set; }
 
 	[Header("Enemy AI")]
 	[SerializeField] private float enemyActionDelay = 0.8f;
+
+	[Header("Stage")]
+	[SerializeField] private BattleStage battleStage;
+
+	[Header("Card Viewer")]
+	[SerializeField] private CardViewer cardViewer;
 
 
 
 	private IEnumerator Start()
 	{
 		yield return null;
+
+		if (battleStage != null)
+			battleStage.Setup(_character1.characterInfo, _character2.characterInfo);
+
+		if (cardViewer != null)
+			cardViewer.onHideCards += () => IsViewingCards = false;
+
 		StartPlayerTurn();
 	}
 
 	private void Update()
 	{
-		if (_battleOver || !_isPlayerTurn) return;
+		if (_battleOver || !_isPlayerTurn || IsViewingCards) return;
 
 		if (Input.GetKeyDown(KeyCode.E))
 		{
@@ -217,4 +231,36 @@ public class Arena : MonoBehaviour
 
 		return false;
 	}
+
+	#region Card Viewer Buttons
+
+	public void ShowDeck()
+	{
+		if (cardViewer == null) return;
+		IsViewingCards = true;
+		cardViewer.DisplayCards(_character1.characterInfo.GetInventory().deck.ToArray());
+	}
+
+	public void ShowDiscardPile()
+	{
+		if (cardViewer == null) return;
+		IsViewingCards = true;
+		cardViewer.DisplayCards(_character1.discardPile.ToArray());
+	}
+
+	public void ShowExhaustPile()
+	{
+		if (cardViewer == null) return;
+		IsViewingCards = true;
+		cardViewer.DisplayCards(_character1.exhaustPile.ToArray());
+	}
+
+	public void HideCardViewer()
+	{
+		if (cardViewer == null) return;
+		cardViewer.HideCards();
+		// IsViewingCards is reset by the onHideCards callback
+	}
+
+	#endregion
 }

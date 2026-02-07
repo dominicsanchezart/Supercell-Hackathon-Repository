@@ -15,3 +15,5 @@ MonoBehaviour:
   <baseHealth>k__BackingField: 100
   <baseEnergy>k__BackingField: 3
   <baseDrawSize>k__BackingField: 5
+  <characterSprite>k__BackingField: {fileID: 21300000, guid: 84d9662acf8cf0f4b802be040533179b, type: 3}
+  <flipSpriteForRight>k__BackingField: 0

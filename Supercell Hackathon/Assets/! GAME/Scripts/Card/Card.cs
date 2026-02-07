@@ -23,6 +23,7 @@ public class Card : MonoBehaviour
 
 	[Header("Text")]
 	[SerializeField] private TextMeshProUGUI nameText;
+	[SerializeField] private TextMeshProUGUI energyCostText;
 	[SerializeField] private TextMeshProUGUI typeText;
 	[SerializeField] private TextMeshProUGUI action1Text;
 
@@ -38,7 +39,7 @@ public class Card : MonoBehaviour
 
 	private void SetupBorder()
 	{
-		if (cardData.cardFaciton1 == CardFaction.None)
+		if (cardData.cardFaction1 == CardFaction.None)
 		{
 			borderFull.gameObject.SetActive(true);
 			borderTop.gameObject.SetActive(false);
@@ -47,13 +48,13 @@ public class Card : MonoBehaviour
 			return;
 		}
 
-		if (cardData.cardFaciton1 == cardData.cardFaciton2)
+		if (cardData.cardFaction1 == cardData.cardFaction2)
 		{
 			borderFull.gameObject.SetActive(true);
 			borderTop.gameObject.SetActive(false);
 			borderBottom.gameObject.SetActive(false);
 
-			borderFull.sprite = cardBorderData.GetFullBorder(cardData.cardFaciton1);
+			borderFull.sprite = cardBorderData.GetFullBorder(cardData.cardFaction1);
 		}
 		else
 		{
@@ -61,8 +62,8 @@ public class Card : MonoBehaviour
 			borderTop.gameObject.SetActive(true);
 			borderBottom.gameObject.SetActive(true);
 
-			borderTop.sprite = cardBorderData.GetTopBorder(cardData.cardFaciton1);
-			borderBottom.sprite = cardBorderData.GetBottomBorder(cardData.cardFaciton2);
+			borderTop.sprite = cardBorderData.GetTopBorder(cardData.cardFaction1);
+			borderBottom.sprite = cardBorderData.GetBottomBorder(cardData.cardFaction2);
 		}
 	}
 
@@ -77,6 +78,7 @@ public class Card : MonoBehaviour
 	private void SetupText()
 	{
 		nameText.text = cardData.cardName;
+		energyCostText.text = cardData.baseEnergyCost.ToString();
 		typeText.text = cardData.cardType.ToString();
 		action1Text.text = cardData.GetDescription();
 	}

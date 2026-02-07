@@ -6,8 +6,8 @@ public class CardData : ScriptableObject
 	[Header("Card Info")]
     public string cardName;
 	public CardType cardType;
-	public CardFaction cardFaciton1;
-	public CardFaction cardFaciton2;
+	public CardFaction cardFaction1;
+	public CardFaction cardFaction2;
 
 
 	[Header("Card Visuals")]

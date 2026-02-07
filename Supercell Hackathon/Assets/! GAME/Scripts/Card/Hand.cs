@@ -82,6 +82,12 @@ public class Hand : MonoBehaviour
 	{
 		if (!showCardVisuals) return;
 
+		if (arena != null && arena.IsViewingCards)
+		{
+			DisableAllCardColliders();
+			return;
+		}
+
 		HandleDragInput();
 
 		if (!_isDragging)
@@ -89,6 +95,15 @@ public class Hand : MonoBehaviour
 			HandleScroll();
 			UpdateSelectedCardRotation();
 			RefreshLayout();
+		}
+	}
+
+	private void DisableAllCardColliders()
+	{
+		foreach (var card in cards)
+		{
+			var col = card.GetComponentInChildren<Collider2D>();
+			if (col != null) col.enabled = false;
 		}
 	}
 
@@ -198,25 +213,35 @@ public class Hand : MonoBehaviour
 
     public void RemoveRandomCard()
     {
-        if (cards.Count == 0) return;
+        if (cardsInHand.Count == 0) return;
 
-        int index = Random.Range(0, cards.Count);
-        var card = cards[index].GetComponent<Card>();
+        int index = Random.Range(0, cardsInHand.Count);
+        CardData data = cardsInHand[index];
 
-        cardsInHand.Remove(card.cardData);
-        discardPile.Add(card.cardData);
-        RemoveCard(cards[index]);
+        cardsInHand.RemoveAt(index);
+        discardPile.Add(data);
+
+        // Remove visual card if it exists
+        if (index < cards.Count)
+            RemoveCard(cards[index]);
     }
 
     public void ExhaustCard()
     {
-        if (!IsValidSelection()) return;
+        if (cardsInHand.Count == 0) return;
 
-        var view = cards[selectedIndex];
-        var card = view.GetComponent<Card>();
-        cardsInHand.Remove(card.cardData);
-        exhaustPile.Add(card.cardData);
-        RemoveCard(view);
+        int index;
+        if (showCardVisuals && IsValidSelection())
+            index = selectedIndex;
+        else
+            index = Random.Range(0, cardsInHand.Count);
+
+        CardData data = cardsInHand[index];
+        cardsInHand.RemoveAt(index);
+        exhaustPile.Add(data);
+
+        if (index < cards.Count)
+            RemoveCard(cards[index]);
     }
 
     /// <summary>
@@ -268,7 +293,7 @@ public class Hand : MonoBehaviour
 
         if (playable.Count == 0) return false;
 
-        int index = playable[Random.Range(0, playable.Count)];
+        int index = playable[Random.Range(0, playable.Count - 1)];
         CardData data = cardsInHand[index];
 
         characterInfo.SpendEnergy(data.baseEnergyCost);
@@ -330,16 +355,13 @@ public class Hand : MonoBehaviour
         {
             if (!isPlayer)
             {
-                Debug.LogWarning("HandleDragInput: isPlayer is false. Check the inspector on the player Hand.");
                 return;
             }
             if (!arena._isPlayerTurn)
             {
-                Debug.LogWarning("HandleDragInput: Not player's turn.");
                 return;
             }
 
-			Debug.Log($"Mouse down at world pos: {mouseWorld}");
             if (cards.Count == 0 || !IsValidSelection()) return;
 
             // Check if the selected card was clicked
@@ -361,11 +383,9 @@ public class Hand : MonoBehaviour
 
             if (!hitSelected)
             {
-                Debug.Log("Click was not on the selected card.");
                 return;
             }
 
-            Debug.Log($"Dragging card: {selectedCard.GetComponent<Card>().cardData.cardName}");
             _isDragging = true;
             _draggedCard = selectedCard;
             _dragStartWorldPos = selectedCard.transform.position;
@@ -484,6 +504,10 @@ public class Hand : MonoBehaviour
             }
 
             card.SetMasked(isSelected);
+
+            // Disable collider on non-selected cards so they can't be hovered/picked by mouse
+            var col = card.GetComponentInChildren<Collider2D>();
+            if (col != null) col.enabled = isSelected;
 
             // Don't override position of the card being dragged
             if (_isDragging && card == _draggedCard)

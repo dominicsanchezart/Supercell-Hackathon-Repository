@@ -1597,6 +1597,7 @@ MonoBehaviour:
   borderTop: {fileID: 8033301007730983434}
   borderBottom: {fileID: 2091101120130821751}
   nameText: {fileID: 4406473529902211701}
+  energyCostText: {fileID: 1326385922195130983}
   typeText: {fileID: 7779254867734039582}
   action1Text: {fileID: 1271827033682361136}
 --- !u!114 &417919371723923728
@@ -1612,6 +1613,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardView
   owner: {fileID: 0}
+  isBurning: 0
   mask: {fileID: 8041646275476474134}
   masedSprites:
   - {fileID: 3557431568355492795}

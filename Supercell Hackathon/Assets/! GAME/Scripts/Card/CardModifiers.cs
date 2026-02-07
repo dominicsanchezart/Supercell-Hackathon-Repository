@@ -1,16 +1,10 @@
 using UnityEngine;
 
+/// <summary>
+/// Placeholder for card modifier logic (e.g. upgrades, temporary buffs).
+/// TODO: Implement modifier system.
+/// </summary>
 public class CardModifiers : MonoBehaviour
 {
-    private CardData cardData;
 
-
-
-	public void OutputCardData()
-	{
-		// cardData = GetComponent<CardData>();
-		// Debug.Log("Card Name: " + cardData.cardName);
-		// Debug.Log("Card Description: " + cardData.cardDescription);
-		// Debug.Log("Card Cost: " + cardData.cardCost);
-	}
 }

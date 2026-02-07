@@ -25,7 +25,7 @@ public class Inventory : MonoBehaviour
 
 	public void AssignDeck(List<CardData> newDeck)
 	{
-		deck = newDeck;
+		deck = new List<CardData>(newDeck);
 	}
 
 	public void ClearDeck()

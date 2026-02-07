@@ -176,6 +176,7 @@ public class CharacterInfo : MonoBehaviour
 	public void ProcessEndOfTurnEffects()
 	{
 		// Poison: deal damage equal to stacks, then decay by 1
+		// NOTE: Poison intentionally bypasses block (direct HP damage, like Slay the Spire)
 		if (_poison > 0)
 		{
 			int poisonDamage = _poison;
