@@ -22,6 +22,11 @@ public class CharacterInfo : MonoBehaviour
 	/// </summary>
 	public event Action OnStatsChanged;
 
+	/// <summary>
+	/// Fired when this character dies. Arena subscribes to trigger win/lose flow.
+	/// </summary>
+	public event Action OnDeath;
+
 
 
 	private void Awake()
@@ -245,6 +250,7 @@ public class CharacterInfo : MonoBehaviour
 	public void HandleDeath()
 	{
 		Debug.Log($"{_data.name} has been defeated!");
+		OnDeath?.Invoke();
 	}
 
 	public bool IsAlive()

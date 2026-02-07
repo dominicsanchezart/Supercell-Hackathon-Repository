@@ -157,4 +157,17 @@ public class RunManager : MonoBehaviour
 	{
 		SceneManager.LoadScene(mapSceneName);
 	}
+
+	/// <summary>
+	/// Ends the current run (e.g. player died). Placeholder: returns to main menu.
+	/// </summary>
+	public void EndRun()
+	{
+		Debug.Log("Run ended. Returning to main menu (placeholder).");
+		State = null;
+
+		// TODO: Replace with actual main menu scene name once it exists.
+		// For now, reload the map scene as a placeholder.
+		SceneManager.LoadScene(mapSceneName);
+	}
 }

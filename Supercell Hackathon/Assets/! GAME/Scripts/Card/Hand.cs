@@ -233,6 +233,18 @@ public class Hand : MonoBehaviour
         cardsInHand.Clear();
     }
 
+    /// <summary>
+    /// Immediately removes all visual cards from hand without discarding.
+    /// Used when battle ends to clean up the hand display.
+    /// </summary>
+    public void ClearHand()
+    {
+        for (int i = cards.Count - 1; i >= 0; i--)
+            RemoveCard(cards[i]);
+
+        cardsInHand.Clear();
+    }
+
     public void RemoveRandomCard()
     {
         if (cardsInHand.Count == 0) return;
