@@ -4,6 +4,7 @@ using UnityEngine;
 public class CardView : MonoBehaviour
 {
     [HideInInspector] public Hand owner;
+    [HideInInspector] public bool isBurning;
 
     SpriteRenderer[] sprites;
 	[SerializeField] GameObject mask;
@@ -13,6 +14,9 @@ public class CardView : MonoBehaviour
     int[] relativeOrders;
 	int canvasSortingLayer = 20;
 
+    private Color[] originalColors;
+    private static readonly Color burnTint = new Color(1f, 0.45f, 0.3f, 1f);
+
 
 
     void Awake()
@@ -20,9 +24,11 @@ public class CardView : MonoBehaviour
         sprites = GetComponentsInChildren<SpriteRenderer>();
 
         relativeOrders = new int[sprites.Length];
+        originalColors = new Color[sprites.Length];
         for (int i = 0; i < sprites.Length; i++)
         {
             relativeOrders[i] = sprites[i].sortingOrder;
+            originalColors[i] = sprites[i].color;
         }
     }
 
@@ -44,4 +50,13 @@ public class CardView : MonoBehaviour
 		}
 		mask.SetActive(enabled);
 	}
+
+    public void SetBurning(bool burning)
+    {
+        isBurning = burning;
+        for (int i = 0; i < sprites.Length; i++)
+        {
+            sprites[i].color = burning ? burnTint : originalColors[i];
+        }
+    }
 }

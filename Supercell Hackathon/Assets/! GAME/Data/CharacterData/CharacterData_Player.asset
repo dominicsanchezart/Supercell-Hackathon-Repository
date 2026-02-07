@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f480fcffb5c93542ac5c1b34e5ba565, type: 3}
   m_Name: CharacterData_Player
   m_EditorClassIdentifier: Assembly-CSharp::CharacterData
-  <maxHealth>k__BackingField: 100
-  <maxEnergy>k__BackingField: 100
+  <baseHealth>k__BackingField: 100
+  <baseEnergy>k__BackingField: 3
   <baseDrawSize>k__BackingField: 5

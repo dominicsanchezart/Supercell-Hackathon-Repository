@@ -299,13 +299,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hand
   characterInfo: {fileID: 1950661064}
-  cardsInHand: []
-  drawPile: []
-  discardPile: []
-  exhaustPile: []
-  cardPrefab: {fileID: 7365090266981536612, guid: 4564135a2c65afe43b74b020230ec4bd, type: 3}
-  isPlayer: 0
   arena: {fileID: 2068168975}
+  handRoot: {fileID: 492984035}
+  cardPrefab: {fileID: 7365090266981536612, guid: 4564135a2c65afe43b74b020230ec4bd, type: 3}
+  isPlayer: 1
+  showCardVisuals: 1
   maxHandWidth: 10
   sideLift: 0.6
   curveExponent: 1.6
@@ -316,8 +314,15 @@ MonoBehaviour:
   selectedScale: 1.3
   maxLookRotation: 10
   lookRotationSmooth: 12
-  handRoot: {fileID: 492984035}
+  dragPlayThreshold: 2
+  dragReturnSpeed: 20
+  burnDamagePerCard: 2
+  maxBurnCards: 5
   selectedSortingBoost: 1000
+  cardsInHand: []
+  drawPile: []
+  discardPile: []
+  exhaustPile: []
 --- !u!1 &644939515
 GameObject:
   m_ObjectHideFlags: 0
@@ -673,6 +678,8 @@ MonoBehaviour:
   verticalSpacing: 4
   horizontalSpacing: 3
   scrollSpeed: 1
+  minScroll: 2
+  maxScroll: 50
   hoverScale: 1.35
   hoverSmooth: 15
   cardLayer:
@@ -869,6 +876,7 @@ MonoBehaviour:
   _burn: 0
   _poison: 0
   _weaken: 0
+  _empower: 0
   _gold: 0
 --- !u!4 &1117344994
 Transform:
@@ -1342,13 +1350,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hand
   characterInfo: {fileID: 1117344993}
-  cardsInHand: []
-  drawPile: []
-  discardPile: []
-  exhaustPile: []
+  arena: {fileID: 2068168975}
+  handRoot: {fileID: 1855899005}
   cardPrefab: {fileID: 7365090266981536612, guid: 4564135a2c65afe43b74b020230ec4bd, type: 3}
   isPlayer: 0
-  arena: {fileID: 2068168975}
+  showCardVisuals: 0
   maxHandWidth: 10
   sideLift: 0.6
   curveExponent: 1.6
@@ -1359,8 +1365,15 @@ MonoBehaviour:
   selectedScale: 1.3
   maxLookRotation: 10
   lookRotationSmooth: 12
-  handRoot: {fileID: 1855899005}
+  dragPlayThreshold: 2
+  dragReturnSpeed: 20
+  burnDamagePerCard: 2
+  maxBurnCards: 5
   selectedSortingBoost: 1000
+  cardsInHand: []
+  drawPile: []
+  discardPile: []
+  exhaustPile: []
 --- !u!4 &1855899005
 Transform:
   m_ObjectHideFlags: 0
@@ -1507,6 +1520,7 @@ MonoBehaviour:
   _burn: 0
   _poison: 0
   _weaken: 0
+  _empower: 0
   _gold: 0
 --- !u!4 &1950661066
 Transform:
@@ -1556,6 +1570,7 @@ MonoBehaviour:
   _character1: {fileID: 492984036}
   _character2: {fileID: 1855899004}
   _isPlayerTurn: 1
+  enemyActionDelay: 0.8
 --- !u!4 &2068168976
 Transform:
   m_ObjectHideFlags: 0

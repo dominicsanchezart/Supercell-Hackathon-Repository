@@ -11,6 +11,8 @@ public class Hand : MonoBehaviour
     [Header("Prefabs")]
     [SerializeField] private GameObject cardPrefab;
     [SerializeField] private bool isPlayer;
+	[SerializeField] private bool showCardVisuals = true;
+	
 
     [Header("Hand Layout")]
     public float maxHandWidth = 10f;
@@ -26,9 +28,22 @@ public class Hand : MonoBehaviour
     public float maxLookRotation = 15f;
     public float lookRotationSmooth = 12f;
 
+    [Header("Drag to Play")]
+    public float dragPlayThreshold = 2.0f;
+    public float dragReturnSpeed = 20f;
+
+    [Header("Burn")]
+    [SerializeField] private int burnDamagePerCard = 2;
+    [SerializeField] private int maxBurnCards = 5;
+
     [Header("Sorting")]
     public int selectedSortingBoost = 1000;
     private const int SORTING_STRIDE = 100;
+
+    // Drag state
+    private bool _isDragging;
+    private Vector3 _dragStartWorldPos;
+    private CardView _draggedCard;
 
     // Card collections
     public List<CardData> cardsInHand = new();
@@ -63,12 +78,19 @@ public class Hand : MonoBehaviour
 
     private void Start() => StartBattle();
 
-    private void Update()
-    {
-        HandleScroll();
-        UpdateSelectedCardRotation();
-        RefreshLayout();
-    }
+	private void Update()
+	{
+		if (!showCardVisuals) return;
+
+		HandleDragInput();
+
+		if (!_isDragging)
+		{
+			HandleScroll();
+			UpdateSelectedCardRotation();
+			RefreshLayout();
+		}
+	}
 
     #endregion
 
@@ -89,6 +111,7 @@ public class Hand : MonoBehaviour
     {
         characterInfo.ResetEnergy();
         DrawNewHand();
+        ApplyBurnToCards();
     }
 
     [ContextMenu("Test Discard Hand")]
@@ -125,42 +148,50 @@ public class Hand : MonoBehaviour
         }
     }
 
-    public void UseCard()
-    {
-        if (!IsValidSelection()) return;
+	public void UseCard()
+	{
+		if (!showCardVisuals || !IsValidSelection())
+			return;
 
-        CardView view = cards[selectedIndex];
-        CardData data = view.GetComponent<Card>().cardData;
+		CardView view = cards[selectedIndex];
+		CardData data = view.GetComponent<Card>().cardData;
 
-        if (characterInfo.GetEnergy() < data.baseEnergyCost) return;
+		if (characterInfo.GetEnergy() < data.baseEnergyCost) return;
 
-        characterInfo.SpendEnergy(data.baseEnergyCost);
-        ResolveCardActions(data);
+		characterInfo.SpendEnergy(data.baseEnergyCost);
 
-        cardsInHand.Remove(data);
-        discardPile.Add(data);
-        RemoveCard(view);
-    }
+		// Burning card deals damage to the player who plays it
+		if (view.isBurning)
+		{
+			characterInfo.TakeDamage(burnDamagePerCard);
+			Debug.Log($"Burned card played! {characterInfo._data.name} takes {burnDamagePerCard} burn damage.");
+		}
+
+		ResolveCardActions(data);
+
+		cardsInHand.Remove(data);
+		discardPile.Add(data);
+		RemoveCard(view);
+	}
 
     private void ResolveCardActions(CardData data)
     {
-        arena.ResolveAction(data.actionType1, data.action1Value, isPlayer);
+        arena.ResolveAction(data.actionType1, data.action1Value, data.actionTarget1, isPlayer);
 
         if (data.actionType2 != CardActionType.None)
-            arena.ResolveAction(data.actionType2, data.action2Value, isPlayer);
+            arena.ResolveAction(data.actionType2, data.action2Value, data.actionTarget2, isPlayer);
 
         if (data.actionType3 != CardActionType.None)
-            arena.ResolveAction(data.actionType3, data.action3Value, isPlayer); // fixed typo
+            arena.ResolveAction(data.actionType3, data.action3Value, data.actionTarget3, isPlayer);
     }
 
     public void DiscardHand()
     {
+        foreach (var data in cardsInHand)
+            discardPile.Add(data);
+
         for (int i = cards.Count - 1; i >= 0; i--)
-        {
-            var view = cards[i];
-            discardPile.Add(view.GetComponent<Card>().cardData);
-            RemoveCard(view);
-        }
+            RemoveCard(cards[i]);
 
         cardsInHand.Clear();
     }
@@ -181,9 +212,73 @@ public class Hand : MonoBehaviour
     {
         if (!IsValidSelection()) return;
 
-        var card = cards[selectedIndex].GetComponent<Card>();
+        var view = cards[selectedIndex];
+        var card = view.GetComponent<Card>();
         cardsInHand.Remove(card.cardData);
         exhaustPile.Add(card.cardData);
+        RemoveCard(view);
+    }
+
+    /// <summary>
+    /// Sets random cards in hand on fire based on burn stacks. Max 5 cards.
+    /// Each card set on fire consumes 1 burn stack.
+    /// </summary>
+    public void ApplyBurnToCards()
+    {
+        int burnStacks = characterInfo.GetBurn();
+        if (burnStacks <= 0 || cards.Count == 0) return;
+
+        int cardsToIgnite = Mathf.Min(burnStacks, maxBurnCards, cards.Count);
+
+        // Build list of non-burning card indices
+        List<int> available = new();
+        for (int i = 0; i < cards.Count; i++)
+        {
+            if (!cards[i].isBurning)
+                available.Add(i);
+        }
+
+        int actualIgnited = Mathf.Min(cardsToIgnite, available.Count);
+
+        // Shuffle and pick
+        for (int i = available.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            (available[i], available[j]) = (available[j], available[i]);
+        }
+
+        for (int i = 0; i < actualIgnited; i++)
+        {
+            cards[available[i]].SetBurning(true);
+        }
+
+        characterInfo.ConsumeBurn(actualIgnited);
+    }
+
+    public bool TryPlayRandomCard()
+    {
+        if (cardsInHand.Count == 0) return false;
+
+        List<int> playable = new();
+        for (int i = 0; i < cardsInHand.Count; i++)
+        {
+            if (characterInfo.GetEnergy() >= cardsInHand[i].baseEnergyCost)
+                playable.Add(i);
+        }
+
+        if (playable.Count == 0) return false;
+
+        int index = playable[Random.Range(0, playable.Count)];
+        CardData data = cardsInHand[index];
+
+        characterInfo.SpendEnergy(data.baseEnergyCost);
+        ResolveCardActions(data);
+
+        cardsInHand.RemoveAt(index);
+        discardPile.Add(data);
+
+        Debug.Log($"Enemy played: {data.cardName}");
+        return true;
     }
 
     private void ReshuffleDiscardIntoDraw()
@@ -198,18 +293,109 @@ public class Hand : MonoBehaviour
         }
     }
 
-    private void SpawnCardView(CardData data)
-    {
-        GameObject go = Instantiate(cardPrefab, handRoot);
-        var view = go.GetComponent<CardView>();
-        var card = go.GetComponent<Card>();
-        card.SetCardData(data);
-        AddCard(view);
-    }
+	private void SpawnCardView(CardData data)
+	{
+		if (!showCardVisuals)
+			return;
+
+		GameObject go = Instantiate(cardPrefab, handRoot);
+		var view = go.GetComponent<CardView>();
+		var card = go.GetComponent<Card>();
+
+		card.SetCardData(data);
+		AddCard(view);
+	}
 
     #endregion
 
     #region Card Selection & Input
+
+    private Vector3 GetMouseWorldPosition()
+    {
+        Vector3 mousePos = Input.mousePosition;
+        mousePos.z = Mathf.Abs(Camera.main.transform.position.z);
+        Vector3 worldPos = Camera.main.ScreenToWorldPoint(mousePos);
+        worldPos.z = 0f;
+        return worldPos;
+    }
+
+    private void HandleDragInput()
+    {
+        if (Camera.main == null) return;
+
+        Vector3 mouseWorld = GetMouseWorldPosition();
+
+        // Start drag on click
+        if (Input.GetMouseButtonDown(0) && !_isDragging)
+        {
+            if (!isPlayer)
+            {
+                Debug.LogWarning("HandleDragInput: isPlayer is false. Check the inspector on the player Hand.");
+                return;
+            }
+            if (!arena._isPlayerTurn)
+            {
+                Debug.LogWarning("HandleDragInput: Not player's turn.");
+                return;
+            }
+
+			Debug.Log($"Mouse down at world pos: {mouseWorld}");
+            if (cards.Count == 0 || !IsValidSelection()) return;
+
+            // Check if the selected card was clicked
+            CardView selectedCard = cards[selectedIndex];
+            Collider2D col = selectedCard.GetComponentInChildren<Collider2D>();
+            if (col == null) return;
+
+            Collider2D[] hits = Physics2D.OverlapPointAll(mouseWorld);
+            bool hitSelected = false;
+            foreach (var hit in hits)
+            {
+                CardView view = hit.GetComponentInParent<CardView>();
+                if (view == selectedCard)
+                {
+                    hitSelected = true;
+                    break;
+                }
+            }
+
+            if (!hitSelected)
+            {
+                Debug.Log("Click was not on the selected card.");
+                return;
+            }
+
+            Debug.Log($"Dragging card: {selectedCard.GetComponent<Card>().cardData.cardName}");
+            _isDragging = true;
+            _draggedCard = selectedCard;
+            _dragStartWorldPos = selectedCard.transform.position;
+        }
+
+        // Follow mouse while dragging
+        if (_isDragging && Input.GetMouseButton(0))
+        {
+            Vector3 pos = mouseWorld;
+            pos.z = _draggedCard.transform.position.z;
+            _draggedCard.transform.position = pos;
+            _draggedCard.transform.localRotation = Quaternion.identity;
+        }
+
+        // Release - play card if dragged high enough
+        if (_isDragging && Input.GetMouseButtonUp(0))
+        {
+            float dragDelta = _draggedCard.transform.position.y - _dragStartWorldPos.y;
+
+            if (dragDelta >= dragPlayThreshold)
+            {
+                UseCard();
+                arena.CheckBattleOver();
+            }
+
+            // Card snaps back via RefreshLayout on next frame
+            _isDragging = false;
+            _draggedCard = null;
+        }
+    }
 
     private void HandleScroll()
     {
@@ -298,6 +484,15 @@ public class Hand : MonoBehaviour
             }
 
             card.SetMasked(isSelected);
+
+            // Don't override position of the card being dragged
+            if (_isDragging && card == _draggedCard)
+            {
+                card.transform.localScale = Vector3.Lerp(card.transform.localScale, targetScale, Time.deltaTime * smoothSpeed);
+                card.SetSortingOrder(baseOrder);
+                continue;
+            }
+
             card.transform.localPosition = Vector3.Lerp(card.transform.localPosition, targetPos, Time.deltaTime * smoothSpeed);
             card.transform.localScale = Vector3.Lerp(card.transform.localScale, targetScale, Time.deltaTime * smoothSpeed);
             card.SetSortingOrder(baseOrder);
