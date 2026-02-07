@@ -34,9 +34,9 @@ MonoBehaviour:
   itemCards:
   - {fileID: 11400000, guid: 52a9958b6f8d6f04eb37b65e2c63abaa, type: 2}
   - {fileID: 11400000, guid: 058d256b706826f4fb884797d40962c4, type: 2}
-  patronCardCount: 3
-  neutralCardCount: 1
-  itemCardCount: 1
+  patronCardCount: 4
+  neutralCardCount: 2
+  itemCardCount: 2
   commonMinPrice: 35
   commonMaxPrice: 45
   uncommonMinPrice: 60
@@ -48,5 +48,5 @@ MonoBehaviour:
   cardRemoveBasePrice: 50
   cardRemovePriceIncrease: 25
   saleChance: 0.5
-  saleDiscount: 0.5
+  saleDiscount: 0.35
   campHealPercent: 0.3

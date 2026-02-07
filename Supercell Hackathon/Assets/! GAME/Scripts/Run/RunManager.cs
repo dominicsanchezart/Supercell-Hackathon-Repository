@@ -93,10 +93,21 @@ public class RunManager : MonoBehaviour
 			mapView.interactable = value;
 	}
 
+	void ResetMapCameraZoom()
+	{
+		MapView mapView = Object.FindAnyObjectByType<MapView>();
+		if (mapView != null && mapView.mapCamera != null)
+		{
+			mapView.zoomLevel = 5f;
+			mapView.mapCamera.orthographicSize = 5f;
+		}
+	}
+
 	IEnumerator LoadEncounterAdditive(string sceneName)
 	{
 		// Disable map interaction and hide map visuals
 		SetMapInteractable(false);
+		ResetMapCameraZoom();
 		MapSceneController mapController = FindMapController();
 		if (mapController != null)
 			mapController.SetVisualsActive(false);

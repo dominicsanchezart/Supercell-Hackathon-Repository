@@ -611,7 +611,7 @@ Canvas:
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: -857986177
+  m_SortingLayerID: 1574551723
   m_SortingOrder: 650
   m_TargetDisplay: 0
 --- !u!114 &7045306998655649009
@@ -851,8 +851,8 @@ Canvas:
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: -857986177
-  m_SortingOrder: 700
+  m_SortingLayerID: -710398937
+  m_SortingOrder: 550
   m_TargetDisplay: 0
 --- !u!114 &65094971416488863
 MonoBehaviour:
@@ -972,8 +972,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: -857986177
-  m_SortingLayer: 4
+  m_SortingLayerID: -710398937
+  m_SortingLayer: 3
   m_SortingOrder: 600
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 15949b4f45940ca4999239f24fe34ee1, type: 3}
@@ -1183,8 +1183,8 @@ Canvas:
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: -857986177
-  m_SortingOrder: 500
+  m_SortingLayerID: -710398937
+  m_SortingOrder: 510
   m_TargetDisplay: 0
 --- !u!114 &5626116491991674942
 MonoBehaviour:

@@ -3,13 +3,16 @@ using UnityEngine;
 
 /// <summary>
 /// Bootstrap for the Camp scene (LVL_Camp).
-/// Reads ShopData for heal percent config, initializes CampView.
+/// Reads CampData config, initializes CampView with OptionCards.
 /// Has a standalone test mode for testing outside the full run flow.
+///
+/// Includes a fallback camera for standalone testing — automatically
+/// destroyed when the scene loads additively (map camera already exists).
 /// </summary>
 public class CampSceneController : MonoBehaviour
 {
 	[SerializeField] CampView campView;
-	[SerializeField] ShopData shopData;
+	[SerializeField] CampData campData;
 
 	[Header("Standalone Test Mode")]
 	[Tooltip("Enable to test the camp scene without RunManager.")]
@@ -21,8 +24,14 @@ public class CampSceneController : MonoBehaviour
 	[Tooltip("Starter deck for testing upgrades (drag CardData assets here).")]
 	[SerializeField] CardData[] testDeck;
 
+	[Header("Fallback Camera")]
+	[Tooltip("Camera used only for standalone testing. Destroyed when loaded additively.")]
+	[SerializeField] Camera fallbackCamera;
+
 	void Start()
 	{
+		HandleFallbackCamera();
+
 		// If no RunManager exists and test mode is on, bootstrap a fake run
 		if ((RunManager.Instance == null || RunManager.Instance.State == null) && testMode)
 		{
@@ -35,11 +44,21 @@ public class CampSceneController : MonoBehaviour
 			return;
 		}
 
-		float healPercent = 0.30f;
-		if (shopData != null)
-			healPercent = shopData.campHealPercent;
+		campView.Initialize(campData);
+	}
 
-		campView.Initialize(healPercent);
+	void HandleFallbackCamera()
+	{
+		if (fallbackCamera == null) return;
+
+		// If a RunManager exists, we loaded additively — the map camera is active
+		// Destroy the fallback so we don't have two cameras rendering
+		if (RunManager.Instance != null)
+		{
+			Destroy(fallbackCamera.gameObject);
+			fallbackCamera = null;
+		}
+		// Otherwise we're in standalone mode — keep it
 	}
 
 	void SetupTestRun()
@@ -57,7 +76,9 @@ public class CampSceneController : MonoBehaviour
 			}
 		}
 
-		rm.StartNewRun(42, testMaxHP, deck, false);
+		int testSeed = UnityEngine.Random.Range(0, 100000);
+		Debug.Log($"CampSceneController: Test seed = {testSeed}");
+		rm.StartNewRun(testSeed, testMaxHP, deck, false);
 		rm.State.currentHP = testCurrentHP;
 
 		Debug.Log($"CampSceneController: Test mode — HP {testCurrentHP}/{testMaxHP}, {deck.Count} cards.");

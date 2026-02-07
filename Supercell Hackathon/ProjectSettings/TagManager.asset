@@ -12,8 +12,8 @@ TagManager:
   - Water
   - UI
   - Shop
-  - 
-  - 
+  - Deck View Separator
+  - Deck View
   - 
   - 
   - 
@@ -49,6 +49,15 @@ TagManager:
     locked: 0
   - name: Card
     uniqueID: 3584568359
+    locked: 0
+  - name: Shop
+    uniqueID: 1574551723
+    locked: 0
+  - name: Deck View BG
+    uniqueID: 4233511003
+    locked: 0
+  - name: Deck View
+    uniqueID: 2736424073
     locked: 0
   - name: HUD
     uniqueID: 3436981119

@@ -86,7 +86,9 @@ public class ShopSceneController : MonoBehaviour
 			}
 		}
 
-		rm.StartNewRun(42, 80, deck, false);
+		int testSeed = UnityEngine.Random.Range(0, 100000);
+		Debug.Log($"ShopSceneController: Test seed = {testSeed}");
+		rm.StartNewRun(testSeed, 80, deck, false);
 		rm.State.gold = testGold;
 		rm.State.patronFaction = testFaction;
 

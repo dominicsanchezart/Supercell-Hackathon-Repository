@@ -35,18 +35,18 @@ public class ShopView : MonoBehaviour
 	[Tooltip("Y position of the bottom row (items + card removal).")]
 	public float bottomRowY = -2.5f;
 
-	[Header("Card Removal")]
-	public GameObject removalPanel;
-	public Transform removalCardContainer;
-	[Tooltip("Fallback prefab if Card.prefab is null.")]
-	public GameObject removalCardPrefab;
-	public Button cancelRemovalButton;
-	[Tooltip("Spacing between cards in the removal grid.")]
-	public float removalSpacing = 2f;
-	[Tooltip("Cards per row in the removal grid.")]
-	public int removalCardsPerRow = 5;
-	[Tooltip("Vertical spacing between rows in the removal grid.")]
-	public float removalRowSpacing = 2.8f;
+	[Header("Card Removal (uses CardViewer)")]
+	[Tooltip("The same CardViewer component used in battle to show deck contents. " +
+	         "Clicking a card in the viewer removes it from the deck.")]
+	public CardViewer cardViewer;
+	[Tooltip("Backdrop sprite behind the card viewer (dark overlay). " +
+	         "Toggled on/off — do NOT put CardViewer on this object.")]
+	public GameObject cardViewerBackdrop;
+
+	[Header("Overlay Canvas")]
+	[Tooltip("The Screen Space - Overlay canvas. Its GraphicRaycaster is disabled " +
+	         "while the CardViewer is open so Physics2D raycasts can reach the cards.")]
+	public GraphicRaycaster overlayRaycaster;
 
 	[Header("Confirmation")]
 	public GameObject confirmPanel;
@@ -58,6 +58,7 @@ public class ShopView : MonoBehaviour
 	List<ShopItem> shopItems;
 	ShopItem pendingPurchase;
 	ShopCardSlot pendingSlot;
+	bool isRemovalOpen;
 
 	/// <summary>
 	/// When true, all card slot clicks and hover are disabled.
@@ -83,14 +84,18 @@ public class ShopView : MonoBehaviour
 		if (confirmYesButton != null)
 			confirmYesButton.onClick.AddListener(OnConfirmPurchase);
 
-		if (cancelRemovalButton != null)
-			cancelRemovalButton.onClick.AddListener(HideRemovalPanel);
+		// Wire CardViewer callbacks for card removal
+		if (cardViewer != null)
+		{
+			cardViewer.onHideCards += OnRemovalViewerClosed;
+			cardViewer.onCardSelected += OnRemovalCardClicked;
+		}
+
+		if (cardViewerBackdrop != null)
+			cardViewerBackdrop.SetActive(false);
 
 		if (confirmPanel != null)
 			confirmPanel.SetActive(false);
-
-		if (removalPanel != null)
-			removalPanel.SetActive(false);
 	}
 
 	// ─── Slot Spawning & Layout ───────────────────────────────────
@@ -255,96 +260,45 @@ public class ShopView : MonoBehaviour
 		RefreshAllPrices();
 	}
 
-	// ─── Card Removal ─────────────────────────────────────────────
+	// ─── Card Removal (via CardViewer) ────────────────────────────
 
 	void ShowRemovalPanel()
 	{
-		if (removalPanel == null) return;
+		if (cardViewer == null) return;
 
 		IsBlocked = true;
-		removalPanel.SetActive(true);
+		isRemovalOpen = true;
 
-		// Clear existing cards in the removal panel
-		if (removalCardContainer != null)
-		{
-			foreach (Transform child in removalCardContainer)
-				Destroy(child.gameObject);
-		}
+		if (cardViewerBackdrop != null)
+			cardViewerBackdrop.SetActive(true);
+
+		// Disable overlay raycaster so Physics2D can reach CardViewer cards
+		if (overlayRaycaster != null)
+			overlayRaycaster.enabled = false;
 
 		RunState state = RunManager.Instance?.State;
 		if (state == null) return;
 
-		for (int i = 0; i < state.deck.Count; i++)
-		{
-			CardData cardData = state.deck[i];
-			int index = i;
-
-			GameObject cardObj = null;
-
-			if (cardPrefab != null)
-			{
-				cardObj = Instantiate(cardPrefab, removalCardContainer);
-
-				Card card = cardObj.GetComponent<Card>();
-				if (card != null)
-					card.SetCardData(cardData);
-
-				CardView cardView = cardObj.GetComponent<CardView>();
-				if (cardView != null)
-					cardView.enabled = false;
-
-				cardObj.transform.localScale = Vector3.one * 0.75f;
-			}
-			else if (removalCardPrefab != null)
-			{
-				cardObj = Instantiate(removalCardPrefab, removalCardContainer);
-
-				TextMeshProUGUI nameText = cardObj.GetComponentInChildren<TextMeshProUGUI>();
-				if (nameText != null)
-					nameText.text = cardData.cardName;
-			}
-
-			if (cardObj == null) continue;
-
-			int row = i / removalCardsPerRow;
-			int col = i % removalCardsPerRow;
-
-			int colsThisRow = Mathf.Min(removalCardsPerRow, state.deck.Count - row * removalCardsPerRow);
-			float rowWidth = (colsThisRow - 1) * removalSpacing;
-			float startX = -rowWidth * 0.5f;
-
-			cardObj.transform.localPosition = new Vector3(
-				startX + col * removalSpacing,
-				-row * removalRowSpacing,
-				0f
-			);
-
-			Collider2D col2d = cardObj.GetComponent<Collider2D>();
-			if (col2d != null)
-			{
-				RemovalCardClick click = cardObj.AddComponent<RemovalCardClick>();
-				click.Initialize(this, index);
-			}
-		}
+		// Feed the player's deck into CardViewer — it handles layout, scroll, hover
+		cardViewer.DisplayCards(state.deck.ToArray());
 	}
 
 	void HideRemovalPanel()
 	{
-		if (removalPanel != null)
-			removalPanel.SetActive(false);
-
-		IsBlocked = false;
+		if (cardViewer != null)
+			cardViewer.HideCards();
 	}
 
 	/// <summary>
-	/// Called by RemovalCardClick when a card in the removal panel is clicked.
+	/// Called when a card is clicked inside the CardViewer during removal mode.
 	/// </summary>
-	public void OnRemoveCardSelected(int deckIndex)
+	void OnRemovalCardClicked(int cardIndex)
 	{
 		RunState state = RunManager.Instance?.State;
 		if (state == null) return;
-		if (deckIndex < 0 || deckIndex >= state.deck.Count) return;
+		if (cardIndex < 0 || cardIndex >= state.deck.Count) return;
 
+		// Find the removal shop item to charge gold
 		ShopItem removalItem = null;
 		ShopCardSlot removalSlot = null;
 		for (int i = 0; i < shopItems.Count; i++)
@@ -362,16 +316,37 @@ public class ShopView : MonoBehaviour
 		int cost = removalItem.GetDisplayPrice();
 		if (state.gold < cost) return;
 
+		// Deduct gold and remove the card
 		state.gold -= cost;
-		state.deck.RemoveAt(deckIndex);
+		state.deck.RemoveAt(cardIndex);
 		state.cardRemoveCount++;
 
 		if (removalSlot != null)
 			removalSlot.MarkSold();
 
+		// Close the viewer and refresh shop
 		HideRemovalPanel();
 		RefreshGoldDisplay();
 		RefreshAllPrices();
+	}
+
+	/// <summary>
+	/// Called when the CardViewer is closed (ESC key or HideCards).
+	/// Restores shop interaction.
+	/// </summary>
+	void OnRemovalViewerClosed()
+	{
+		if (!isRemovalOpen) return;
+		isRemovalOpen = false;
+
+		if (cardViewerBackdrop != null)
+			cardViewerBackdrop.SetActive(false);
+
+		// Re-enable overlay raycaster so UI buttons work again
+		if (overlayRaycaster != null)
+			overlayRaycaster.enabled = true;
+
+		IsBlocked = false;
 	}
 
 	// ─── UI Helpers ───────────────────────────────────────────────

@@ -27,7 +27,7 @@ public class CardViewer : MonoBehaviour
     [Header("Sorting")]
     [SerializeField] private int viewerBaseSortingOrder = 10000;
 
-    private Camera cam;
+    public Camera _cam;
     private Transform hoveredCard;
     private Vector3 hoveredOriginalScale;
     private int hoveredOriginalSorting;
@@ -38,9 +38,16 @@ public class CardViewer : MonoBehaviour
 
     public System.Action onHideCards;
 
+    /// <summary>
+    /// Optional selection callback. When set, clicking a card in the viewer
+    /// fires this with the card's index in the displayed array.
+    /// Used by the shop's card removal flow.
+    /// </summary>
+    public System.Action<int> onCardSelected;
+
     #region Unity Methods
 
-    private void Awake() => cam = Camera.main;
+    private void Awake() => _cam = Camera.main;
 
     // private void Start() => DisplayCards(cardPrefabs);
 
@@ -48,6 +55,7 @@ public class CardViewer : MonoBehaviour
     {
         ScrollCards();
         HandleHover();
+        HandleClick();
 
 		if (Input.GetKeyDown(KeyCode.Escape))
 		{
@@ -141,13 +149,43 @@ public class CardViewer : MonoBehaviour
 
     #endregion
 
+    #region Selection
+
+    private void HandleClick()
+    {
+        if (onCardSelected == null) return;
+        if (!_cam || spawnedCards.Count == 0) return;
+        if (!Input.GetMouseButtonDown(0)) return;
+
+        Vector3 mouseWorld = _cam.ScreenToWorldPoint(Input.mousePosition);
+        mouseWorld.z = 0f;
+
+        Collider2D hit = Physics2D.OverlapPoint(mouseWorld, cardLayer);
+        if (hit == null) return;
+
+        // Find which spawned card was clicked
+        Transform clicked = hit.transform;
+        for (int i = 0; i < spawnedCards.Count; i++)
+        {
+            if (spawnedCards[i] == null) continue;
+            if (spawnedCards[i].transform == clicked ||
+                clicked.IsChildOf(spawnedCards[i].transform))
+            {
+                onCardSelected.Invoke(i);
+                return;
+            }
+        }
+    }
+
+    #endregion
+
     #region Hover
 
     private void HandleHover()
     {
-        if (!cam || spawnedCards.Count == 0) return;
+        if (!_cam || spawnedCards.Count == 0) return;
 
-        Vector3 mouseWorld = cam.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 mouseWorld = _cam.ScreenToWorldPoint(Input.mousePosition);
         mouseWorld.z = 0f;
 
         Collider2D hit = Physics2D.OverlapPoint(mouseWorld, cardLayer);
