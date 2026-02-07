@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2047a44e41cc8844b92eecf778e07fb0, type: 3}
   m_Name: Card_BloodPact
   m_EditorClassIdentifier: Assembly-CSharp::CardData
-  cardName: 
+  cardName: Blood Pact
   cardType: 0
-  cardFaction1: 0
-  cardFaction2: 0
+  cardFaction1: 1
+  cardFaction2: 1
   layer0: {fileID: 0}
   layer1: {fileID: 0}
   layer2: {fileID: 0}
   layer3: {fileID: 0}
-  baseEnergyCost: 0
-  actionDescription: 
+  baseEnergyCost: 1
+  actionDescription: DO NOT USE
   actionType1: 0
   actionTarget1: 0
   action1Value: 0

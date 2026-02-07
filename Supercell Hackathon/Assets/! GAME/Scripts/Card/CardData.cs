@@ -26,18 +26,27 @@ public class CardData : ScriptableObject
 	public CardActionType actionType1;
 	public ActionTarget actionTarget1;
 	[Min(0)] public int action1Value;
+	[Tooltip("Status effect used by DamagePerStack.")]
+	public StatusEffectType action1StatusEffect;
+	public ActionConditionData action1Condition;
 
 
 	[Header("Action 2: Optional")]
 	public CardActionType actionType2;
 	public ActionTarget actionTarget2;
 	[Min(0)] public int action2Value;
+	[Tooltip("Status effect used by DamagePerStack.")]
+	public StatusEffectType action2StatusEffect;
+	public ActionConditionData action2Condition;
 
 
 	[Header("Action 3: Optional")]
 	public CardActionType actionType3;
 	public ActionTarget actionTarget3;
 	[Min(0)] public int action3Value;
+	[Tooltip("Status effect used by DamagePerStack.")]
+	public StatusEffectType action3StatusEffect;
+	public ActionConditionData action3Condition;
 
 
 	[Header("Upgrades")]

@@ -161,6 +161,14 @@ public class Arena : MonoBehaviour
 		}
 	}
 
+	/// <summary>
+	/// Returns the opponent CharacterInfo for the given side.
+	/// </summary>
+	public CharacterInfo GetOpponent(bool forPlayer)
+	{
+		return forPlayer ? _character2.characterInfo : _character1.characterInfo;
+	}
+
 	private void ApplyAction(CardActionType type, int value, CharacterInfo target, Hand targetHand, CharacterInfo source)
 	{
 		// Values arrive pre-modified by CardModifiers (empower, weaken, dodge, etc.)
@@ -229,6 +237,20 @@ public class Arena : MonoBehaviour
 
 			case CardActionType.DestroyCard:
 				targetHand.DestroyCard();
+				break;
+
+			case CardActionType.GiveEnergy:
+				target.GainEnergy(value);
+				break;
+
+			case CardActionType.DamageLostHP:
+				// value already includes lostHP + base + modifiers (computed by CardModifiers)
+				target.TakeDamage(value);
+				break;
+
+			case CardActionType.DamagePerStack:
+				// value already includes (stacks * base) + modifiers (computed by CardModifiers)
+				target.TakeDamage(value);
 				break;
 
 			default:

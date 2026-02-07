@@ -12,19 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2047a44e41cc8844b92eecf778e07fb0, type: 3}
   m_Name: Card_Block
   m_EditorClassIdentifier: Assembly-CSharp::CardData
-  cardName: 
-  cardType: 0
+  cardName: Block
+  cardType: 1
   cardFaction1: 0
   cardFaction2: 0
   layer0: {fileID: 0}
   layer1: {fileID: 0}
   layer2: {fileID: 0}
   layer3: {fileID: 0}
-  baseEnergyCost: 0
-  actionDescription: 
-  actionType1: 0
+  baseEnergyCost: 1
+  actionDescription: Gain {action1Value} guard.
+  actionType1: 4
   actionTarget1: 0
-  action1Value: 0
+  action1Value: 10
   actionType2: 0
   actionTarget2: 0
   action2Value: 0

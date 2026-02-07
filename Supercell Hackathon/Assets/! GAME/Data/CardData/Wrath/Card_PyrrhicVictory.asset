@@ -12,24 +12,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2047a44e41cc8844b92eecf778e07fb0, type: 3}
   m_Name: Card_PyrrhicVictory
   m_EditorClassIdentifier: Assembly-CSharp::CardData
-  cardName: 
+  cardName: Pyrrhic Victory
   cardType: 0
-  cardFaction1: 0
-  cardFaction2: 0
+  cardFaction1: 1
+  cardFaction2: 1
   layer0: {fileID: 0}
   layer1: {fileID: 0}
   layer2: {fileID: 0}
   layer3: {fileID: 0}
-  baseEnergyCost: 0
-  actionDescription: 
-  actionType1: 0
-  actionTarget1: 0
-  action1Value: 0
-  actionType2: 0
+  baseEnergyCost: 2
+  actionDescription: 'Deal {action1Value} damage. Discard a card randomly.
+
+    If
+    the discarded card was a WRATH card, deal {action2Value}
+
+    additional Damage.'
+  actionType1: 1
+  actionTarget1: 1
+  action1Value: 35
+  action1StatusEffect: 0
+  action1Condition:
+    condition: 0
+    threshold: 0
+    statusEffect: 0
+    cardFaction: 0
+  actionType2: 7
   actionTarget2: 0
   action2Value: 0
-  actionType3: 0
-  actionTarget3: 0
-  action3Value: 0
+  action2StatusEffect: 0
+  action2Condition:
+    condition: 0
+    threshold: 0
+    statusEffect: 0
+    cardFaction: 1
+  actionType3: 1
+  actionTarget3: 1
+  action3Value: 10
+  action3StatusEffect: 0
+  action3Condition:
+    condition: 4
+    threshold: 0
+    statusEffect: 0
+    cardFaction: 1
   canUpgrade: 0
   upgradedCard: {fileID: 0}

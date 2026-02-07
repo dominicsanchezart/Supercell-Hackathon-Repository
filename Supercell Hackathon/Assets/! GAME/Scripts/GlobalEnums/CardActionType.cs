@@ -18,5 +18,18 @@ public enum CardActionType
 	Fury,
 	Energize,
 	Dodge,
-	DestroyCard
+	DestroyCard,
+	GiveEnergy,
+
+	/// <summary>
+	/// Deals damage equal to (maxHP - currentHP) + the card's base value.
+	/// The base value acts as bonus flat damage on top of lost HP.
+	/// </summary>
+	DamageLostHP,
+
+	/// <summary>
+	/// Deals damage equal to (status effect stacks * base value).
+	/// The status effect is chosen per-action slot on the CardData.
+	/// </summary>
+	DamagePerStack
 }

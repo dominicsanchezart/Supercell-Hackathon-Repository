@@ -73,6 +73,14 @@ public class CharacterInfo : MonoBehaviour
 		return _health;
 	}
 
+	/// <summary>
+	/// Returns how much HP has been lost (maxHP - currentHP).
+	/// </summary>
+	public int GetLostHP()
+	{
+		return _data.baseHealth - _health;
+	}
+
 	public void SpendEnergy(int amount)
 	{
 		_energy = Mathf.Max(_energy - amount, 0);
@@ -224,6 +232,42 @@ public class CharacterInfo : MonoBehaviour
 	public int GetDodge()
 	{
 		return _dodge;
+	}
+
+	/// <summary>
+	/// Returns the current stack count for the given status effect.
+	/// </summary>
+	public int GetStatusEffectStacks(StatusEffectType type)
+	{
+		switch (type)
+		{
+			case StatusEffectType.Burn:      return _burn;
+			case StatusEffectType.Poison:    return _poison;
+			case StatusEffectType.Weaken:    return _weaken;
+			case StatusEffectType.Empower:   return _empower;
+			case StatusEffectType.Fury:      return _fury;
+			case StatusEffectType.Energized: return _energized;
+			case StatusEffectType.Dodge:     return _dodge;
+			default:                         return 0;
+		}
+	}
+
+	/// <summary>
+	/// Resets the given status effect stacks to zero.
+	/// </summary>
+	public void ResetStatusEffect(StatusEffectType type)
+	{
+		switch (type)
+		{
+			case StatusEffectType.Burn:      _burn = 0; break;
+			case StatusEffectType.Poison:    _poison = 0; break;
+			case StatusEffectType.Weaken:    _weaken = 0; break;
+			case StatusEffectType.Empower:   _empower = 0; break;
+			case StatusEffectType.Fury:      _fury = 0; break;
+			case StatusEffectType.Energized: _energized = 0; break;
+			case StatusEffectType.Dodge:     _dodge = 0; break;
+		}
+		NotifyStatsChanged();
 	}
 
 	public int GetModifiedBlock(int baseBlock)

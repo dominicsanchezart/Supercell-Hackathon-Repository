@@ -198,13 +198,55 @@ public class Hand : MonoBehaviour
         // Use CardModifiers to get final values with buffs/debuffs applied
         CardModifiers.GetModifiedValues(data, characterInfo, out int mod1, out int mod2, out int mod3);
 
-        arena.ResolveAction(data.actionType1, mod1, data.actionTarget1, isPlayer);
+        if (IsActionConditionMet(data.action1Condition))
+        {
+            arena.ResolveAction(data.actionType1, mod1, data.actionTarget1, isPlayer);
+            if (data.actionType1 == CardActionType.DamagePerStack)
+                characterInfo.ResetStatusEffect(data.action1StatusEffect);
+        }
 
-        if (data.actionType2 != CardActionType.None)
+        if (data.actionType2 != CardActionType.None && IsActionConditionMet(data.action2Condition))
+        {
             arena.ResolveAction(data.actionType2, mod2, data.actionTarget2, isPlayer);
+            if (data.actionType2 == CardActionType.DamagePerStack)
+                characterInfo.ResetStatusEffect(data.action2StatusEffect);
+        }
 
-        if (data.actionType3 != CardActionType.None)
+        if (data.actionType3 != CardActionType.None && IsActionConditionMet(data.action3Condition))
+        {
             arena.ResolveAction(data.actionType3, mod3, data.actionTarget3, isPlayer);
+            if (data.actionType3 == CardActionType.DamagePerStack)
+                characterInfo.ResetStatusEffect(data.action3StatusEffect);
+        }
+    }
+
+    /// <summary>
+    /// Evaluates whether a per-action condition is satisfied.
+    /// </summary>
+    private bool IsActionConditionMet(ActionConditionData cond)
+    {
+        switch (cond.condition)
+        {
+            case CardCondition.None:
+                return true;
+
+            case CardCondition.KillEnemy:
+                return !arena.GetOpponent(isPlayer).IsAlive();
+
+            case CardCondition.BelowHealthValue:
+                return characterInfo.GetHealth() <= cond.threshold;
+
+            case CardCondition.StatusEffectThreshold:
+                return characterInfo.GetStatusEffectStacks(cond.statusEffect) >= cond.threshold;
+
+            case CardCondition.DiscardedCardFaction:
+                if (discardPile.Count == 0) return false;
+                var last = discardPile[discardPile.Count - 1];
+                return last.cardFaction1 == cond.cardFaction || last.cardFaction2 == cond.cardFaction;
+
+            default:
+                return true;
+        }
     }
 
     /// <summary>

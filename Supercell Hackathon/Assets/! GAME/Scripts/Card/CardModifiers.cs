@@ -14,7 +14,8 @@ public static class CardModifiers
 	/// Returns the final modified value for a single action slot,
 	/// based on the action type and the caster's current buffs.
 	/// </summary>
-	public static int GetModifiedValue(CardActionType type, int baseValue, CharacterInfo caster)
+	public static int GetModifiedValue(CardActionType type, int baseValue, CharacterInfo caster,
+		StatusEffectType statusEffect = default)
 	{
 		if (caster == null)
 			return baseValue;
@@ -24,6 +25,14 @@ public static class CardModifiers
 			case CardActionType.Damage:
 			case CardActionType.DamageAll:
 				return caster.GetModifiedDamage(baseValue);
+
+			case CardActionType.DamageLostHP:
+				// Lost HP + base value, then run through damage modifiers (empower/weaken)
+				return caster.GetModifiedDamage(caster.GetLostHP() + baseValue);
+
+			case CardActionType.DamagePerStack:
+				int stacks = caster.GetStatusEffectStacks(statusEffect);
+				return caster.GetModifiedDamage(stacks * baseValue);
 
 			case CardActionType.Guard:
 				return caster.GetModifiedBlock(baseValue);
@@ -39,9 +48,9 @@ public static class CardModifiers
 	public static void GetModifiedValues(CardData data, CharacterInfo caster,
 		out int mod1, out int mod2, out int mod3)
 	{
-		mod1 = GetModifiedValue(data.actionType1, data.action1Value, caster);
-		mod2 = GetModifiedValue(data.actionType2, data.action2Value, caster);
-		mod3 = GetModifiedValue(data.actionType3, data.action3Value, caster);
+		mod1 = GetModifiedValue(data.actionType1, data.action1Value, caster, data.action1StatusEffect);
+		mod2 = GetModifiedValue(data.actionType2, data.action2Value, caster, data.action2StatusEffect);
+		mod3 = GetModifiedValue(data.actionType3, data.action3Value, caster, data.action3StatusEffect);
 	}
 
 	/// <summary>
