@@ -15,6 +15,7 @@ MonoBehaviour:
   patronName: Gilded Serpent
   faction: 2
   pactTitle: Pact of Pride
+  passive: 2
   passiveDescription: Pact of Pride placeholder
   portrait: {fileID: 0}
   patronColor: {r: 0.12001601, g: 0.8207547, b: 0.3616815, a: 1}

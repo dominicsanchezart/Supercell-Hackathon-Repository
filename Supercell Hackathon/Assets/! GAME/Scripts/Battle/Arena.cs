@@ -27,11 +27,19 @@ public class Arena : MonoBehaviour
 	[SerializeField] private float victoryDelay = 1.0f;
 	[SerializeField] private float defeatDelay = 1.5f;
 
-
+	// Patron passive tracking
+	// Used by Pride passive (Perfect Form) to check if player took damage this turn
+	private bool _tookDamageThisTurn;
 
 	private IEnumerator Start()
 	{
 		yield return null;
+
+		// Sync run HP into battle (player may not be at max HP)
+		if (RunManager.Instance != null && RunManager.Instance.State != null)
+		{
+			_character1.characterInfo.SetHealth(RunManager.Instance.State.currentHP);
+		}
 
 		if (battleStage != null)
 			battleStage.Setup(_character1.characterInfo, _character2.characterInfo);
@@ -61,6 +69,7 @@ public class Arena : MonoBehaviour
 		if (_battleOver) return;
 
 		_isPlayerTurn = true;
+		_tookDamageThisTurn = false;
 
 		// Reset block at start of turn (like Slay the Spire)
 		_character1.characterInfo.ResetBlock();
@@ -68,6 +77,9 @@ public class Arena : MonoBehaviour
 		// Process burn/poison damage at start of turn
 		_character1.characterInfo.ProcessStartOfTurnEffects();
 		if (CheckBattleOver()) return;
+
+		// TODO: Patron passives — Ruin (Adaptive Biology): check enemy conditions, grant buff
+		// TODO: Patron passives — Pride (Perfect Form): if _perfectFormActive, grant +1 energy + heal 2
 
 		_character1.StartTurn();
 
@@ -77,6 +89,8 @@ public class Arena : MonoBehaviour
 	public void EndPlayerTurn()
 	{
 		if (!_isPlayerTurn || _battleOver) return;
+
+		// TODO: Patron passives — Pride (Perfect Form): if !_tookDamageThisTurn, set flag for next turn
 
 		// Decay weaken, reset empower at end of turn
 		_character1.characterInfo.ProcessEndOfTurnEffects();
@@ -134,6 +148,18 @@ public class Arena : MonoBehaviour
 	}
 
 	/// <summary>
+	/// Instantly kills the enemy. For testing combat flow across the map.
+	/// Right-click Arena in the Inspector → "Defeat Enemy (Test)".
+	/// </summary>
+	[ContextMenu("Defeat Enemy (Test)")]
+	public void DefeatEnemyTest()
+	{
+		if (_battleOver) return;
+		_character2.characterInfo.TakeDamage(99999);
+		CheckBattleOver();
+	}
+
+	/// <summary>
 	/// Resolves a card action using the ActionTarget to determine who gets affected.
 	/// Self = caster, Enemy = opponent, All = both.
 	/// </summary>
@@ -178,6 +204,12 @@ public class Arena : MonoBehaviour
 			case CardActionType.Damage:
 			case CardActionType.DamageAll:
 				target.TakeDamage(value);
+				// Track damage for patron passives
+				if (target == _character1.characterInfo)
+				{
+					_tookDamageThisTurn = true;
+					// TODO: Wrath passive (Bleed Out) — gain 2 Fury when taking card damage
+				}
 				break;
 
 			case CardActionType.Heal:
@@ -245,11 +277,15 @@ public class Arena : MonoBehaviour
 			case CardActionType.DamageLostHP:
 				// value already includes lostHP + base + modifiers (computed by CardModifiers)
 				target.TakeDamage(value);
+				if (target == _character1.characterInfo)
+					_tookDamageThisTurn = true;
 				break;
 
 			case CardActionType.DamagePerStack:
 				// value already includes (stacks * base) + modifiers (computed by CardModifiers)
 				target.TakeDamage(value);
+				if (target == _character1.characterInfo)
+					_tookDamageThisTurn = true;
 				break;
 
 			case CardActionType.GainGold:

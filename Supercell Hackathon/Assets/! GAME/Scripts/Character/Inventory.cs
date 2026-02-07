@@ -10,7 +10,16 @@ public class Inventory : MonoBehaviour
 
 	private void Awake()
 	{
-		AssignDeck(testDeck.cards);
+		// Use the run's deck if available (from PatronData starter deck + any cards added during the run)
+		if (RunManager.Instance != null && RunManager.Instance.State != null
+			&& RunManager.Instance.State.deck.Count > 0)
+		{
+			AssignDeck(RunManager.Instance.State.deck);
+		}
+		else if (testDeck != null && testDeck.cards != null)
+		{
+			AssignDeck(testDeck.cards);
+		}
 	}
 
 	public void AddCardToDeck(CardData card)

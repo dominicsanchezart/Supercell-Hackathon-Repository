@@ -15,8 +15,6 @@ public class CardViewer : MonoBehaviour
 
     [Header("Scrolling")]
     [SerializeField] private float scrollSpeed = 5f;
-    [SerializeField] private float minScroll = 2f;
-    [SerializeField] private float maxScroll = 50f;
 
     [Header("Hover")]
     [SerializeField] private float hoverScale = 1.35f;
@@ -142,6 +140,37 @@ public class CardViewer : MonoBehaviour
 
         float input = -Input.mouseScrollDelta.y;
         if (Mathf.Abs(input) < 0.01f) return;
+
+        // Content extends downward: row centers go from y=0 to y=-(rows-1)*spacing
+        int rowCount = Mathf.CeilToInt((float)spawnedCards.Count / Mathf.Max(cardsPerRow, 1));
+        float contentBottom = (rowCount - 1) * verticalSpacing;
+
+        // Full viewport height the camera can see
+        float viewportHeight = _cam != null ? _cam.orthographicSize * 2f : 10f;
+
+        // How far below the cardRoot origin the camera bottom sits
+        float cardRootWorldY = cardRoot.parent != null
+            ? cardRoot.parent.position.y
+            : cardRoot.position.y;
+        float camBottomY = _cam != null
+            ? _cam.transform.position.y - _cam.orthographicSize
+            : cardRootWorldY - 5f;
+        float visibleBelow = cardRootWorldY - camBottomY;
+
+        // How far above the cardRoot origin the camera top sits
+        float camTopY = _cam != null
+            ? _cam.transform.position.y + _cam.orthographicSize
+            : cardRootWorldY + 5f;
+        float visibleAbove = camTopY - cardRootWorldY;
+
+        // Allow scrolling down (negative) so top row can reach center of viewport
+        // Top row is at y=0 relative to cardRoot; let it drop to ~middle of screen
+        float topPadding = Mathf.Max(0f, visibleAbove - viewportHeight * 0.35f);
+        float minScroll = -topPadding;
+
+        // Allow scrolling up (positive) so bottom row can reach center of viewport
+        float bottomPadding = viewportHeight * 0.35f;
+        float maxScroll = Mathf.Max(0f, contentBottom - visibleBelow + bottomPadding);
 
         verticalScroll = Mathf.Clamp(verticalScroll + input * scrollSpeed, minScroll, maxScroll);
         cardRoot.localPosition = new Vector3(0f, verticalScroll, 0f);

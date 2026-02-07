@@ -1,6 +1,18 @@
 using UnityEngine;
 
 /// <summary>
+/// Identifies which passive ability a patron grants.
+/// Used by Arena to apply passive effects at the correct hook points.
+/// </summary>
+public enum PatronPassive
+{
+	None,
+	BleedOut,        // Wrath — gain 2 Fury when taking card damage
+	PerfectForm,     // Pride — +1 energy + heal 2 if no damage taken last turn
+	AdaptiveBiology  // Ruin — random buff based on enemy conditions at turn start
+}
+
+/// <summary>
 /// Defines a Patron (Pact) the player can choose at run start.
 /// Bundles faction identity, character stats, starter deck, and passive info.
 ///
@@ -21,6 +33,8 @@ public class PatronData : ScriptableObject
 	public CardFaction faction;
 	[Tooltip("Short flavor tagline (e.g. 'Pact of Wrath').")]
 	public string pactTitle;
+	[Tooltip("Which passive ability this patron grants.")]
+	public PatronPassive passive;
 	[TextArea]
 	[Tooltip("Description of the patron's passive ability.")]
 	public string passiveDescription;

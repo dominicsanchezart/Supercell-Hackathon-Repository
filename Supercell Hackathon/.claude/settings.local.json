@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:neocortex.link)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:docs.neocortex.link)"
+    ]
+  }
+}

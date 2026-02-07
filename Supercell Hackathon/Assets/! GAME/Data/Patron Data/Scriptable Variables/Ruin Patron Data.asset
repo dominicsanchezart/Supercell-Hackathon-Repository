@@ -15,6 +15,7 @@ MonoBehaviour:
   patronName: Stitch Prophet
   faction: 3
   pactTitle: Pact of Ruin
+  passive: 3
   passiveDescription: Pact of Ruin placeholder
   portrait: {fileID: 0}
   patronColor: {r: 0.59255135, g: 0.14509802, b: 0.8392157, a: 1}

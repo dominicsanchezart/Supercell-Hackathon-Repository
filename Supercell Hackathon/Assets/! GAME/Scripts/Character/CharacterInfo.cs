@@ -5,6 +5,8 @@ public class CharacterInfo : MonoBehaviour
 {
 	public CharacterData _data;
 	[SerializeField] private Inventory _inventory;
+	[Tooltip("If true, this character's stats will be overridden by the active PatronData at battle start.")]
+	[SerializeField] private bool _isPlayer;
     [SerializeField] private int _health;
 	[SerializeField] private int _block;
 	[SerializeField] private int _energy;
@@ -42,6 +44,14 @@ public class CharacterInfo : MonoBehaviour
 
 	private void Awake()
 	{
+		// If this is the player character, override _data with the patron's CharacterData
+		if (_isPlayer && RunManager.Instance != null && RunManager.Instance.State != null)
+		{
+			PatronData patron = RunManager.Instance.State.patronData;
+			if (patron != null && patron.characterData != null)
+				_data = patron.characterData;
+		}
+
 		SetupCharacter();
 	}
 
@@ -88,6 +98,16 @@ public class CharacterInfo : MonoBehaviour
 	public int GetHealth()
 	{
 		return _health;
+	}
+
+	/// <summary>
+	/// Sets health directly (e.g. syncing run HP into battle).
+	/// Clamped between 0 and baseHealth.
+	/// </summary>
+	public void SetHealth(int value)
+	{
+		_health = Mathf.Clamp(value, 0, _data.baseHealth);
+		NotifyStatsChanged();
 	}
 
 	/// <summary>

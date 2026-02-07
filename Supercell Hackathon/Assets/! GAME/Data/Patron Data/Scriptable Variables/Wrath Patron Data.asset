@@ -15,6 +15,7 @@ MonoBehaviour:
   patronName: Cinder King
   faction: 1
   pactTitle: Pact of Wrath
+  passive: 1
   passiveDescription: Pact of Wrath placeholder
   portrait: {fileID: 0}
   patronColor: {r: 0.8396226, g: 0.25870875, b: 0.14653791, a: 1}

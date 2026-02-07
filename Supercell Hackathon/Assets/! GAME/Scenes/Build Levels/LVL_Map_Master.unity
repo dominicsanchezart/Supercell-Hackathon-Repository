@@ -445,7 +445,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RunManager
   mapConfig: {fileID: 11400000, guid: 3d489766a86d3cd438a26e8b19b2d0f3, type: 2}
   mapSceneName: LVL_Map_Master
-  battleSceneName: LVL_Battle
+  battleSceneName: LVL_Testing_Dominic
   shopSceneName: LVL_Shop
   campSceneName: LVL_Camp
   eventSceneName: LVL_Event
