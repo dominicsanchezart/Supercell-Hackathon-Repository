@@ -111,6 +111,7 @@ public class CharacterHUD : MonoBehaviour
 		if (statusEffectData.TryGetVisual(status, out Sprite sprite, out Color tint))
 		{
 			var icon = GetOrCreateIcon();
+			tint.a = 1f;
 			icon.Setup(sprite, tint, stacks);
 		}
 	}
