@@ -21,7 +21,7 @@ MonoBehaviour:
   layer2: {fileID: 0}
   layer3: {fileID: 0}
   baseEnergyCost: 2
-  actionDescription: 'Deal {action1Value} damage. Discard a card randomly.
+  actionDescription: 'Deal {action1Value} Damage. Discard a card randomly.
 
     If
     the discarded card was a WRATH card, deal {action2Value}

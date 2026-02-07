@@ -15,5 +15,12 @@ MonoBehaviour:
   <baseHealth>k__BackingField: 100
   <baseEnergy>k__BackingField: 3
   <baseDrawSize>k__BackingField: 5
-  <characterSprite>k__BackingField: {fileID: 21300000, guid: 84d9662acf8cf0f4b802be040533179b, type: 3}
+  <attackDelay>k__BackingField: 0.8
+  <characterSprite>k__BackingField: {fileID: 21300000, guid: bfd5a056407f45a4ebe390f725272544, type: 3}
   <flipSpriteForRight>k__BackingField: 0
+  <battleBackground>k__BackingField: {fileID: 0}
+  <idleSprite>k__BackingField: {fileID: 21300000, guid: bfd5a056407f45a4ebe390f725272544, type: 3}
+  <activeActionSprite>k__BackingField: {fileID: 21300000, guid: caf79f9ccf9d5904c9a9a0e53002a7e0, type: 3}
+  <passiveActionSprite>k__BackingField: {fileID: 21300000, guid: 5cabbbce64be1e7478c34ce652cbc6e1, type: 3}
+  <damageTakenSprite>k__BackingField: {fileID: 21300000, guid: 1f3e0c2039ef2774aac40925842454c5, type: 3}
+  <poseDuration>k__BackingField: 0.5

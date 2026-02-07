@@ -23,6 +23,17 @@ public class CharacterInfo : MonoBehaviour
 	public event Action OnStatsChanged;
 
 	/// <summary>
+	/// Fired when this character takes damage (after block absorption).
+	/// </summary>
+	public event Action OnDamageTaken;
+
+	/// <summary>
+	/// Fired when this character plays a card. Passes the CardType so listeners
+	/// can distinguish Attack cards from others.
+	/// </summary>
+	public event Action<CardType> OnCardPlayed;
+
+	/// <summary>
 	/// Fired when this character dies. Arena subscribes to trigger win/lose flow.
 	/// </summary>
 	public event Action OnDeath;
@@ -46,6 +57,11 @@ public class CharacterInfo : MonoBehaviour
 		OnStatsChanged?.Invoke();
 	}
 
+	public void NotifyCardPlayed(CardType type)
+	{
+		OnCardPlayed?.Invoke(type);
+	}
+
 	public void TakeDamage(int amount)
 	{
 		if (_block > 0)
@@ -58,6 +74,7 @@ public class CharacterInfo : MonoBehaviour
 		_health = Mathf.Max(_health - amount, 0);
 		Debug.Log($"{_data.name} takes {amount} damage. HP: {_health}/{_data.baseHealth} Block: {_block}");
 		NotifyStatsChanged();
+		OnDamageTaken?.Invoke();
 		if (_health == 0)
 			HandleDeath();
 	}
@@ -116,7 +133,7 @@ public class CharacterInfo : MonoBehaviour
 
 	public void GainBlock(int amount)
 	{
-		_block += amount;
+		_block = Mathf.Min(_block + amount, _data.baseHealth);
 		Debug.Log($"{_data.name} gains {amount} block. Total block: {_block}");
 		NotifyStatsChanged();
 	}

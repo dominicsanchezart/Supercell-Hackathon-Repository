@@ -31,5 +31,6 @@ public enum CardActionType
 	/// Deals damage equal to (status effect stacks * base value).
 	/// The status effect is chosen per-action slot on the CardData.
 	/// </summary>
-	DamagePerStack
+	DamagePerStack,
+	GainGold
 }

@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2047a44e41cc8844b92eecf778e07fb0, type: 3}
-  m_Name: Card_RadiantBarrier
+  m_Name: Card_SerpentsTihte
   m_EditorClassIdentifier: Assembly-CSharp::CardData
   cardName: 
   cardType: 0
-  cardFaction1: 0
-  cardFaction2: 0
+  cardFaction1: 2
+  cardFaction2: 2
   layer0: {fileID: 0}
   layer1: {fileID: 0}
   layer2: {fileID: 0}
@@ -25,11 +25,29 @@ MonoBehaviour:
   actionType1: 0
   actionTarget1: 0
   action1Value: 0
+  action1StatusEffect: 0
+  action1Condition:
+    condition: 0
+    threshold: 0
+    statusEffect: 0
+    cardFaction: 0
   actionType2: 0
   actionTarget2: 0
   action2Value: 0
+  action2StatusEffect: 0
+  action2Condition:
+    condition: 0
+    threshold: 0
+    statusEffect: 0
+    cardFaction: 0
   actionType3: 0
   actionTarget3: 0
   action3Value: 0
+  action3StatusEffect: 0
+  action3Condition:
+    condition: 0
+    threshold: 0
+    statusEffect: 0
+    cardFaction: 0
   canUpgrade: 0
   upgradedCard: {fileID: 0}

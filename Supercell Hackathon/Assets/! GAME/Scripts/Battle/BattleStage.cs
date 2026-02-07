@@ -17,6 +17,10 @@ public class BattleStage : MonoBehaviour
 	[SerializeField] private SpriteRenderer leftSpriteRenderer;
 	[SerializeField] private SpriteRenderer rightSpriteRenderer;
 
+	[Header("Battle Background")]
+	[Tooltip("SpriteRenderer used to display per-enemy battle backgrounds.")]
+	[SerializeField] private SpriteRenderer backgroundRenderer;
+
 	[Header("Positioning")]
 	[Tooltip("How far from center (in viewport %). 0.25 = quarter of the screen.")]
 	[SerializeField] private float horizontalOffset = 0.25f;
@@ -29,8 +33,11 @@ public class BattleStage : MonoBehaviour
 	[SerializeField] private AnimationCurve slideCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
 	[Header("Scale")]
-	[SerializeField] private float spriteScale = 3f;
 	[SerializeField] private int sortingOrder = -10;
+
+	[Header("Damage Shake")]
+	[SerializeField] private float shakeDuration = 0.3f;
+	[SerializeField] private float shakeMagnitude = 0.15f;
 
 	private Vector3 _leftTarget;
 	private Vector3 _rightTarget;
@@ -52,8 +59,15 @@ public class BattleStage : MonoBehaviour
 	/// </summary>
 	public void Setup(CharacterInfo left, CharacterInfo right)
 	{
+		// Unsubscribe from previous characters
+		Unsubscribe();
+
 		leftCharacter = left;
 		rightCharacter = right;
+
+		// Subscribe to events
+		Subscribe();
+
 		Initialize();
 	}
 
@@ -91,6 +105,9 @@ public class BattleStage : MonoBehaviour
 		SetupSprite(leftSpriteRenderer, leftCharacter._data, false);
 		SetupSprite(rightSpriteRenderer, rightCharacter._data, true);
 
+		// Update battle background from the right (enemy) character if available
+		UpdateBackground(rightCharacter._data);
+
 		// Start off-screen and slide in
 		StopAllCoroutines();
 		StartCoroutine(SlideIn());
@@ -101,7 +118,6 @@ public class BattleStage : MonoBehaviour
 		if (data.characterSprite != null)
 			sr.sprite = data.characterSprite;
 
-		sr.transform.localScale = Vector3.one * spriteScale;
 		sr.sortingOrder = sortingOrder;
 
 		// Flip the right-side character so they face left (toward the player)
@@ -110,6 +126,17 @@ public class BattleStage : MonoBehaviour
 			shouldFlip = !shouldFlip;
 
 		sr.flipX = shouldFlip;
+	}
+
+	private void UpdateBackground(CharacterData enemyData)
+	{
+		if (backgroundRenderer == null) return;
+
+		if (enemyData.battleBackground != null)
+		{
+			backgroundRenderer.sprite = enemyData.battleBackground;
+			backgroundRenderer.gameObject.SetActive(true);
+		}
 	}
 
 	private IEnumerator SlideIn()
@@ -216,4 +243,113 @@ public class BattleStage : MonoBehaviour
 		go.SetActive(false);
 		return go.AddComponent<SpriteRenderer>();
 	}
+
+	#region Damage Shake
+
+	private void ShakeLeft()
+	{
+		ShowDamageSprite(leftSpriteRenderer, leftCharacter);
+		StartCoroutine(Shake(leftSpriteRenderer.transform, _leftTarget));
+	}
+
+	private void ShakeRight()
+	{
+		ShowDamageSprite(rightSpriteRenderer, rightCharacter);
+		StartCoroutine(Shake(rightSpriteRenderer.transform, _rightTarget));
+	}
+
+	private IEnumerator Shake(Transform target, Vector3 restPosition)
+	{
+		float elapsed = 0f;
+		while (elapsed < shakeDuration)
+		{
+			float strength = shakeMagnitude * (1f - elapsed / shakeDuration);
+			Vector3 offset = new Vector3(
+				Random.Range(-strength, strength),
+				Random.Range(-strength, strength),
+				0f);
+			target.position = restPosition + offset;
+			elapsed += Time.deltaTime;
+			yield return null;
+		}
+		target.position = restPosition;
+	}
+
+	private void OnDestroy()
+	{
+		Unsubscribe();
+	}
+
+	#endregion
+
+	#region Sprite State Swapping
+
+	private void OnLeftCardPlayed(CardType type) => ShowActionSprite(leftSpriteRenderer, leftCharacter, type);
+	private void OnRightCardPlayed(CardType type) => ShowActionSprite(rightSpriteRenderer, rightCharacter, type);
+
+	private void ShowActionSprite(SpriteRenderer sr, CharacterInfo info, CardType type)
+	{
+		if (info == null || info._data == null) return;
+
+		Sprite actionSprite = type == CardType.Attack
+			? info._data.activeActionSprite
+			: info._data.passiveActionSprite;
+
+		if (actionSprite != null)
+			StartCoroutine(FlashSprite(sr, info._data, actionSprite));
+	}
+
+	private void ShowDamageSprite(SpriteRenderer sr, CharacterInfo info)
+	{
+		if (info == null || info._data == null) return;
+
+		Sprite dmgSprite = info._data.damageTakenSprite;
+		if (dmgSprite != null)
+			StartCoroutine(FlashSprite(sr, info._data, dmgSprite));
+	}
+
+	/// <summary>
+	/// Temporarily swaps to a sprite, then returns to the idle/default sprite.
+	/// </summary>
+	private IEnumerator FlashSprite(SpriteRenderer sr, CharacterData data, Sprite tempSprite)
+	{
+		sr.sprite = tempSprite;
+		yield return new WaitForSeconds(data.poseDuration);
+		// Return to idle (fall back to characterSprite if no idle sprite)
+		sr.sprite = data.idleSprite != null ? data.idleSprite : data.characterSprite;
+	}
+
+	#endregion
+
+	#region Subscribe / Unsubscribe
+
+	private void Subscribe()
+	{
+		if (leftCharacter != null)
+		{
+			leftCharacter.OnDamageTaken += ShakeLeft;
+			leftCharacter.OnCardPlayed += OnLeftCardPlayed;
+		}
+		if (rightCharacter != null)
+		{
+			rightCharacter.OnDamageTaken += ShakeRight;
+			rightCharacter.OnCardPlayed += OnRightCardPlayed;
+		}
+	}
+
+	private void Unsubscribe()
+	{
+		if (leftCharacter != null)
+		{
+			leftCharacter.OnDamageTaken -= ShakeLeft;
+			leftCharacter.OnCardPlayed -= OnLeftCardPlayed;
+		}
+		if (rightCharacter != null)
+		{
+			rightCharacter.OnDamageTaken -= ShakeRight;
+			rightCharacter.OnCardPlayed -= OnRightCardPlayed;
+		}
+	}
+
+	#endregion
 }

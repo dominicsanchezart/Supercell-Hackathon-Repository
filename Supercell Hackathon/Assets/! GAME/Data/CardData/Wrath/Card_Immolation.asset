@@ -21,9 +21,9 @@ MonoBehaviour:
   layer2: {fileID: 0}
   layer3: {fileID: 0}
   baseEnergyCost: 1
-  actionDescription: 'Apply {action1Value} burn.
+  actionDescription: 'Apply {action1Value} Burn.
 
-    Take {action2Value} damage.'
+    Take {action2Value} Damage.'
   actionType1: 10
   actionTarget1: 1
   action1Value: 5

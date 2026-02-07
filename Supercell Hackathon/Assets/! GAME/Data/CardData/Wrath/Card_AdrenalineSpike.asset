@@ -21,18 +21,36 @@ MonoBehaviour:
   layer2: {fileID: 0}
   layer3: {fileID: 0}
   baseEnergyCost: 1
-  actionDescription: 'Take {action1Value} damage.
+  actionDescription: 'Take {action1Value} Damage.
 
-    Gain {action2Value} energy
+    Gain {action2Value} Energy
     this turn.'
   actionType1: 1
   actionTarget1: 0
   action1Value: 5
+  action1StatusEffect: 0
+  action1Condition:
+    condition: 0
+    threshold: 0
+    statusEffect: 0
+    cardFaction: 0
   actionType2: 17
   actionTarget2: 0
   action2Value: 2
+  action2StatusEffect: 0
+  action2Condition:
+    condition: 0
+    threshold: 0
+    statusEffect: 0
+    cardFaction: 0
   actionType3: 0
   actionTarget3: 0
   action3Value: 0
+  action3StatusEffect: 0
+  action3Condition:
+    condition: 0
+    threshold: 0
+    statusEffect: 0
+    cardFaction: 0
   canUpgrade: 0
   upgradedCard: {fileID: 0}

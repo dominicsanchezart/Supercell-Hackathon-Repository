@@ -9,9 +9,6 @@ public class Arena : MonoBehaviour
 	private bool _battleOver = false;
 	public bool IsViewingCards { get; private set; }
 
-	[Header("Enemy AI")]
-	[SerializeField] private float enemyActionDelay = 0.8f;
-
 	[Header("Stage")]
 	[SerializeField] private BattleStage battleStage;
 
@@ -107,7 +104,8 @@ public class Arena : MonoBehaviour
 
 	private IEnumerator RunEnemyAI()
 	{
-		yield return new WaitForSeconds(enemyActionDelay);
+		float delay = _character2.characterInfo._data.attackDelay;
+		yield return new WaitForSeconds(delay);
 
 		bool playedCard = true;
 		while (playedCard && !_battleOver)
@@ -116,7 +114,7 @@ public class Arena : MonoBehaviour
 			if (playedCard)
 			{
 				if (CheckBattleOver()) yield break;
-				yield return new WaitForSeconds(enemyActionDelay);
+				yield return new WaitForSeconds(delay);
 			}
 		}
 
@@ -251,6 +249,10 @@ public class Arena : MonoBehaviour
 			case CardActionType.DamagePerStack:
 				// value already includes (stacks * base) + modifiers (computed by CardModifiers)
 				target.TakeDamage(value);
+				break;
+
+			case CardActionType.GainGold:
+				target.GainGold(value);
 				break;
 
 			default:

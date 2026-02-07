@@ -21,15 +21,33 @@ MonoBehaviour:
   layer2: {fileID: 0}
   layer3: {fileID: 0}
   baseEnergyCost: 2
-  actionDescription: Deal {action1Value} damage.
+  actionDescription: Deal {action1Value} Damage.
   actionType1: 1
   actionTarget1: 1
   action1Value: 8
+  action1StatusEffect: 0
+  action1Condition:
+    condition: 0
+    threshold: 0
+    statusEffect: 0
+    cardFaction: 0
   actionType2: 0
   actionTarget2: 0
   action2Value: 0
+  action2StatusEffect: 0
+  action2Condition:
+    condition: 0
+    threshold: 0
+    statusEffect: 0
+    cardFaction: 0
   actionType3: 0
   actionTarget3: 0
   action3Value: 0
+  action3StatusEffect: 0
+  action3Condition:
+    condition: 0
+    threshold: 0
+    statusEffect: 0
+    cardFaction: 0
   canUpgrade: 0
   upgradedCard: {fileID: 0}

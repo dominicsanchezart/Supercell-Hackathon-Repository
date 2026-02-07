@@ -10,47 +10,45 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2047a44e41cc8844b92eecf778e07fb0, type: 3}
-  m_Name: Card_FuryUnleashed
+  m_Name: Card_CorrodingSpite
   m_EditorClassIdentifier: Assembly-CSharp::CardData
-  cardName: Fury Unleashed
-  cardType: 0
-  cardFaction1: 1
-  cardFaction2: 1
+  cardName: Corroding Spite
+  cardType: 1
+  cardFaction1: 2
+  cardFaction2: 2
   layer0: {fileID: 0}
   layer1: {fileID: 0}
   layer2: {fileID: 0}
   layer3: {fileID: 0}
-  baseEnergyCost: 2
-  actionDescription: 'Deal {action1Value} Damage.
-
-    Deal {action2Value} additional
-    Damage for each Fury you have, then reset Fury.'
-  actionType1: 1
-  actionTarget1: 1
-  action1Value: 15
+  baseEnergyCost: 1
+  actionDescription: "Gain {action1Value} Guard. \nDiscard a random card. If that
+    card is\na PRIDE card, apply {action3Value} Poison."
+  actionType1: 4
+  actionTarget1: 0
+  action1Value: 6
   action1StatusEffect: 0
   action1Condition:
     condition: 0
     threshold: 0
     statusEffect: 0
     cardFaction: 0
-  actionType2: 19
-  actionTarget2: 1
-  action2Value: 5
-  action2StatusEffect: 5
+  actionType2: 7
+  actionTarget2: 0
+  action2Value: 1
+  action2StatusEffect: 0
   action2Condition:
     condition: 0
     threshold: 0
     statusEffect: 0
-    cardFaction: 0
-  actionType3: 0
-  actionTarget3: 0
-  action3Value: 0
+    cardFaction: 2
+  actionType3: 11
+  actionTarget3: 1
+  action3Value: 5
   action3StatusEffect: 0
   action3Condition:
-    condition: 0
+    condition: 4
     threshold: 0
     statusEffect: 0
-    cardFaction: 0
+    cardFaction: 2
   canUpgrade: 0
   upgradedCard: {fileID: 0}

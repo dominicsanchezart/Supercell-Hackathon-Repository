@@ -185,6 +185,9 @@ public class Hand : MonoBehaviour
 
 		ResolveCardActions(data);
 
+		// Notify listeners which type of card was played (for sprite swaps)
+		characterInfo.NotifyCardPlayed(data.cardType);
+
 		cardsInHand.Remove(data);
 		discardPile.Add(data);
 		RemoveCard(view);
@@ -238,6 +241,9 @@ public class Hand : MonoBehaviour
 
             case CardCondition.StatusEffectThreshold:
                 return characterInfo.GetStatusEffectStacks(cond.statusEffect) >= cond.threshold;
+
+            case CardCondition.EnemyStatusEffectThreshold:
+                return arena.GetOpponent(isPlayer).GetStatusEffectStacks(cond.statusEffect) >= cond.threshold;
 
             case CardCondition.DiscardedCardFaction:
                 if (discardPile.Count == 0) return false;
@@ -393,6 +399,9 @@ public class Hand : MonoBehaviour
 
         characterInfo.SpendEnergy(data.baseEnergyCost);
         ResolveCardActions(data);
+
+        // Notify listeners which type of card was played (for sprite swaps)
+        characterInfo.NotifyCardPlayed(data.cardType);
 
         cardsInHand.RemoveAt(index);
         discardPile.Add(data);

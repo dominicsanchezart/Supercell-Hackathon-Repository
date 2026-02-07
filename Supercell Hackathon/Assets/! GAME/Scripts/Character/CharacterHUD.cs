@@ -7,6 +7,7 @@ public class CharacterHUD : MonoBehaviour
 {
     [SerializeField] private CharacterInfo characterInfo;
     [SerializeField] private Slider healthSlider;
+	[SerializeField] private Slider guardSlider;
 	[SerializeField] private TextMeshProUGUI healthText;
 	[SerializeField] private TextMeshProUGUI guardText;
 	[SerializeField] private TextMeshProUGUI energyText;
@@ -69,6 +70,14 @@ public class CharacterHUD : MonoBehaviour
 		healthSlider.maxValue = characterInfo._data.baseHealth;
 		healthSlider.value = characterInfo.GetHealth();
 		healthText.text = $"{characterInfo.GetHealth()}";
+
+		if (guardSlider != null)
+		{
+			guardSlider.maxValue = characterInfo._data.baseHealth;
+			guardSlider.value = characterInfo.GetBlock();
+			guardSlider.gameObject.SetActive(characterInfo.GetBlock() > 0);
+		}
+
 		guardText.text = characterInfo.GetBlock() > 0 ? $"{characterInfo.GetBlock()}" : "";
 		energyText.text = $"{characterInfo.GetEnergy()}/3";
 

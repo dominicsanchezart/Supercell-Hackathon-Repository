@@ -19,5 +19,8 @@ public enum CardCondition
 	StatusEffectThreshold,
 
 	/// <summary>Action fires only if the most recently discarded card matches a card faction.</summary>
-	DiscardedCardFaction
+	DiscardedCardFaction,
+
+	/// <summary>Action fires only if the enemy has >= threshold stacks of a status effect.</summary>
+	EnemyStatusEffectThreshold
 }

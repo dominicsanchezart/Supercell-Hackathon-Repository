@@ -10,34 +10,33 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2047a44e41cc8844b92eecf778e07fb0, type: 3}
-  m_Name: Card_FuryUnleashed
+  m_Name: Card_OpulentRemedy
   m_EditorClassIdentifier: Assembly-CSharp::CardData
-  cardName: Fury Unleashed
-  cardType: 0
-  cardFaction1: 1
-  cardFaction2: 1
+  cardName: Opulent Remedy
+  cardType: 4
+  cardFaction1: 2
+  cardFaction2: 2
   layer0: {fileID: 0}
   layer1: {fileID: 0}
   layer2: {fileID: 0}
   layer3: {fileID: 0}
-  baseEnergyCost: 2
-  actionDescription: 'Deal {action1Value} Damage.
+  baseEnergyCost: 1
+  actionDescription: 'Heal {action1Value} HP.
 
-    Deal {action2Value} additional
-    Damage for each Fury you have, then reset Fury.'
-  actionType1: 1
-  actionTarget1: 1
-  action1Value: 15
+    Gain {action2Value} Gold.'
+  actionType1: 3
+  actionTarget1: 0
+  action1Value: 8
   action1StatusEffect: 0
   action1Condition:
     condition: 0
     threshold: 0
     statusEffect: 0
     cardFaction: 0
-  actionType2: 19
-  actionTarget2: 1
+  actionType2: 20
+  actionTarget2: 0
   action2Value: 5
-  action2StatusEffect: 5
+  action2StatusEffect: 0
   action2Condition:
     condition: 0
     threshold: 0
