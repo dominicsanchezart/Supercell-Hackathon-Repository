@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2047a44e41cc8844b92eecf778e07fb0, type: 3}
-  m_Name: Card_AdaptiveMutation
+  m_Name: Card_ReinforcedShield
   m_EditorClassIdentifier: Assembly-CSharp::CardData
-  cardName: Adaptive Harvest
-  cardType: 4
+  cardName: Reinforced Shield
+  cardType: 1
   cardFaction1: 3
   cardFaction2: 3
   layer0: {fileID: 0}
@@ -21,19 +21,23 @@ MonoBehaviour:
   layer2: {fileID: 0}
   layer3: {fileID: 0}
   baseEnergyCost: 2
-  actionDescription: DO NOT USE
-  actionType1: 0
+  actionDescription: 'Gain {action1Value} Guard.
+
+    Gain {action2Value} Dodge.
+
+'
+  actionType1: 4
   actionTarget1: 0
-  action1Value: 0
+  action1Value: 18
   action1StatusEffect: 0
   action1Condition:
     condition: 0
     threshold: 0
     statusEffect: 0
     cardFaction: 0
-  actionType2: 0
+  actionType2: 15
   actionTarget2: 0
-  action2Value: 0
+  action2Value: 2
   action2StatusEffect: 0
   action2Condition:
     condition: 0

@@ -10,39 +10,44 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2047a44e41cc8844b92eecf778e07fb0, type: 3}
-  m_Name: Card_AdaptiveMutation
+  m_Name: Card_FortificationMatrix
   m_EditorClassIdentifier: Assembly-CSharp::CardData
-  cardName: Adaptive Harvest
-  cardType: 4
+  cardName: Fortification Matrix
+  cardType: 1
   cardFaction1: 3
   cardFaction2: 3
   layer0: {fileID: 0}
   layer1: {fileID: 0}
   layer2: {fileID: 0}
   layer3: {fileID: 0}
-  baseEnergyCost: 2
-  actionDescription: DO NOT USE
-  actionType1: 0
+  baseEnergyCost: 3
+  actionDescription: 'Gain {action1Value} Guard.
+
+    Gain {action2Value} Dodge.
+
+    Apply
+    {action3Value} Weakened.'
+  actionType1: 4
   actionTarget1: 0
-  action1Value: 0
+  action1Value: 30
   action1StatusEffect: 0
   action1Condition:
     condition: 0
     threshold: 0
     statusEffect: 0
     cardFaction: 0
-  actionType2: 0
+  actionType2: 15
   actionTarget2: 0
-  action2Value: 0
+  action2Value: 3
   action2StatusEffect: 0
   action2Condition:
     condition: 0
     threshold: 0
     statusEffect: 0
     cardFaction: 0
-  actionType3: 0
-  actionTarget3: 0
-  action3Value: 0
+  actionType3: 12
+  actionTarget3: 1
+  action3Value: 3
   action3StatusEffect: 0
   action3Condition:
     condition: 0

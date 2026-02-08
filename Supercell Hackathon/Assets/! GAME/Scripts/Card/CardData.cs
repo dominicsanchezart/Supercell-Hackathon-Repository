@@ -18,7 +18,7 @@ public class CardData : ScriptableObject
 
 
 	[Header("Card Actions")]
-	[Range(0, 7)] public int baseEnergyCost;
+	[Range(0, 3)] public int baseEnergyCost;
 	[TextArea] public string actionDescription;
 
 
