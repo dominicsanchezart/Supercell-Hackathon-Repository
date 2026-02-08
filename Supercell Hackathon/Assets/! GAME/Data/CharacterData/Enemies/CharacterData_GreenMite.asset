@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f480fcffb5c93542ac5c1b34e5ba565, type: 3}
   m_Name: CharacterData_GreenMite
   m_EditorClassIdentifier: Assembly-CSharp::CharacterData
-  <baseHealth>k__BackingField: 150
+  <baseHealth>k__BackingField: 75
   <baseEnergy>k__BackingField: 3
   <baseDrawSize>k__BackingField: 3
   <attackDelay>k__BackingField: 0.8
