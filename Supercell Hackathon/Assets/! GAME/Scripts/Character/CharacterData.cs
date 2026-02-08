@@ -15,6 +15,10 @@ public class CharacterData : ScriptableObject
 	[field: Header("Visuals")]
 	[field: SerializeField] public Sprite characterSprite { get; private set; }
 	[field: SerializeField] public bool flipSpriteForRight { get; private set; }
+	[field: Tooltip("Position offset applied to the battle sprite.")]
+	[field: SerializeField] public Vector3 spriteOffset { get; private set; } = Vector3.zero;
+	[field: Tooltip("Scale multiplier for the battle sprite. Defaults to 1.")]
+	[field: SerializeField] public float spriteScale { get; private set; } = 1f;
 
 	[field: Header("Battle Background (Optional)")]
 	[field: Tooltip("Background sprite shown when fighting this character. Leave null to keep the current background.")]
