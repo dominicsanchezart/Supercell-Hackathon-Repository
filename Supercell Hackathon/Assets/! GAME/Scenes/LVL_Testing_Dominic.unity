@@ -3618,109 +3618,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &812873282
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 812873283}
-  m_Layer: 0
-  m_Name: CardRoot
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &812873283
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 812873282}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 819569702}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &819569701
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 819569702}
-  - component: {fileID: 819569703}
-  m_Layer: 0
-  m_Name: CardViewer
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &819569702
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 819569701}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 812873283}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &819569703
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 819569701}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 31972a52b3d0e06428ce7ba42b505eee, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CardViewer
-  cardPrefabs:
-  - {fileID: 11400000, guid: 697277dddc2cc284caca1eedb45265e5, type: 2}
-  - {fileID: 11400000, guid: 058d256b706826f4fb884797d40962c4, type: 2}
-  - {fileID: 11400000, guid: 52a9958b6f8d6f04eb37b65e2c63abaa, type: 2}
-  - {fileID: 11400000, guid: 697277dddc2cc284caca1eedb45265e5, type: 2}
-  - {fileID: 11400000, guid: 058d256b706826f4fb884797d40962c4, type: 2}
-  - {fileID: 11400000, guid: 52a9958b6f8d6f04eb37b65e2c63abaa, type: 2}
-  - {fileID: 11400000, guid: 058d256b706826f4fb884797d40962c4, type: 2}
-  - {fileID: 11400000, guid: 52a9958b6f8d6f04eb37b65e2c63abaa, type: 2}
-  - {fileID: 11400000, guid: 697277dddc2cc284caca1eedb45265e5, type: 2}
-  - {fileID: 11400000, guid: 058d256b706826f4fb884797d40962c4, type: 2}
-  - {fileID: 11400000, guid: 52a9958b6f8d6f04eb37b65e2c63abaa, type: 2}
-  - {fileID: 11400000, guid: 697277dddc2cc284caca1eedb45265e5, type: 2}
-  cardPrefab: {fileID: 7365090266981536612, guid: 4564135a2c65afe43b74b020230ec4bd, type: 3}
-  cardRoot: {fileID: 812873283}
-  cardsPerRow: 4
-  verticalSpacing: 4
-  horizontalSpacing: 3
-  scrollSpeed: 1
-  hoverScale: 1.35
-  hoverSmooth: 15
-  cardLayer:
-    serializedVersion: 2
-    m_Bits: 8
-  hoverSortingBoost: 1000
-  viewerBaseSortingOrder: 10000
-  _cam: {fileID: 0}
 --- !u!1 &820758099
 GameObject:
   m_ObjectHideFlags: 0
@@ -6634,8 +6531,6 @@ MonoBehaviour:
   _character2: {fileID: 1855899004}
   _isPlayerTurn: 1
   battleStage: {fileID: 2068168977}
-  cardViewer: {fileID: 819569703}
-  cardViewerBackdrop: {fileID: 0}
   battleRewardUI: {fileID: 2068168980}
   gameOverUI: {fileID: 2068168979}
   battleUI: {fileID: 89842795}
@@ -6708,6 +6603,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   patronSlideDelay: 0.3
+  characterSortingLayer: Character
   sortingOrder: -10
   shakeDuration: 0.3
   shakeMagnitude: 0.15
@@ -6746,6 +6642,7 @@ MonoBehaviour:
   hoverScale: 1.25
   hoverSmooth: 14
   hoverSortingBoost: 500
+  rewardSortingLayer: Card
   baseSortingOrder: 5000
   cardLayer:
     serializedVersion: 2
@@ -6753,7 +6650,7 @@ MonoBehaviour:
   titleText: {fileID: 0}
   goldRewardText: {fileID: 0}
   skipButton: {fileID: 0}
-  rewardPool: {fileID: 11400000, guid: ef724edaac614464fb616a97afa82e51, type: 2}
+  rewardPool: {fileID: 11400000, guid: 37195cd3395da774292d90a27bc04dfd, type: 2}
   cardsToOffer: 3
   goldRewardMin: 10
   goldRewardMax: 25
@@ -6762,7 +6659,6 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 389458073}
-  - {fileID: 819569702}
   - {fileID: 1688142216}
   - {fileID: 1950661066}
   - {fileID: 1117344994}

@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9f480fcffb5c93542ac5c1b34e5ba565, type: 3}
-  m_Name: CharacterData_GuildedMaiden
+  m_Name: CharacteData_NPC_Shopkeep
   m_EditorClassIdentifier: Assembly-CSharp::CharacterData
-  <baseHealth>k__BackingField: 100
-  <baseEnergy>k__BackingField: 3
-  <baseDrawSize>k__BackingField: 3
+  <baseHealth>k__BackingField: 0
+  <baseEnergy>k__BackingField: 0
+  <baseDrawSize>k__BackingField: 0
   <attackDelay>k__BackingField: 0.8
   <deck>k__BackingField: {fileID: 0}
-  <characterSprite>k__BackingField: {fileID: 21300000, guid: ac15637a4332f5f4888f5db317b6c9f4, type: 3}
-  <flipSpriteForRight>k__BackingField: 1
-  <spriteOffset>k__BackingField: {x: 1.5, y: 0, z: 0}
-  <spriteScale>k__BackingField: 1.5
-  <battleBackground>k__BackingField: {fileID: 21300000, guid: 317f2636aa2d19442ae4b7acc2bfb427, type: 3}
+  <characterSprite>k__BackingField: {fileID: 0}
+  <flipSpriteForRight>k__BackingField: 0
+  <spriteOffset>k__BackingField: {x: 0, y: 0, z: 0}
+  <spriteScale>k__BackingField: 1
+  <battleBackground>k__BackingField: {fileID: 0}
   <idleSprite>k__BackingField: {fileID: 0}
   <activeActionSprite>k__BackingField: {fileID: 0}
   <passiveActionSprite>k__BackingField: {fileID: 0}
   <damageTakenSprite>k__BackingField: {fileID: 0}
-  <poseDuration>k__BackingField: 0.5
+  <poseDuration>k__BackingField: 0.4

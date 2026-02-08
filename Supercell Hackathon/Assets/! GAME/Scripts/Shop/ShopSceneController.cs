@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,6 +14,10 @@ public class ShopSceneController : MonoBehaviour
 {
 	[SerializeField] ShopView shopView;
 	[SerializeField] ShopData shopData;
+
+	[Header("Encounter Stage")]
+	[Tooltip("Optional EncounterStage for character sprite display. Leave null to skip character display.")]
+	[SerializeField] EncounterStage encounterStage;
 
 	[Header("Standalone Test Mode")]
 	[Tooltip("Enable to test the shop scene without RunManager.")]
@@ -54,6 +59,29 @@ public class ShopSceneController : MonoBehaviour
 
 		// Initialize shop UI
 		shopView.Initialize(items);
+
+		// Set up character display (player + shopkeeper)
+		if (encounterStage != null)
+			encounterStage.Setup();
+
+		// Wire leave flow: slide characters out, then return to map
+		shopView.onLeaveShop = OnLeaveShop;
+	}
+
+	void OnLeaveShop()
+	{
+		StartCoroutine(LeaveShopRoutine());
+	}
+
+	IEnumerator LeaveShopRoutine()
+	{
+		// Slide characters off screen
+		if (encounterStage != null)
+			yield return encounterStage.SlideOut();
+
+		// Return to map
+		if (RunManager.Instance != null)
+			RunManager.Instance.OnEncounterComplete();
 	}
 
 	void HandleFallbackCamera()

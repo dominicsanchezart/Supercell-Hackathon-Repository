@@ -18,6 +18,7 @@ public class CardView : MonoBehaviour
     private Color[] originalColors;
     private static readonly Color burnTint = new Color(1f, 0.45f, 0.3f, 1f);
     private const int MASK_LEEWAY = 10;
+    private string _currentSortingLayer;
 
 
 
@@ -33,10 +34,20 @@ public class CardView : MonoBehaviour
             originalColors[i] = sprites[i].color;
         }
 
+        // Find SpriteMask from serialized field or by searching children
         if (mask != null)
         {
             spriteMask = mask.GetComponent<SpriteMask>();
             mask.SetActive(true);
+        }
+        else
+        {
+            spriteMask = GetComponentInChildren<SpriteMask>(true);
+            if (spriteMask != null)
+            {
+                mask = spriteMask.gameObject;
+                mask.SetActive(true);
+            }
         }
 
         // Default all masked sprites to visible inside mask
@@ -70,6 +81,10 @@ public class CardView : MonoBehaviour
             spriteMask.backSortingOrder = minOrder - MASK_LEEWAY;
             spriteMask.frontSortingOrder = maxOrder + MASK_LEEWAY;
             spriteMask.isCustomRangeActive = true;
+
+            // Ensure the mask stays on the same sorting layer as the sprites
+            if (!string.IsNullOrEmpty(_currentSortingLayer))
+                spriteMask.sortingLayerName = _currentSortingLayer;
         }
     }
 
@@ -79,6 +94,8 @@ public class CardView : MonoBehaviour
     /// </summary>
     public void SetSortingLayer(string layerName)
     {
+        _currentSortingLayer = layerName;
+
         for (int i = 0; i < sprites.Length; i++)
         {
             sprites[i].sortingLayerName = layerName;
@@ -86,6 +103,32 @@ public class CardView : MonoBehaviour
 
         if (canvas != null)
             canvas.sortingLayerName = layerName;
+
+        // Ensure the mask is active and on the same sorting layer
+        if (mask != null)
+        {
+            mask.SetActive(true);
+
+            if (spriteMask == null)
+                spriteMask = mask.GetComponentOrInChildren<SpriteMask>();
+
+            if (spriteMask != null)
+            {
+                spriteMask.frontSortingLayerID = SortingLayer.NameToID(layerName);
+                spriteMask.backSortingLayerID = SortingLayer.NameToID(layerName);
+            }
+                
+        }
+
+        // Re-apply mask interaction on masked sprites
+        if (masedSprites != null)
+        {
+            foreach (var sprite in masedSprites)
+            {
+                if (sprite != null)
+                    sprite.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            }
+        }
     }
 
 	public void SetMasked(bool enabled)

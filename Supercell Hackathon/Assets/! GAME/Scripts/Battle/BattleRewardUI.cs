@@ -204,7 +204,7 @@ public class BattleRewardUI : MonoBehaviour
 			if (cardView != null)
 			{
 				cardView.SetSortingLayer(rewardSortingLayer);
-				cardView.SetSortingOrder(baseSortingOrder + i);
+				cardView.SetSortingOrder(baseSortingOrder + i * 50);
 				cardView.enabled = false; // disable Hand-based interaction
 			}
 

@@ -16,6 +16,7 @@ MonoBehaviour:
   <baseEnergy>k__BackingField: 3
   <baseDrawSize>k__BackingField: 3
   <attackDelay>k__BackingField: 0.8
+  <deck>k__BackingField: {fileID: 0}
   <characterSprite>k__BackingField: {fileID: 21300000, guid: c9db427bf51fcac42b37911e5ee9041e, type: 3}
   <flipSpriteForRight>k__BackingField: 1
   <spriteOffset>k__BackingField: {x: 1.5, y: 1.5, z: 0}

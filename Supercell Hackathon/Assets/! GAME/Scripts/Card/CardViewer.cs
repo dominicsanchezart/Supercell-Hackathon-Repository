@@ -144,12 +144,14 @@ public class CardViewer : MonoBehaviour
 
             cardObj.GetComponent<Card>().SetCardData(cards[i]);
 
-            // Place cards on the Deck View sorting layer so they render above game content
+            // Place cards on the Deck View sorting layer so they render above game content.
+            // Space each card by 50 sorting orders so their per-card SpriteMask custom
+            // ranges (canvasSortingLayer=20 + MASK_LEEWAY=10) don't overlap each other.
             var cardView = cardObj.GetComponent<CardView>();
             if (cardView != null)
             {
                 cardView.SetSortingLayer(viewerSortingLayer);
-                cardView.SetSortingOrder(viewerBaseSortingOrder + i);
+                cardView.SetSortingOrder(viewerBaseSortingOrder + i * 50);
             }
 
             int row = i / cardsPerRow;

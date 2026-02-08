@@ -345,12 +345,25 @@ public class ShopView : MonoBehaviour
 		}
 	}
 
+	/// <summary>
+	/// Called when the leave button is clicked. If onLeaveShop is set, the scene
+	/// controller handles the transition (e.g. slide-out animation first). Otherwise
+	/// falls back to directly completing the encounter.
+	/// </summary>
+	public System.Action onLeaveShop;
+
 	void OnLeaveClicked()
 	{
 		if (IsBlocked) return;
 
-		if (RunManager.Instance != null)
+		if (onLeaveShop != null)
+		{
+			onLeaveShop.Invoke();
+		}
+		else if (RunManager.Instance != null)
+		{
 			RunManager.Instance.OnEncounterComplete();
+		}
 	}
 
 	private void OnDestroy()
