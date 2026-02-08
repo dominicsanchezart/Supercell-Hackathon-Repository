@@ -43,6 +43,7 @@ public class ShopCardSlot : MonoBehaviour
 	ShopItem shopItem;
 	ShopView shopView;
 	GameObject spawnedCard;
+	CardView spawnedCardView;
 
 	// Hover state
 	bool isHovered;
@@ -97,9 +98,8 @@ public class ShopCardSlot : MonoBehaviour
 			if (cardCol != null)
 				cardCol.enabled = false;
 
-			CardView cardView = spawnedCard.GetComponent<CardView>();
-			if (cardView != null)
-				cardView.enabled = false;
+			// Keep CardView alive so we can set per-slot sorting orders & masks
+			spawnedCardView = spawnedCard.GetComponent<CardView>();
 		}
 	}
 
@@ -184,6 +184,17 @@ public class ShopCardSlot : MonoBehaviour
 
 		if (slotCollider != null)
 			slotCollider.enabled = false;
+	}
+
+	/// <summary>
+	/// Assign a unique base sorting order so this card's SpriteMask only
+	/// covers its own sprites and doesn't bleed into neighbouring slots.
+	/// Called by ShopView after spawning all slots.
+	/// </summary>
+	public void SetSlotSortingOrder(int baseOrder)
+	{
+		if (spawnedCardView != null)
+			spawnedCardView.SetSortingOrder(baseOrder);
 	}
 
 	public ShopItem GetShopItem() => shopItem;

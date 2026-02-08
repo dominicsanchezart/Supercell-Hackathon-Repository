@@ -5,8 +5,8 @@ using TMPro;
 
 /// <summary>
 /// Main shop UI controller. Spawns card slots in a two-row layout:
-///   Top row:    Patron + Neutral cards (6 slots)
-///   Bottom row: Items + Card Removal  (3 slots)
+///   Top row:    3 cards (Faction / Neutral)
+///   Bottom row: 4 slots (Faction / Neutral + Card Removal)
 /// Handles buy/remove flow and the card removal deck picker.
 /// Uses the real Card.prefab for all card displays.
 ///
@@ -120,33 +120,43 @@ public class ShopView : MonoBehaviour
 		}
 
 		LayoutSlots();
+		AssignSortingOrders();
+	}
+
+	/// <summary>
+	/// Gives each slot a unique base sorting order (spaced by 100) so
+	/// each card's SpriteMask only affects its own sprites.
+	/// </summary>
+	void AssignSortingOrders()
+	{
+		for (int i = 0; i < slots.Count; i++)
+		{
+			if (slots[i] != null)
+				slots[i].SetSlotSortingOrder(i * 100);
+		}
 	}
 
 	/// <summary>
 	/// Two-row layout:
-	///   Top row:    PatronCard + NeutralCard slots
-	///   Bottom row: ItemCard + CardRemoval slots
+	///   Top row:    First 3 slots (Patron / Neutral cards)
+	///   Bottom row: Remaining slots (Items + Card Removal)
 	/// Each row is independently centered.
 	/// </summary>
 	void LayoutSlots()
 	{
 		if (slots.Count == 0) return;
 
+		const int topRowCount = 3;
+
 		List<ShopCardSlot> topRow = new();
 		List<ShopCardSlot> bottomRow = new();
 
 		for (int i = 0; i < slots.Count; i++)
 		{
-			ShopItem item = shopItems[i];
-			if (item.slotType == ShopItem.SlotType.ItemCard ||
-				item.slotType == ShopItem.SlotType.CardRemoval)
-			{
-				bottomRow.Add(slots[i]);
-			}
-			else
-			{
+			if (i < topRowCount)
 				topRow.Add(slots[i]);
-			}
+			else
+				bottomRow.Add(slots[i]);
 		}
 
 		LayoutRow(topRow, topRowY);
