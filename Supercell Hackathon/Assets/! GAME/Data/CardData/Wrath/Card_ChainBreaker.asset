@@ -18,8 +18,8 @@ MonoBehaviour:
   cardFaction2: 1
   layer0: {fileID: 21300000, guid: 139bb4bd323c182469c493889ddd8d92, type: 3}
   layer1: {fileID: 21300000, guid: 0bdc178b01331514bbd8bc36e28f623e, type: 3}
-  layer2: {fileID: 0}
-  layer3: {fileID: 0}
+  layer2: {fileID: 21300000, guid: 24a2ea7f33bd50e4a9c7de3b5f221c3a, type: 3}
+  layer3: {fileID: 21300000, guid: f705b346899f67a409a20511293d36b3, type: 3}
   baseEnergyCost: 2
   actionDescription: "Deal damage equal to the HP you've \nlost this combat.\nCard
     can only be used once per combat."

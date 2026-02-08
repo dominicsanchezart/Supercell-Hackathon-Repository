@@ -52,6 +52,41 @@ public class BattleStage : MonoBehaviour
 	[SerializeField] private float shakeDuration = 0.3f;
 	[SerializeField] private float shakeMagnitude = 0.15f;
 
+	[Header("Card Play Effect Sprites — Attack (per Faction)")]
+	[Tooltip("Attack effect for Wrath faction cards.")]
+	[SerializeField] private Sprite attackEffectWrath;
+	[Tooltip("Attack effect for Pride faction cards.")]
+	[SerializeField] private Sprite attackEffectPride;
+	[Tooltip("Attack effect for Ruin faction cards.")]
+	[SerializeField] private Sprite attackEffectRuin;
+	[Tooltip("Fallback attack effect when faction is None or unset.")]
+	[SerializeField] private Sprite attackEffectDefault;
+
+	[Header("Card Play Effect Sprites — Non-Attack (per Faction)")]
+	[Tooltip("Non-attack effect for Wrath faction cards.")]
+	[SerializeField] private Sprite nonAttackEffectWrath;
+	[Tooltip("Non-attack effect for Pride faction cards.")]
+	[SerializeField] private Sprite nonAttackEffectPride;
+	[Tooltip("Non-attack effect for Ruin faction cards.")]
+	[SerializeField] private Sprite nonAttackEffectRuin;
+	[Tooltip("Fallback non-attack effect when faction is None or unset.")]
+	[SerializeField] private Sprite nonAttackEffectDefault;
+
+	[Header("Card Effect Settings")]
+	[Tooltip("Scale multiplier for the effect sprite.")]
+	[SerializeField] private float effectScale = 1.5f;
+	[Tooltip("Multiplier applied to the pose duration to slow down the effect movement.")]
+	[SerializeField] private float effectDurationMultiplier = 3f;
+	[Tooltip("Sorting layer for the effect sprites.")]
+	[SerializeField] private string effectSortingLayer = "Character";
+	[Tooltip("Sorting order for the effect sprite (should be above characters).")]
+	[SerializeField] private int effectSortingOrder = 50;
+	[Tooltip("How far above the caster non-attack effects rise.")]
+	[SerializeField] private float nonAttackRiseHeight = 1.5f;
+	[Tooltip("How far attack effects travel toward the target (0 = stays at caster, 1 = reaches target).")]
+	[Range(0f, 1f)]
+	[SerializeField] private float attackTravelFraction = 1f;
+
 	private Vector3 _leftTarget;
 	private Vector3 _rightTarget;
 	private Vector3 _patronTarget;
@@ -433,8 +468,17 @@ public class BattleStage : MonoBehaviour
 
 	#region Sprite State Swapping
 
-	private void OnLeftCardPlayed(CardType type) => ShowActionSprite(leftSpriteRenderer, leftCharacter, type);
-	private void OnRightCardPlayed(CardType type) => ShowActionSprite(rightSpriteRenderer, rightCharacter, type);
+	private void OnLeftCardPlayed(CardData data)
+	{
+		ShowActionSprite(leftSpriteRenderer, leftCharacter, data.cardType);
+		SpawnCardEffect(true, data, leftCharacter._data != null ? leftCharacter._data.poseDuration : 0.4f);
+	}
+
+	private void OnRightCardPlayed(CardData data)
+	{
+		ShowActionSprite(rightSpriteRenderer, rightCharacter, data.cardType);
+		SpawnCardEffect(false, data, rightCharacter._data != null ? rightCharacter._data.poseDuration : 0.4f);
+	}
 
 	private void ShowActionSprite(SpriteRenderer sr, CharacterInfo info, CardType type)
 	{
@@ -446,6 +490,85 @@ public class BattleStage : MonoBehaviour
 
 		if (actionSprite != null)
 			StartCoroutine(FlashSprite(sr, info._data, actionSprite));
+	}
+
+	/// <summary>
+	/// Returns the attack effect sprite for the card's primary faction.
+	/// Falls back to the default attack sprite if nothing is assigned.
+	/// </summary>
+	private Sprite GetAttackEffectSprite(CardFaction faction)
+	{
+		Sprite s = faction switch
+		{
+			CardFaction.Wrath => attackEffectWrath,
+			CardFaction.Pride => attackEffectPride,
+			CardFaction.Ruin  => attackEffectRuin,
+			_ => null
+		};
+		return s != null ? s : attackEffectDefault;
+	}
+
+	/// <summary>
+	/// Returns the non-attack effect sprite for the card's primary faction.
+	/// Falls back to the default non-attack sprite if nothing is assigned.
+	/// </summary>
+	private Sprite GetNonAttackEffectSprite(CardFaction faction)
+	{
+		Sprite s = faction switch
+		{
+			CardFaction.Wrath => nonAttackEffectWrath,
+			CardFaction.Pride => nonAttackEffectPride,
+			CardFaction.Ruin  => nonAttackEffectRuin,
+			_ => null
+		};
+		return s != null ? s : nonAttackEffectDefault;
+	}
+
+	/// <summary>
+	/// Spawns a card play effect sprite based on faction and whether it's an attack.
+	/// Attack cards: projectile moves from caster toward target.
+	/// Non-attack cards: sprite appears near caster and rises upward.
+	/// </summary>
+	private void SpawnCardEffect(bool isLeftSide, CardData data, float duration)
+	{
+		bool isAttack = data.cardType == CardType.Attack;
+		CardFaction faction = data.cardFaction1;
+
+		Sprite effectSprite = isAttack
+			? GetAttackEffectSprite(faction)
+			: GetNonAttackEffectSprite(faction);
+
+		if (effectSprite == null) return;
+
+		Vector3 casterPos = isLeftSide ? _leftTarget : _rightTarget;
+		Vector3 targetPos = isLeftSide ? _rightTarget : _leftTarget;
+		bool flipX = !isLeftSide; // flip when coming from the right side
+
+		Vector3 start, end;
+
+		if (isAttack)
+		{
+			// Attack: move from caster toward target, limited by travel fraction
+			start = casterPos;
+			end = Vector3.Lerp(casterPos, targetPos, attackTravelFraction);
+		}
+		else
+		{
+			// Non-attack: appear at caster and rise upward
+			start = casterPos + Vector3.up * 0.5f;
+			end = casterPos + Vector3.up * (0.5f + nonAttackRiseHeight);
+		}
+
+		CardPlayEffect.Spawn(
+			effectSprite,
+			start,
+			end,
+			duration * effectDurationMultiplier,
+			flipX,
+			effectScale,
+			effectSortingLayer,
+			effectSortingOrder
+		);
 	}
 
 	private void ShowDamageSprite(SpriteRenderer sr, CharacterInfo info)

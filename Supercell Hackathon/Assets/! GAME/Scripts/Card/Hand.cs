@@ -344,8 +344,8 @@ public class Hand : MonoBehaviour
 		if (isPlayer)
 			PatronAffinityTracker.OnCardPlayed(data);
 
-		// Notify listeners which type of card was played (for sprite swaps)
-		characterInfo.NotifyCardPlayed(data.cardType);
+		// Notify listeners which card was played (for sprite swaps & effects)
+		characterInfo.NotifyCardPlayed(data);
 
 		cardsInHand.Remove(data);
 		discardPile.Add(data);
@@ -611,8 +611,8 @@ public class Hand : MonoBehaviour
         ResolveCardActions(data);
         _cardBeingPlayed = null;
 
-        // Notify listeners which type of card was played (for sprite swaps)
-        characterInfo.NotifyCardPlayed(data.cardType);
+        // Notify listeners which card was played (for sprite swaps & effects)
+        characterInfo.NotifyCardPlayed(data);
 
         // Card actions may have altered the hand — find the card by reference instead of stale index
         int removeIndex = cardsInHand.IndexOf(data);

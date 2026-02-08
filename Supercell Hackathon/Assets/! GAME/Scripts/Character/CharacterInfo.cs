@@ -30,10 +30,10 @@ public class CharacterInfo : MonoBehaviour
 	public event Action OnDamageTaken;
 
 	/// <summary>
-	/// Fired when this character plays a card. Passes the CardType so listeners
-	/// can distinguish Attack cards from others.
+	/// Fired when this character plays a card. Passes the full CardData so listeners
+	/// can read type, faction, etc.
 	/// </summary>
-	public event Action<CardType> OnCardPlayed;
+	public event Action<CardData> OnCardPlayed;
 
 	/// <summary>
 	/// Fired when this character dies. Arena subscribes to trigger win/lose flow.
@@ -84,9 +84,9 @@ public class CharacterInfo : MonoBehaviour
 		OnStatsChanged?.Invoke();
 	}
 
-	public void NotifyCardPlayed(CardType type)
+	public void NotifyCardPlayed(CardData data)
 	{
-		OnCardPlayed?.Invoke(type);
+		OnCardPlayed?.Invoke(data);
 	}
 
 	public void TakeDamage(int amount)
@@ -380,20 +380,20 @@ public class CharacterInfo : MonoBehaviour
 
 	public void ProcessEndOfTurnEffects()
 	{
-		// Poison: deal damage equal to stacks, then decay by 1
+		// Poison: deal damage equal to stacks, then clear
 		// NOTE: Poison intentionally bypasses block (direct HP damage, like Slay the Spire)
 		if (_poison > 0)
 		{
 			int poisonDamage = _poison;
 			_health = Mathf.Max(_health - poisonDamage, 0);
-			_poison = Mathf.Max(_poison - 1, 0);
-			Debug.Log($"{_data.name} takes {poisonDamage} poison damage. Poison remaining: {_poison}");
+			_poison = 0;
+			Debug.Log($"{_data.name} takes {poisonDamage} poison damage. Poison cleared.");
 
 			if (_health == 0) HandleDeath();
 		}
 
-		if (_weaken > 0)
-			_weaken = Mathf.Max(_weaken - 1, 0);
+		// Weaken resets at end of turn
+		_weaken = 0;
 
 		_empower = 0;
 
