@@ -5,8 +5,13 @@ using UnityEngine;
 /// Call OnCardPlayed() from Hand.UseCard() to track which factions the player favors.
 ///
 /// Affinity tiers:
+///   Hostile (below 0): Patron is aggressive, threatening, questions the pact.
 ///   Cold (0–9 points): Patron is dismissive and terse.
 ///   Warm (10+ points): Patron is engaged and personality-rich.
+///
+/// Playing a card from the patron's faction: +1 to patron affinity.
+/// Playing a card from a rival faction: -(energy cost) to patron affinity.
+/// Playing a factionless (None) card: no change.
 ///
 /// Affinity resets at the start of each new run (initialized in RunManager.StartNewRun).
 /// </summary>
@@ -18,28 +23,61 @@ public static class PatronAffinityTracker
 	public const int WARM_THRESHOLD = 10;
 
 	/// <summary>
-	/// Called when the player plays a card. Awards 1 affinity point per matching faction.
-	/// Dual-pact cards (both factions set) award 1 point to each.
+	/// Below this threshold the patron becomes Hostile.
+	/// </summary>
+	public const int HOSTILE_THRESHOLD = 0;
+
+	/// <summary>
+	/// Called when the player plays a card.
+	/// Matching faction: +1 affinity.
+	/// Rival faction: -(energy cost) affinity. Expensive betrayals sting more.
+	/// Neutral cards: no effect.
 	/// </summary>
 	public static void OnCardPlayed(CardData card)
 	{
 		if (RunManager.Instance == null || RunManager.Instance.State == null) return;
-		var affinity = RunManager.Instance.State.affinityPoints;
+		var state = RunManager.Instance.State;
+		var affinity = state.affinityPoints;
 		if (affinity == null) return;
 
-		if (card.cardFaction1 != CardFaction.None && affinity.ContainsKey(card.cardFaction1))
+		CardFaction patronFaction = state.patronFaction;
+		int cost = Mathf.Max(1, card.baseEnergyCost);
+
+		// Process first faction (skip factionless cards)
+		if (card.cardFaction1 != CardFaction.None)
 		{
-			affinity[card.cardFaction1]++;
-			Debug.Log($"[Affinity] +1 {card.cardFaction1} (now {affinity[card.cardFaction1]})");
+			if (card.cardFaction1 == patronFaction)
+			{
+				if (affinity.ContainsKey(patronFaction))
+				{
+					affinity[patronFaction]++;
+					Debug.Log($"[Affinity] +1 {patronFaction} (now {affinity[patronFaction]})");
+				}
+			}
+			else
+			{
+				// Rival faction — subtract points equal to energy cost
+				if (affinity.ContainsKey(patronFaction))
+				{
+					affinity[patronFaction] -= cost;
+					Debug.Log($"[Affinity] -{cost} {patronFaction} from rival {card.cardFaction1} play (now {affinity[patronFaction]})");
+				}
+			}
 		}
 
-		// Dual-pact: second faction gets a point too (only if different from first)
+		// Process second faction (dual-pact cards)
 		if (card.cardFaction2 != CardFaction.None
-			&& card.cardFaction2 != card.cardFaction1
-			&& affinity.ContainsKey(card.cardFaction2))
+			&& card.cardFaction2 != card.cardFaction1)
 		{
-			affinity[card.cardFaction2]++;
-			Debug.Log($"[Affinity] +1 {card.cardFaction2} (now {affinity[card.cardFaction2]})");
+			if (card.cardFaction2 == patronFaction)
+			{
+				if (affinity.ContainsKey(patronFaction))
+				{
+					affinity[patronFaction]++;
+					Debug.Log($"[Affinity] +1 {patronFaction} from dual-pact (now {affinity[patronFaction]})");
+				}
+			}
+			// Don't double-punish for dual-pact rival cards
 		}
 	}
 
@@ -56,11 +94,15 @@ public static class PatronAffinityTracker
 	}
 
 	/// <summary>
-	/// Returns the affinity tier ("Cold" or "Warm") for a given faction.
+	/// Returns the affinity tier for a given faction.
+	/// "Hostile" (below 0), "Cold" (0-9), "Warm" (10+)
 	/// </summary>
 	public static string GetAffinityTier(CardFaction faction)
 	{
-		return GetAffinity(faction) >= WARM_THRESHOLD ? "Warm" : "Cold";
+		int points = GetAffinity(faction);
+		if (points < HOSTILE_THRESHOLD) return "Hostile";
+		if (points >= WARM_THRESHOLD) return "Warm";
+		return "Cold";
 	}
 
 	/// <summary>
@@ -73,8 +115,7 @@ public static class PatronAffinityTracker
 	}
 
 	/// <summary>
-	/// Logs all faction affinities to the console. Call from anywhere for debugging.
-	/// Press F9 at runtime (handled by AffinityDebugHotkey MonoBehaviour) or call directly.
+	/// Logs all faction affinities to the console.
 	/// </summary>
 	public static void LogAffinityStatus()
 	{

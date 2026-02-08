@@ -239,7 +239,13 @@ public class ShopView : MonoBehaviour
 
 		// Add card to deck
 		if (pendingPurchase.card != null)
+		{
 			state.deck.Add(pendingPurchase.card);
+
+			// Notify patron about the purchase
+			if (PatronDialogueManager.Instance != null)
+				PatronDialogueManager.Instance.OnCardPurchased(pendingPurchase.card);
+		}
 
 		// Mark as sold
 		if (pendingSlot != null)

@@ -232,7 +232,13 @@ public class Hand : MonoBehaviour
 
 		// Track patron affinity from played card factions
 		if (isPlayer)
+		{
 			PatronAffinityTracker.OnCardPlayed(data);
+
+			// Notify patron if a rival card was played
+			if (PatronDialogueManager.Instance != null)
+				PatronDialogueManager.Instance.OnRivalCardPlayed(data);
+		}
 
 		// Notify listeners which type of card was played (for sprite swaps)
 		characterInfo.NotifyCardPlayed(data.cardType);

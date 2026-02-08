@@ -41,4 +41,13 @@ public class PatronDialogueData : ScriptableObject
 
 	[Header("Event Node (NeoCortex fallback)")]
 	[TextArea] public string[] eventFallbackLines;
+
+	[Header("Rival Card Played (NeoCortex fallback)")]
+	[Tooltip("Player played a card from a rival faction in combat.")]
+	[TextArea] public string[] rivalCardPlayedLines;
+
+	[Header("Card Purchased (NeoCortex fallback)")]
+	[Tooltip("Player bought a card at the shop — reaction varies by faction match.")]
+	[TextArea] public string[] rivalCardPurchasedLines;
+	[TextArea] public string[] loyalCardPurchasedLines;
 }

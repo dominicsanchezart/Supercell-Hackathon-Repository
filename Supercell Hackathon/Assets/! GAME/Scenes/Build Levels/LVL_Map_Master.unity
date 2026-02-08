@@ -131,10 +131,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Patron Dialogue Manager
       objectReference: {fileID: 0}
-    - target: {fileID: 4437476387059301490, guid: 1d2cb2f43fb3423469b2cb973a7b6b5f, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 8275028316803578989, guid: 1d2cb2f43fb3423469b2cb973a7b6b5f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -429,6 +425,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RunManager
   mapConfig: {fileID: 11400000, guid: 3d489766a86d3cd438a26e8b19b2d0f3, type: 2}
+  mainMenuSceneName: LVL_Main_Menu
   mapSceneName: LVL_Map_Master
   battleSceneName: LVL_Testing_Dominic
   shopSceneName: LVL_Shop

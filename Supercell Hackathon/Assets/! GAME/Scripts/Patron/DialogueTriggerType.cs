@@ -9,5 +9,7 @@ public enum DialogueTriggerType
 	CombatEnd,
 	RewardCardChosen,
 	BossEncounterStart,
-	EventNodeEntered
+	EventNodeEntered,
+	RivalCardPlayed,
+	CardPurchased
 }

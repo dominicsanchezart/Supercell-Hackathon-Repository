@@ -145,6 +145,10 @@ public class PatronDialogueManager : MonoBehaviour
 		_turnDamageDealt = 0;
 		_initialized = false;
 		TryInitialize();
+
+		// Reset NeoCortex session so each run gets fresh AI context
+		if (neoCortexProvider != null)
+			neoCortexProvider.CleanSessionOnNewRun();
 	}
 
 	#region Public API — Called by Arena or any scene
@@ -158,9 +162,13 @@ public class PatronDialogueManager : MonoBehaviour
 		ResetForNewCombat();
 
 		if (_activeDialogue == null) return;
-		string line = PickUnusedLine(_activeDialogue.combatStartLines);
-		if (!string.IsNullOrEmpty(line))
-			ShowLine(line);
+		string desc =
+			$"Your warlock enters combat against {enemyName}. " +
+			"They draw their opening hand " +
+			"and steel themselves for the fight.";
+		TryShowQuip(
+			_activeDialogue.combatStartLines,
+			DialogueTriggerType.CombatStart, desc);
 	}
 
 	/// <summary>
@@ -175,8 +183,13 @@ public class PatronDialogueManager : MonoBehaviour
 		if (_turnDamageDealt < 15) return;
 
 		_midCombatQuipFired = true;
-		TryShowQuip(_activeDialogue?.bigDamageLines, DialogueTriggerType.MidCombatQuip,
-			$"Player dealt {_turnDamageDealt} damage in a single turn.");
+		string dmgDesc =
+			$"Your warlock just unleashed a devastating blow, " +
+			$"dealing {_turnDamageDealt} damage in one turn. " +
+			"The enemy reels from the impact.";
+		TryShowQuip(
+			_activeDialogue?.bigDamageLines,
+			DialogueTriggerType.MidCombatQuip, dmgDesc);
 	}
 
 	/// <summary>
@@ -189,8 +202,14 @@ public class PatronDialogueManager : MonoBehaviour
 		if ((float)currentHP / maxHP >= 0.25f) return;
 
 		_midCombatQuipFired = true;
-		TryShowQuip(_activeDialogue?.lowHPLines, DialogueTriggerType.MidCombatQuip,
-			$"Player dropped to {currentHP}/{maxHP} HP (critical).");
+		string hpDesc =
+			$"Your warlock has been beaten down to " +
+			$"{currentHP}/{maxHP} HP. " +
+			"They are bleeding and barely standing. " +
+			"They might die here.";
+		TryShowQuip(
+			_activeDialogue?.lowHPLines,
+			DialogueTriggerType.MidCombatQuip, hpDesc);
 	}
 
 	/// <summary>
@@ -201,8 +220,13 @@ public class PatronDialogueManager : MonoBehaviour
 		if (_midCombatQuipFired) return;
 
 		_midCombatQuipFired = true;
-		TryShowQuip(_activeDialogue?.highStatusLines, DialogueTriggerType.MidCombatQuip,
-			$"Enemy has {stacks} stacks of {statusName}.");
+		string statusDesc =
+			$"Your warlock's enemy writhes under {stacks} " +
+			$"stacks of {statusName}. The effects compound " +
+			"and the foe is falling apart.";
+		TryShowQuip(
+			_activeDialogue?.highStatusLines,
+			DialogueTriggerType.MidCombatQuip, statusDesc);
 	}
 
 	/// <summary>
@@ -216,9 +240,22 @@ public class PatronDialogueManager : MonoBehaviour
 			? _activeDialogue.closeCallVictoryLines
 			: _activeDialogue.victoryLines;
 
-		string line = PickUnusedLine(pool);
-		if (!string.IsNullOrEmpty(line))
-			ShowLine(line);
+		string desc;
+		if (hpPercent < 0.2f)
+			desc = "Your warlock barely survived. " +
+				"They are torn open, bleeding, " +
+				"clinging to life by a thread.";
+		else if (hpPercent > 0.75f)
+			desc = "Your warlock crushed the enemy " +
+				"and still stands strong. " +
+				"Barely a scratch on them.";
+		else
+			desc = "Your warlock won the fight. " +
+				"They took some hits but the " +
+				"enemy lies dead at their feet.";
+
+		TryShowQuip(pool,
+			DialogueTriggerType.CombatEnd, desc);
 	}
 
 	/// <summary>
@@ -228,12 +265,26 @@ public class PatronDialogueManager : MonoBehaviour
 	{
 		if (_activeDialogue == null) return;
 
-		bool matchesFaction = card.cardFaction1 == _patronFaction || card.cardFaction2 == _patronFaction;
-		string[] pool = matchesFaction ? _activeDialogue.approvalLines : _activeDialogue.disapprovalLines;
+		bool matchesFaction =
+			card.cardFaction1 == _patronFaction ||
+			card.cardFaction2 == _patronFaction;
+		string[] pool = matchesFaction
+			? _activeDialogue.approvalLines
+			: _activeDialogue.disapprovalLines;
 
-		string line = PickUnusedLine(pool);
-		if (!string.IsNullOrEmpty(line))
-			ShowLine(line);
+		string cardFaction = card.cardFaction1.ToString();
+		string desc;
+		if (matchesFaction)
+			desc = $"Your warlock chose {card.cardName}, " +
+				$"a {cardFaction} contract that feeds " +
+				"your power. They honor your pact.";
+		else
+			desc = $"Your warlock chose {card.cardName}, " +
+				$"a {cardFaction} contract. That power " +
+				"belongs to a rival patron, not you.";
+
+		TryShowQuip(pool,
+			DialogueTriggerType.RewardCardChosen, desc);
 	}
 
 	/// <summary>
@@ -242,8 +293,13 @@ public class PatronDialogueManager : MonoBehaviour
 	public void OnBossEncounterStart(string bossName)
 	{
 		TryInitialize();
-		TryShowQuip(_activeDialogue?.bossStartFallbackLines, DialogueTriggerType.BossEncounterStart,
-			$"Boss encounter starting against {bossName}.");
+		string desc =
+			$"Your warlock faces {bossName}, " +
+			"the most dangerous foe they have " +
+			"encountered. This could be the end.";
+		TryShowQuip(
+			_activeDialogue?.bossStartFallbackLines,
+			DialogueTriggerType.BossEncounterStart, desc);
 	}
 
 	/// <summary>
@@ -252,8 +308,80 @@ public class PatronDialogueManager : MonoBehaviour
 	public void OnEventNodeEntered(string eventName)
 	{
 		TryInitialize();
-		TryShowQuip(_activeDialogue?.eventFallbackLines, DialogueTriggerType.EventNodeEntered,
-			$"Entered event: {eventName}.");
+		string desc =
+			$"Your warlock has stumbled into {eventName}. " +
+			"Something lurks in the shadows here. " +
+			"The outcome is uncertain.";
+		TryShowQuip(
+			_activeDialogue?.eventFallbackLines,
+			DialogueTriggerType.EventNodeEntered, desc);
+	}
+
+	/// <summary>
+	/// Called when the player plays a card from a rival faction in combat.
+	/// Only fires once per combat to avoid spam.
+	/// </summary>
+	public void OnRivalCardPlayed(CardData card)
+	{
+		if (_midCombatQuipFired) return;
+		if (_activeDialogue == null) return;
+
+		bool isRival =
+			card.cardFaction1 != CardFaction.None &&
+			card.cardFaction1 != _patronFaction;
+
+		if (!isRival) return;
+
+		_midCombatQuipFired = true;
+		string faction = card.cardFaction1.ToString();
+		string desc =
+			$"Your warlock just played {card.cardName}, " +
+			$"a {faction} contract. That power belongs " +
+			"to a rival patron. They spit on your pact.";
+		TryShowQuip(
+			_activeDialogue.rivalCardPlayedLines,
+			DialogueTriggerType.RivalCardPlayed, desc);
+	}
+
+	/// <summary>
+	/// Called when the player buys a card at the shop.
+	/// Reacts based on whether the card matches the patron's faction.
+	/// </summary>
+	public void OnCardPurchased(CardData card)
+	{
+		if (_activeDialogue == null) return;
+
+		bool matchesFaction =
+			card.cardFaction1 == _patronFaction ||
+			card.cardFaction2 == _patronFaction;
+		string faction = card.cardFaction1.ToString();
+
+		string desc;
+		string[] pool;
+		if (matchesFaction)
+		{
+			desc = $"Your warlock spent gold on {card.cardName}, " +
+				$"a {faction} contract that strengthens " +
+				"your hold over them. A wise investment.";
+			pool = _activeDialogue.loyalCardPurchasedLines;
+		}
+		else
+		{
+			bool isRival =
+				card.cardFaction1 != CardFaction.None;
+			if (isRival)
+				desc = $"Your warlock wasted gold on {card.cardName}, " +
+					$"a {faction} contract. They spent your " +
+					"tribute buying power from a rival.";
+			else
+				desc = $"Your warlock bought {card.cardName}, " +
+					"a neutral contract. Not your power, " +
+					"but not a rival's either.";
+			pool = _activeDialogue.rivalCardPurchasedLines;
+		}
+
+		TryShowQuip(pool,
+			DialogueTriggerType.CardPurchased, desc);
 	}
 
 	/// <summary>
