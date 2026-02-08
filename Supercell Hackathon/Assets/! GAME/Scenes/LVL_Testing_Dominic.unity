@@ -1100,7 +1100,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7520857870562840003, guid: 80f50f275d046b141878f46d648dc5eb, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -539.63
+      value: -541.1
       objectReference: {fileID: 0}
     - target: {fileID: 7520857870562840003, guid: 80f50f275d046b141878f46d648dc5eb, type: 3}
       propertyPath: m_LocalPosition.z
@@ -3568,8 +3568,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1574551723
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
@@ -5680,8 +5680,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1574551723
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
@@ -5840,8 +5840,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1574551723
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
@@ -5946,7 +5946,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1688142216
 Transform:
   m_ObjectHideFlags: 0
@@ -5979,13 +5979,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CardInfoPopup
   hand: {fileID: 492984036}
   popupRoot: {fileID: 1688142215}
+  energySection: {fileID: 644939515}
+  energyCostText: {fileID: 0}
+  typeSection: {fileID: 1219382680}
   cardNameText: {fileID: 0}
   cardTypeText: {fileID: 0}
-  energyCostText: {fileID: 0}
   descriptionText: {fileID: 0}
   action1Text: {fileID: 0}
   action2Text: {fileID: 0}
   action3Text: {fileID: 0}
+  statusSection: {fileID: 1574900575}
   statusEffectsText: {fileID: 0}
 --- !u!1 &1733193733
 GameObject:

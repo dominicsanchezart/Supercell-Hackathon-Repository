@@ -18,8 +18,8 @@ MonoBehaviour:
   cardFaction2: 1
   layer0: {fileID: 21300000, guid: 139bb4bd323c182469c493889ddd8d92, type: 3}
   layer1: {fileID: 21300000, guid: 0bdc178b01331514bbd8bc36e28f623e, type: 3}
-  layer2: {fileID: 0}
-  layer3: {fileID: 0}
+  layer2: {fileID: 21300000, guid: 9846eb2dc203ffe4f9d7b2036c15ae28, type: 3}
+  layer3: {fileID: 21300000, guid: b6e1d022a8fd7164792c58d2b63174be, type: 3}
   baseEnergyCost: 2
   actionDescription: 'Deal {action1Value} Damage.
 
