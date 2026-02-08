@@ -18,8 +18,8 @@ MonoBehaviour:
   cardFaction2: 3
   layer0: {fileID: 21300000, guid: 356c3948cf5658b4589a6b8da281cf18, type: 3}
   layer1: {fileID: 21300000, guid: 62458f08444dc194bbe9a507ff75998f, type: 3}
-  layer2: {fileID: 0}
-  layer3: {fileID: 0}
+  layer2: {fileID: 21300000, guid: 09e151e42e84e554da12a8821864167d, type: 3}
+  layer3: {fileID: 21300000, guid: 75a2e05e00a47f84981458fc5600394b, type: 3}
   baseEnergyCost: 1
   actionDescription: 'Apply {action1Value} Weakened.
 
