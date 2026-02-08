@@ -39,6 +39,8 @@ public class BattleStage : MonoBehaviour
 	[SerializeField] private float slideDistance = 8f;
 	[SerializeField] private float slideDuration = 0.6f;
 	[SerializeField] private AnimationCurve slideCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+	[Tooltip("Delay before the patron portrait slides in after the player/enemy.")]
+	[SerializeField] private float patronSlideDelay = 0.3f;
 
 	[Header("Scale")]
 	[SerializeField] private int sortingOrder = -10;
@@ -189,7 +191,6 @@ public class BattleStage : MonoBehaviour
 	{
 		Vector3 leftStart = _leftTarget + Vector3.left * slideDistance;
 		Vector3 rightStart = _rightTarget + Vector3.right * slideDistance;
-		Vector3 patronStart = _patronTarget + Vector3.left * slideDistance;
 
 		leftSpriteRenderer.transform.position = leftStart;
 		rightSpriteRenderer.transform.position = rightStart;
@@ -197,14 +198,9 @@ public class BattleStage : MonoBehaviour
 		leftSpriteRenderer.gameObject.SetActive(true);
 		rightSpriteRenderer.gameObject.SetActive(true);
 
-		// Only show patron portrait if it has a sprite assigned
 		bool showPatron = patronSpriteRenderer != null && patronSpriteRenderer.sprite != null;
-		if (showPatron)
-		{
-			patronSpriteRenderer.transform.position = patronStart;
-			patronSpriteRenderer.gameObject.SetActive(true);
-		}
 
+		// Slide player + enemy in first
 		float elapsed = 0f;
 		while (elapsed < slideDuration)
 		{
@@ -214,20 +210,36 @@ public class BattleStage : MonoBehaviour
 			leftSpriteRenderer.transform.position = Vector3.Lerp(leftStart, _leftTarget, t);
 			rightSpriteRenderer.transform.position = Vector3.Lerp(rightStart, _rightTarget, t);
 
-			if (showPatron)
-				patronSpriteRenderer.transform.position = Vector3.Lerp(patronStart, _patronTarget, t);
-
 			yield return null;
 		}
 
 		leftSpriteRenderer.transform.position = _leftTarget;
 		rightSpriteRenderer.transform.position = _rightTarget;
+
+		// Patron slides in AFTER the player with a delay
 		if (showPatron)
+		{
+			yield return new WaitForSeconds(patronSlideDelay);
+
+			Vector3 patronStart = _patronTarget + Vector3.left * slideDistance;
+			patronSpriteRenderer.transform.position = patronStart;
+			patronSpriteRenderer.gameObject.SetActive(true);
+
+			elapsed = 0f;
+			while (elapsed < slideDuration)
+			{
+				elapsed += Time.deltaTime;
+				float t = slideCurve.Evaluate(Mathf.Clamp01(elapsed / slideDuration));
+				patronSpriteRenderer.transform.position = Vector3.Lerp(patronStart, _patronTarget, t);
+				yield return null;
+			}
+
 			patronSpriteRenderer.transform.position = _patronTarget;
+		}
 	}
 
 	/// <summary>
-	/// Slides both characters out. Useful for scene transitions.
+	/// Slides ALL characters (player, enemy, patron) off screen.
 	/// </summary>
 	public Coroutine SlideOut()
 	{
@@ -262,6 +274,69 @@ public class BattleStage : MonoBehaviour
 
 		leftSpriteRenderer.gameObject.SetActive(false);
 		rightSpriteRenderer.gameObject.SetActive(false);
+		if (hasPatron)
+			patronSpriteRenderer.gameObject.SetActive(false);
+	}
+
+	/// <summary>
+	/// Slides only the enemy off screen. Player and patron stay visible.
+	/// Used post-victory so the patron can deliver dialogue.
+	/// </summary>
+	public Coroutine SlideOutEnemyOnly()
+	{
+		return StartCoroutine(SlideOutEnemyOnlyRoutine());
+	}
+
+	private IEnumerator SlideOutEnemyOnlyRoutine()
+	{
+		Vector3 rightEnd = _rightTarget + Vector3.right * slideDistance;
+		Vector3 rightStart = rightSpriteRenderer.transform.position;
+
+		float elapsed = 0f;
+		while (elapsed < slideDuration)
+		{
+			elapsed += Time.deltaTime;
+			float t = slideCurve.Evaluate(Mathf.Clamp01(elapsed / slideDuration));
+			rightSpriteRenderer.transform.position = Vector3.Lerp(rightStart, rightEnd, t);
+			yield return null;
+		}
+
+		rightSpriteRenderer.gameObject.SetActive(false);
+	}
+
+	/// <summary>
+	/// Slides the player and patron off screen (enemy should already be hidden).
+	/// Called after post-combat dialogue and rewards are done.
+	/// </summary>
+	public Coroutine SlideOutPlayerAndPatron()
+	{
+		return StartCoroutine(SlideOutPlayerAndPatronRoutine());
+	}
+
+	private IEnumerator SlideOutPlayerAndPatronRoutine()
+	{
+		Vector3 leftEnd = _leftTarget + Vector3.left * slideDistance;
+		Vector3 patronEnd = _patronTarget + Vector3.left * slideDistance;
+
+		Vector3 leftStart = leftSpriteRenderer.transform.position;
+		Vector3 patronStart = patronSpriteRenderer != null ? patronSpriteRenderer.transform.position : Vector3.zero;
+		bool hasPatron = patronSpriteRenderer != null && patronSpriteRenderer.gameObject.activeSelf;
+
+		float elapsed = 0f;
+		while (elapsed < slideDuration)
+		{
+			elapsed += Time.deltaTime;
+			float t = slideCurve.Evaluate(Mathf.Clamp01(elapsed / slideDuration));
+
+			leftSpriteRenderer.transform.position = Vector3.Lerp(leftStart, leftEnd, t);
+
+			if (hasPatron)
+				patronSpriteRenderer.transform.position = Vector3.Lerp(patronStart, patronEnd, t);
+
+			yield return null;
+		}
+
+		leftSpriteRenderer.gameObject.SetActive(false);
 		if (hasPatron)
 			patronSpriteRenderer.gameObject.SetActive(false);
 	}

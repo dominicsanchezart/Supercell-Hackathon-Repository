@@ -43,8 +43,8 @@ public class PatronDialogueBox : MonoBehaviour
 	[Header("Screen Positioning")]
 	[Tooltip("Viewport position (0-1). X=0 left, Y=0 bottom.")]
 	[SerializeField] private Vector2 viewportAnchor = new Vector2(0.25f, 0.22f);
-	[Tooltip("Sorting order for the box (should be high to render above game content).")]
-	[SerializeField] private int sortingOrder = 950;
+	[Tooltip("Sorting order for the box (must be higher than all game content including reward cards at 5000 and card viewer at 10000).")]
+	[SerializeField] private int sortingOrder = 30000;
 
 	// State
 	private Coroutine _activeRoutine;
@@ -52,6 +52,17 @@ public class PatronDialogueBox : MonoBehaviour
 	private bool _typewriterDone;
 	private bool _patronColorApplied;
 	private float _dismissCooldown; // Prevents accidental dismiss from card clicks
+
+	/// <summary>
+	/// Returns true if the dialogue box is currently showing (including typewriter + auto-dismiss).
+	/// </summary>
+	public bool IsShowing => _isShowing;
+
+	/// <summary>
+	/// Fired when a dialogue line finishes (either dismissed or auto-faded out).
+	/// Subscribe to know when it's safe to proceed after dialogue.
+	/// </summary>
+	public System.Action onDialogueFinished;
 
 	private void Awake()
 	{
@@ -112,7 +123,13 @@ public class PatronDialogueBox : MonoBehaviour
 
 		_isShowing = false;
 		_typewriterDone = false;
-		StartCoroutine(FadeOut());
+		StartCoroutine(DismissFadeOut());
+	}
+
+	private IEnumerator DismissFadeOut()
+	{
+		yield return FadeOut();
+		onDialogueFinished?.Invoke();
 	}
 
 	/// <summary>
@@ -151,6 +168,7 @@ public class PatronDialogueBox : MonoBehaviour
 		yield return FadeOut();
 
 		_activeRoutine = null;
+		onDialogueFinished?.Invoke();
 	}
 
 	private IEnumerator FadeIn()

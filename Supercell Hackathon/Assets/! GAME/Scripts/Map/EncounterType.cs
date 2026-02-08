@@ -4,5 +4,6 @@ public enum EncounterType
 	BattleBoss,
 	Shop,
 	Camp,
-	Event
+	Event,
+	Treasure
 }

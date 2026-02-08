@@ -15,8 +15,8 @@ public static class ShopInventory
 
 		List<ShopItem> items = new();
 
-		// 1. Patron-specific cards
-		CardData[] patronPool = shopData.GetPatronCards(runState.patronFaction);
+		// 1. Patron-specific cards (only shop-eligible)
+		CardData[] patronPool = FilterShopEligible(shopData.GetPatronCards(runState.patronFaction));
 		if (patronPool.Length > 0)
 		{
 			CardData[] picked = PickRandom(rng, patronPool, shopData.patronCardCount);
@@ -33,8 +33,8 @@ public static class ShopInventory
 			}
 		}
 
-		// 2. Neutral cards
-		CardData[] neutralPool = shopData.neutralCards;
+		// 2. Neutral cards (only shop-eligible)
+		CardData[] neutralPool = FilterShopEligible(shopData.neutralCards);
 		if (neutralPool != null && neutralPool.Length > 0)
 		{
 			CardData[] picked = PickRandom(rng, neutralPool, shopData.neutralCardCount);
@@ -51,8 +51,8 @@ public static class ShopInventory
 			}
 		}
 
-		// 3. Item cards
-		CardData[] itemPool = shopData.itemCards;
+		// 3. Item cards (only shop-eligible)
+		CardData[] itemPool = FilterShopEligible(shopData.itemCards);
 		if (itemPool != null && itemPool.Length > 0)
 		{
 			CardData[] picked = PickRandom(rng, itemPool, shopData.itemCardCount);
@@ -106,6 +106,22 @@ public static class ShopInventory
 			return data.RollPrice(rng, data.uncommonMinPrice, data.uncommonMaxPrice);
 		else
 			return data.RollPrice(rng, data.commonMinPrice, data.commonMaxPrice);
+	}
+
+	/// <summary>
+	/// Filters out cards that are not shop-eligible (e.g. enemy-only cards).
+	/// </summary>
+	static CardData[] FilterShopEligible(CardData[] pool)
+	{
+		if (pool == null || pool.Length == 0) return pool ?? new CardData[0];
+
+		List<CardData> eligible = new();
+		for (int i = 0; i < pool.Length; i++)
+		{
+			if (pool[i] != null && pool[i].shopEligible)
+				eligible.Add(pool[i]);
+		}
+		return eligible.ToArray();
 	}
 
 	static CardData[] PickRandom(System.Random rng, CardData[] pool, int count)

@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b334f2a8a31100448583efc717676dc, type: 3}
+  m_Name: EnemyData_GuildedMaiden
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyPreset
+  enemyName: Guilded Maiden
+  characterData: {fileID: 11400000, guid: 4d6ce3dd53ef08d469169eeecb33d0e8, type: 2}
+  deck: {fileID: 11400000, guid: cde4314ca403103448eaef2b830858fa, type: 2}
+  difficultyTier: 0

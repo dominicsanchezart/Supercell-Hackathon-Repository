@@ -52,6 +52,16 @@ public class PatronDialogueManager : MonoBehaviour
 	private bool _midCombatQuipFired;
 	private int _turnDamageDealt;
 
+	/// <summary>
+	/// Returns true if the dialogue box is currently showing a line.
+	/// </summary>
+	public bool IsDialogueActive => dialogueBox != null && dialogueBox.IsShowing;
+
+	/// <summary>
+	/// Access the underlying dialogue box to subscribe to onDialogueFinished events.
+	/// </summary>
+	public PatronDialogueBox DialogueBox => dialogueBox;
+
 	private void Awake()
 	{
 		if (Instance != null && Instance != this)

@@ -12,4 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86309f2b2f3bc3446aefb90b8b01852b, type: 3}
   m_Name: Deck_Wrath
   m_EditorClassIdentifier: Assembly-CSharp::Deck
-  cards: []
+  cards:
+  - {fileID: 11400000, guid: 3e7b8b5ec968f6e4f9b3359bac301263, type: 2}
+  - {fileID: 11400000, guid: 3e7b8b5ec968f6e4f9b3359bac301263, type: 2}
+  - {fileID: 11400000, guid: 3e7b8b5ec968f6e4f9b3359bac301263, type: 2}
+  - {fileID: 11400000, guid: 3e7b8b5ec968f6e4f9b3359bac301263, type: 2}
+  - {fileID: 11400000, guid: 4640fb517f7755c498f2fddaf5a1f1a4, type: 2}
+  - {fileID: 11400000, guid: 4640fb517f7755c498f2fddaf5a1f1a4, type: 2}
+  - {fileID: 11400000, guid: 4640fb517f7755c498f2fddaf5a1f1a4, type: 2}
+  - {fileID: 11400000, guid: 28ad80588e99758458c911dd21f1a466, type: 2}
+  - {fileID: 11400000, guid: 8729d32017a648145aa11a9a18d7a204, type: 2}
+  - {fileID: 11400000, guid: b492ea17e7e32ed488d10672fe333fd3, type: 2}
+  - {fileID: 11400000, guid: fe81ec38a69896c47b1b0db30ce4e177, type: 2}
+  - {fileID: 11400000, guid: cc747b855d4a6e943aad663ee2bf6e27, type: 2}

@@ -3,11 +3,13 @@ using UnityEngine;
 using TMPro;
 
 /// <summary>
-/// Displays random card rewards after an enemy is defeated.
+/// Displays random card rewards after an enemy is defeated (or from a Treasure node).
 /// Spawns Card.prefab instances directly (like CardViewer / ShopCardSlot)
 /// and uses Physics2D raycasting for hover and click — no extra prefab needed.
 ///
-/// Setup (in battle scene):
+/// Also awards gold with a configurable amount. Gold is displayed in the reward text.
+///
+/// Setup (in battle scene or treasure scene):
 ///   1. Create a child GameObject as the card root (where cards are parented)
 ///   2. Assign Card.prefab and a Deck as the reward pool
 ///   3. Optionally add a skip OptionCard and title text
@@ -40,6 +42,8 @@ public class BattleRewardUI : MonoBehaviour
 
 	[Header("Text")]
 	[SerializeField] private TextMeshProUGUI titleText;
+	[Tooltip("Optional separate text element for gold reward display. If null, gold is shown in the title.")]
+	[SerializeField] private TextMeshProUGUI goldRewardText;
 
 	[Header("Skip")]
 	[Tooltip("Optional button to skip the reward and go straight to the map.")]
@@ -51,6 +55,10 @@ public class BattleRewardUI : MonoBehaviour
 
 	[Header("Reward Count")]
 	[SerializeField] private int cardsToOffer = 3;
+
+	[Header("Gold Reward")]
+	[SerializeField] private int goldRewardMin = 10;
+	[SerializeField] private int goldRewardMax = 25;
 
 	// Runtime state
 	private readonly List<GameObject> spawnedCards = new();
@@ -88,9 +96,19 @@ public class BattleRewardUI : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Show the reward screen with random cards from the pool.
+	/// Show the reward screen with random cards from the pool and a gold reward.
 	/// </summary>
 	public void ShowRewards(System.Action<CardData> onChosen, System.Action onDone)
+	{
+		int goldAmount = Random.Range(goldRewardMin, goldRewardMax + 1);
+		ShowRewards(onChosen, onDone, goldAmount);
+	}
+
+	/// <summary>
+	/// Show the reward screen with random cards and a specific gold amount.
+	/// Use goldAmount = 0 to skip gold.
+	/// </summary>
+	public void ShowRewards(System.Action<CardData> onChosen, System.Action onDone, int goldAmount)
 	{
 		onCardChosen = onChosen;
 		onComplete = onDone;
@@ -103,8 +121,24 @@ public class BattleRewardUI : MonoBehaviour
 		if (rewardPanel != null)
 			rewardPanel.SetActive(true);
 
+		// Award gold immediately
+		if (goldAmount > 0)
+		{
+			if (RunManager.Instance != null && RunManager.Instance.State != null)
+			{
+				RunManager.Instance.State.gold += goldAmount;
+				Debug.Log($"[Rewards] Awarded {goldAmount} gold. Total: {RunManager.Instance.State.gold}");
+			}
+		}
+
+		// Display title and gold
 		if (titleText != null)
 			titleText.text = "Choose a Card Reward";
+
+		if (goldRewardText != null)
+			goldRewardText.text = goldAmount > 0 ? $"+{goldAmount} Gold" : "";
+		else if (titleText != null && goldAmount > 0)
+			titleText.text = $"Choose a Card Reward\n<size=70%>+{goldAmount} Gold</size>";
 
 		offeredCards = PickRandomCards(cardsToOffer);
 		SpawnCards(offeredCards);
@@ -115,6 +149,29 @@ public class BattleRewardUI : MonoBehaviour
 			skipButton.Setup("Skip", "Take no card");
 			skipButton.onClicked = _ => OnSkip();
 		}
+	}
+
+	/// <summary>
+	/// Standalone treasure reward — no card chosen callback needed.
+	/// Awards gold and offers card rewards.
+	/// </summary>
+	public void ShowTreasureRewards(System.Action onDone, int goldAmount = -1)
+	{
+		if (goldAmount < 0)
+			goldAmount = Random.Range(goldRewardMin, goldRewardMax + 1);
+
+		ShowRewards(
+			chosenCard =>
+			{
+				// Add card to run state deck
+				if (RunManager.Instance != null && RunManager.Instance.State != null)
+					RunManager.Instance.State.deck.Add(chosenCard);
+
+				Debug.Log($"[Treasure] Added {chosenCard.cardName} to deck.");
+			},
+			onDone,
+			goldAmount
+		);
 	}
 
 	// ─── Card Spawning & Layout ───────────────────────────────────

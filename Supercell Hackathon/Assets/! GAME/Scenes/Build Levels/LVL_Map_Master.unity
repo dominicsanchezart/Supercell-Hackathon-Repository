@@ -488,6 +488,7 @@ GameObject:
   - component: {fileID: 1445594539}
   - component: {fileID: 1445594538}
   - component: {fileID: 1445594537}
+  - component: {fileID: 1445594540}
   m_Layer: 0
   m_Name: Run Manager
   m_TagString: Untagged
@@ -513,6 +514,7 @@ MonoBehaviour:
   shopSceneName: LVL_Shop
   campSceneName: LVL_Camp
   eventSceneName: LVL_Event
+  treasureSceneName: LVL_Treasure
 --- !u!4 &1445594536
 Transform:
   m_ObjectHideFlags: 0
@@ -586,6 +588,18 @@ MonoBehaviour:
   m_FirstSelected: {fileID: 0}
   m_sendNavigationEvents: 1
   m_DragThreshold: 10
+--- !u!114 &1445594540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1445594534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3bf17c8f11fb064a9aa14ac6af835da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AffinityDebugHotkey
 --- !u!1 &1834909438
 GameObject:
   m_ObjectHideFlags: 0

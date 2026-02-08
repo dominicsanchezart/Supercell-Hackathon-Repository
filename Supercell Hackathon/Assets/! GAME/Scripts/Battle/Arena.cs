@@ -14,6 +14,8 @@ public class Arena : MonoBehaviour
 
 	[Header("Card Viewer")]
 	[SerializeField] private CardViewer cardViewer;
+	[Tooltip("Dark overlay behind the card viewer. Toggled on/off with the viewer.")]
+	[SerializeField] private GameObject cardViewerBackdrop;
 
 	[Header("Battle Result UI")]
 	[SerializeField] private BattleRewardUI battleRewardUI;
@@ -60,7 +62,17 @@ public class Arena : MonoBehaviour
 			battleStage.Setup(_character1.characterInfo, _character2.characterInfo);
 
 		if (cardViewer != null)
-			cardViewer.onHideCards += () => IsViewingCards = false;
+		{
+			cardViewer.onHideCards += () =>
+			{
+				IsViewingCards = false;
+				if (cardViewerBackdrop != null)
+					cardViewerBackdrop.SetActive(false);
+			};
+		}
+
+		if (cardViewerBackdrop != null)
+			cardViewerBackdrop.SetActive(false);
 
 		// Enable battle UI at the start of battle
 		if (battleUI != null)
@@ -484,23 +496,26 @@ public class Arena : MonoBehaviour
 		if (battleUI != null)
 			battleUI.SetActive(false);
 
-		// Slide enemies off screen
+		// Slide ONLY the enemy off screen — keep player, patron, and background visible
 		if (battleStage != null)
-			yield return battleStage.SlideOut();
+			yield return battleStage.SlideOutEnemyOnly();
 
 		// Sync HP back to the run state
 		SyncPlayerStateToRun();
 
-		// Fire combat end dialogue
+		// Fire combat end dialogue (patron stays on screen to deliver it)
 		if (patronDialogue != null)
 		{
 			float hpPercent = _character1.characterInfo._data.baseHealth > 0
 				? (float)_character1.characterInfo.GetHealth() / _character1.characterInfo._data.baseHealth
 				: 1f;
 			patronDialogue.OnCombatEnd(true, hpPercent);
+
+			// Wait for the dialogue to finish (either auto-dismiss or player click)
+			yield return WaitForDialogueToFinish();
 		}
 
-		// Show card reward UI
+		// Show card reward UI (player + patron + background still visible behind it)
 		if (battleRewardUI != null)
 		{
 			battleRewardUI.ShowRewards(
@@ -520,17 +535,59 @@ public class Arena : MonoBehaviour
 				},
 				() =>
 				{
-					// After choosing (or skipping), return to the map
-					ReturnToMap();
+					// After choosing (or skipping), slide out player + patron, then return to map
+					StartCoroutine(SlideOutAndReturnToMap());
 				}
 			);
 		}
 		else
 		{
-			// No reward UI assigned — go straight back to map
+			// No reward UI assigned — slide out and go to map
 			Debug.LogWarning("Arena: No BattleRewardUI assigned. Returning to map immediately.");
-			ReturnToMap();
+			StartCoroutine(SlideOutAndReturnToMap());
 		}
+	}
+
+	/// <summary>
+	/// Waits until the patron dialogue box is no longer showing.
+	/// If no dialogue was triggered, returns immediately.
+	/// </summary>
+	private IEnumerator WaitForDialogueToFinish()
+	{
+		// Give the dialogue a frame to start showing
+		yield return null;
+
+		// Wait while the dialogue is active
+		if (patronDialogue != null && patronDialogue.IsDialogueActive)
+		{
+			bool dialogueDone = false;
+			System.Action onFinished = () => dialogueDone = true;
+
+			if (patronDialogue.DialogueBox != null)
+				patronDialogue.DialogueBox.onDialogueFinished += onFinished;
+
+			// Wait until dialogue finishes or a safety timeout (15s max)
+			float elapsed = 0f;
+			while (!dialogueDone && elapsed < 15f)
+			{
+				elapsed += Time.deltaTime;
+				yield return null;
+			}
+
+			if (patronDialogue.DialogueBox != null)
+				patronDialogue.DialogueBox.onDialogueFinished -= onFinished;
+		}
+	}
+
+	/// <summary>
+	/// Slides the player and patron off screen, then returns to the map.
+	/// </summary>
+	private IEnumerator SlideOutAndReturnToMap()
+	{
+		if (battleStage != null)
+			yield return battleStage.SlideOutPlayerAndPatron();
+
+		ReturnToMap();
 	}
 
 	private IEnumerator HandleDefeat()
@@ -609,6 +666,8 @@ public class Arena : MonoBehaviour
 	{
 		if (cardViewer == null) return;
 		IsViewingCards = true;
+		if (cardViewerBackdrop != null)
+			cardViewerBackdrop.SetActive(true);
 		cardViewer.DisplayCards(_character1.characterInfo.GetInventory().deck.ToArray());
 	}
 
@@ -616,6 +675,8 @@ public class Arena : MonoBehaviour
 	{
 		if (cardViewer == null) return;
 		IsViewingCards = true;
+		if (cardViewerBackdrop != null)
+			cardViewerBackdrop.SetActive(true);
 		cardViewer.DisplayCards(_character1.discardPile.ToArray());
 	}
 
@@ -623,6 +684,8 @@ public class Arena : MonoBehaviour
 	{
 		if (cardViewer == null) return;
 		IsViewingCards = true;
+		if (cardViewerBackdrop != null)
+			cardViewerBackdrop.SetActive(true);
 		cardViewer.DisplayCards(_character1.exhaustPile.ToArray());
 	}
 
@@ -630,7 +693,7 @@ public class Arena : MonoBehaviour
 	{
 		if (cardViewer == null) return;
 		cardViewer.HideCards();
-		// IsViewingCards is reset by the onHideCards callback
+		// IsViewingCards and backdrop are reset by the onHideCards callback
 	}
 
 	#endregion

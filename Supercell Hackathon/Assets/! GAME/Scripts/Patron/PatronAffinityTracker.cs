@@ -71,4 +71,36 @@ public static class PatronAffinityTracker
 		if (RunManager.Instance == null || RunManager.Instance.State == null) return "Cold";
 		return GetAffinityTier(RunManager.Instance.State.patronFaction);
 	}
+
+	/// <summary>
+	/// Logs all faction affinities to the console. Call from anywhere for debugging.
+	/// Press F9 at runtime (handled by AffinityDebugHotkey MonoBehaviour) or call directly.
+	/// </summary>
+	public static void LogAffinityStatus()
+	{
+		if (RunManager.Instance == null || RunManager.Instance.State == null)
+		{
+			Debug.Log("[Affinity] No active run.");
+			return;
+		}
+
+		var state = RunManager.Instance.State;
+		string patronName = state.patronData != null ? state.patronData.name : "None";
+		CardFaction patronFaction = state.patronFaction;
+
+		string log = $"[Affinity] Patron: {patronName} ({patronFaction})\n";
+		log += $"  Active Patron Tier: {GetActivePatronTier()}\n";
+
+		if (state.affinityPoints != null)
+		{
+			foreach (var kvp in state.affinityPoints)
+			{
+				string tier = GetAffinityTier(kvp.Key);
+				string marker = kvp.Key == patronFaction ? " <-- PATRON" : "";
+				log += $"  {kvp.Key}: {kvp.Value} pts ({tier}){marker}\n";
+			}
+		}
+
+		Debug.Log(log);
+	}
 }

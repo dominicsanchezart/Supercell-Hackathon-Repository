@@ -20,5 +20,5 @@ MonoBehaviour:
   portrait: {fileID: 21300000, guid: 4ea3a37ff61917641a7e072d8ff6d664, type: 3}
   patronColor: {r: 0.8396226, g: 0.25870875, b: 0.14653791, a: 1}
   characterData: {fileID: 11400000, guid: 267a18bd39a2aa741a76a0e4e857706c, type: 2}
-  starterDeck: {fileID: 11400000, guid: ef724edaac614464fb616a97afa82e51, type: 2}
+  starterDeck: {fileID: 11400000, guid: 8868150fa298f014895004190e7dafee, type: 2}
   startingGold: 50

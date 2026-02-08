@@ -16,6 +16,7 @@ public class RunManager : MonoBehaviour
 	public string shopSceneName = "LVL_Shop";
 	public string campSceneName = "LVL_Camp";
 	public string eventSceneName = "LVL_Event";
+	public string treasureSceneName = "LVL_Treasure";
 
 	public RunState State { get; private set; }
 
@@ -103,6 +104,7 @@ public class RunManager : MonoBehaviour
 			EncounterType.Shop => shopSceneName,
 			EncounterType.Camp => campSceneName,
 			EncounterType.Event => eventSceneName,
+			EncounterType.Treasure => treasureSceneName,
 			_ => mapSceneName
 		};
 

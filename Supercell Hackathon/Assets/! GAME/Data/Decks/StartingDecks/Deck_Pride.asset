@@ -12,4 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86309f2b2f3bc3446aefb90b8b01852b, type: 3}
   m_Name: Deck_Pride
   m_EditorClassIdentifier: Assembly-CSharp::Deck
-  cards: []
+  cards:
+  - {fileID: 11400000, guid: 3e7b8b5ec968f6e4f9b3359bac301263, type: 2}
+  - {fileID: 11400000, guid: 3e7b8b5ec968f6e4f9b3359bac301263, type: 2}
+  - {fileID: 11400000, guid: 3e7b8b5ec968f6e4f9b3359bac301263, type: 2}
+  - {fileID: 11400000, guid: 3e7b8b5ec968f6e4f9b3359bac301263, type: 2}
+  - {fileID: 11400000, guid: 4640fb517f7755c498f2fddaf5a1f1a4, type: 2}
+  - {fileID: 11400000, guid: 4640fb517f7755c498f2fddaf5a1f1a4, type: 2}
+  - {fileID: 11400000, guid: 577b7a7476befbd47ab8a92b2d27a62f, type: 2}
+  - {fileID: 11400000, guid: 577b7a7476befbd47ab8a92b2d27a62f, type: 2}
+  - {fileID: 11400000, guid: e5913db07981dbd4093c7f68d563a17d, type: 2}
+  - {fileID: 11400000, guid: d4d9d8b59d564764cab6c60393567564, type: 2}
+  - {fileID: 11400000, guid: ee986a1514e98c34aba76fdf41b59fc7, type: 2}
+  - {fileID: 11400000, guid: 66c858dd9b9238042b480daf36758a4e, type: 2}

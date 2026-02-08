@@ -25,3 +25,16 @@ MonoBehaviour:
   minRowForAdvancedTypes: 4
   maxConsecutiveBattles: 3
   maxShopsPerRow: 3
+  minionPresets:
+  - {fileID: 11400000, guid: 75ac092373ffaa24088104a7d00952dd, type: 2}
+  - {fileID: 11400000, guid: c0ff4a065f2497742b500639bd8e6005, type: 2}
+  - {fileID: 11400000, guid: febe82875e32e8846863b297568f1728, type: 2}
+  - {fileID: 11400000, guid: 93ebcc0faf39db54c97fb6c7a8600e08, type: 2}
+  - {fileID: 11400000, guid: 1baa36382ffe6704884e690167d97c20, type: 2}
+  - {fileID: 11400000, guid: f385942bf989e724da0cb996f52286c2, type: 2}
+  - {fileID: 11400000, guid: 6e13549a9ca2b174c902492214759385, type: 2}
+  - {fileID: 11400000, guid: ed663158a65b7fd45ad4408e49f6052b, type: 2}
+  - {fileID: 11400000, guid: 6062d5ae2c47a5a43a1d2c5ed2c32274, type: 2}
+  - {fileID: 11400000, guid: d8bf8ccf386a62a4fb8a09af37e5046a, type: 2}
+  bossPresets:
+  - {fileID: 11400000, guid: 40f4f92490e20664d854e9e471546412, type: 2}

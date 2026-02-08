@@ -49,6 +49,12 @@ public class CardData : ScriptableObject
 	public ActionConditionData action3Condition;
 
 
+	[Header("Availability")]
+	[Tooltip("If true, this card can appear in the shop and as a reward. " +
+	         "Enemy-only cards should have this unchecked.")]
+	public bool shopEligible = true;
+
+
 	[Header("Upgrades")]
 	public bool canUpgrade;
 	public CardData upgradedCard;
