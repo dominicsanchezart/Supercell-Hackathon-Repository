@@ -41,7 +41,7 @@ MonoBehaviour:
     threshold: 1
     statusEffect: 7
     cardFaction: 0
-  actionType3: 0
+  actionType3: 8
   actionTarget3: 0
   action3Value: 0
   action3StatusEffect: 0
