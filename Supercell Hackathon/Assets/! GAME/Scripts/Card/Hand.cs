@@ -55,6 +55,10 @@ public class Hand : MonoBehaviour
     private Vector3 _dragStartWorldPos;
     private CardView _draggedCard;
 
+    // The card currently being played — excluded from random removal effects
+    // so it doesn't accidentally discard/exhaust/destroy itself mid-resolution.
+    private CardData _cardBeingPlayed;
+
     // Card collections
     public List<CardData> cardsInHand = new();
     public List<CardData> drawPile = new();
@@ -228,7 +232,9 @@ public class Hand : MonoBehaviour
 			Debug.Log($"Burned card played! {characterInfo._data.name} takes {burnDamagePerCard} burn damage.");
 		}
 
+		_cardBeingPlayed = data;
 		ResolveCardActions(data);
+		_cardBeingPlayed = null;
 
 		// Track patron affinity from played card factions
 		if (isPlayer)
@@ -346,7 +352,16 @@ public class Hand : MonoBehaviour
     {
         if (cardsInHand.Count == 0) return;
 
-        int index = Random.Range(0, cardsInHand.Count);
+        // Build a list of eligible indices, excluding the card currently being played
+        List<int> eligible = new();
+        for (int i = 0; i < cardsInHand.Count; i++)
+        {
+            if (cardsInHand[i] != _cardBeingPlayed)
+                eligible.Add(i);
+        }
+        if (eligible.Count == 0) return;
+
+        int index = eligible[Random.Range(0, eligible.Count)];
         CardData data = cardsInHand[index];
 
         cardsInHand.RemoveAt(index);
@@ -363,9 +378,25 @@ public class Hand : MonoBehaviour
 
         int index;
         if (showCardVisuals && IsValidSelection())
+        {
+            // Player selects which card to exhaust
             index = selectedIndex;
+            // Safety: don't exhaust the card being played
+            if (cardsInHand[index] == _cardBeingPlayed)
+                return;
+        }
         else
-            index = Random.Range(0, cardsInHand.Count);
+        {
+            // Pick a random card, excluding the one being played
+            List<int> eligible = new();
+            for (int i = 0; i < cardsInHand.Count; i++)
+            {
+                if (cardsInHand[i] != _cardBeingPlayed)
+                    eligible.Add(i);
+            }
+            if (eligible.Count == 0) return;
+            index = eligible[Random.Range(0, eligible.Count)];
+        }
 
         CardData data = cardsInHand[index];
         cardsInHand.RemoveAt(index);
@@ -382,7 +413,16 @@ public class Hand : MonoBehaviour
     {
         if (cardsInHand.Count == 0) return;
 
-        int index = Random.Range(0, cardsInHand.Count);
+        // Build a list of eligible indices, excluding the card currently being played
+        List<int> eligible = new();
+        for (int i = 0; i < cardsInHand.Count; i++)
+        {
+            if (cardsInHand[i] != _cardBeingPlayed)
+                eligible.Add(i);
+        }
+        if (eligible.Count == 0) return;
+
+        int index = eligible[Random.Range(0, eligible.Count)];
         CardData data = cardsInHand[index];
 
         cardsInHand.RemoveAt(index);
@@ -443,20 +483,28 @@ public class Hand : MonoBehaviour
 
         if (playable.Count == 0) return false;
 
-        int index = playable[Random.Range(0, playable.Count - 1)];
+        int index = playable[Random.Range(0, playable.Count)];
         CardData data = cardsInHand[index];
 
         // Play appropriate sound based on card type
         PlaySound(data.cardType == CardType.Attack ? playAttackCardSound : playNonAttackCardSound);
 
         characterInfo.SpendEnergy(data.baseEnergyCost);
+
+        _cardBeingPlayed = data;
         ResolveCardActions(data);
+        _cardBeingPlayed = null;
 
         // Notify listeners which type of card was played (for sprite swaps)
         characterInfo.NotifyCardPlayed(data.cardType);
 
-        cardsInHand.RemoveAt(index);
-        discardPile.Add(data);
+        // Card actions may have altered the hand — find the card by reference instead of stale index
+        int removeIndex = cardsInHand.IndexOf(data);
+        if (removeIndex >= 0)
+        {
+            cardsInHand.RemoveAt(removeIndex);
+            discardPile.Add(data);
+        }
 
         Debug.Log($"Enemy played: {data.cardName}");
         return true;

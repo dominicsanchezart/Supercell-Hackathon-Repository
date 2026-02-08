@@ -20,6 +20,10 @@ public class Arena : MonoBehaviour
 	[Tooltip("Root GameObject for all in-battle UI (HUDs, buttons, etc). Disabled when battle ends.")]
 	[SerializeField] private GameObject battleUI;
 
+	[Header("Enemy Intent")]
+	[Tooltip("UI text that shows the enemy's predicted intent for their next turn.")]
+	[SerializeField] private EnemyIntentDisplay enemyIntentDisplay;
+
 	[Header("Victory Delay")]
 	[SerializeField] private float victoryDelay = 1.0f;
 	[SerializeField] private float defeatDelay = 1.5f;
@@ -61,6 +65,10 @@ public class Arena : MonoBehaviour
 
 		if (battleStage != null)
 			battleStage.Setup(_character1.characterInfo, _character2.characterInfo);
+
+		// Bind enemy intent display to enemy hand
+		if (enemyIntentDisplay != null)
+			enemyIntentDisplay.Bind(_character2);
 
 		if (cardViewer != null)
 		{
@@ -149,6 +157,10 @@ public class Arena : MonoBehaviour
 
 		_character1.StartTurn();
 
+		// Show intent for the enemy's upcoming turn
+		if (enemyIntentDisplay != null)
+			enemyIntentDisplay.Refresh();
+
 		Debug.Log($"=== PLAYER TURN === HP: {_character1.characterInfo.GetHealth()} | Energy: {_character1.characterInfo.GetEnergy()}");
 	}
 
@@ -176,6 +188,10 @@ public class Arena : MonoBehaviour
 		if (_battleOver) return;
 
 		_isPlayerTurn = false;
+
+		// Hide enemy intent when the enemy starts acting
+		if (enemyIntentDisplay != null)
+			enemyIntentDisplay.Hide();
 
 		_character2.characterInfo.ResetBlock();
 		_character2.characterInfo.ProcessStartOfTurnEffects();

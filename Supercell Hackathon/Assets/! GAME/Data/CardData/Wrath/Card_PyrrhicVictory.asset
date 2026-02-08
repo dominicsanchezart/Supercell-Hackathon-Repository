@@ -22,7 +22,7 @@ MonoBehaviour:
   layer3: {fileID: 0}
   baseEnergyCost: 2
   actionDescription: "Deal {action1Value} Damage. Discard a card randomly.\nIf the
-    discarded card was a WRATH card, \ndeal {action2Value} additional Damage."
+    discarded card was a WRATH card, \ndeal {action3Value} additional Damage."
   actionType1: 1
   actionTarget1: 1
   action1Value: 35
