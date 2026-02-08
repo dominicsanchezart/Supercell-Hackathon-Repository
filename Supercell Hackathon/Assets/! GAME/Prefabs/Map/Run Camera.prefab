@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3956135202941464026}
   - component: {fileID: 8301647557556758632}
   - component: {fileID: 4062569778419355611}
+  - component: {fileID: 6770545600536482664}
   m_Layer: 0
   m_Name: Run Camera
   m_TagString: MainCamera
@@ -138,6 +139,20 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &6770545600536482664
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 866659676248663721}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6c4fa529c7a1a545a29ae6c0dad0f48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AspectRatioEnforcer
+  targetAspect: 1.7777778
+  barColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1001 &3340521120382615102
 PrefabInstance:
   m_ObjectHideFlags: 0
