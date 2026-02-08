@@ -84,37 +84,20 @@ public class EncounterStage : MonoBehaviour
 
 	/// <summary>
 	/// Sets up the stage using the serialized npcData and player data from RunState.
-	/// Call this from your scene controller's Start().
+	/// Waits one frame for the camera to be ready (scene may have just loaded additively).
 	/// </summary>
 	public void Setup()
 	{
-		// Get player CharacterData from the run's patron
-		CharacterData playerData = null;
-		if (RunManager.Instance != null && RunManager.Instance.State != null)
-		{
-			PatronData patron = RunManager.Instance.State.patronData;
-			if (patron != null)
-				playerData = patron.characterData;
-		}
-
-		Setup(playerData, npcData);
+		StartCoroutine(SetupDelayed(null, npcData));
 	}
 
 	/// <summary>
-	/// Sets up the stage with explicit character data. Use this overload when
+	/// Sets up the stage with explicit NPC data. Use this overload when
 	/// the NPC is determined dynamically (e.g. random event character).
 	/// </summary>
 	public void Setup(CharacterData overrideNPC)
 	{
-		CharacterData playerData = null;
-		if (RunManager.Instance != null && RunManager.Instance.State != null)
-		{
-			PatronData patron = RunManager.Instance.State.patronData;
-			if (patron != null)
-				playerData = patron.characterData;
-		}
-
-		Setup(playerData, overrideNPC);
+		StartCoroutine(SetupDelayed(null, overrideNPC));
 	}
 
 	/// <summary>
@@ -122,6 +105,27 @@ public class EncounterStage : MonoBehaviour
 	/// </summary>
 	public void Setup(CharacterData leftCharacterData, CharacterData rightCharacterData)
 	{
+		StartCoroutine(SetupDelayed(leftCharacterData, rightCharacterData));
+	}
+
+	/// <summary>
+	/// Waits one frame so the DontDestroyOnLoad camera is ready after additive scene load,
+	/// then resolves player data from RunState and initializes sprites + slide-in.
+	/// </summary>
+	private IEnumerator SetupDelayed(CharacterData leftOverride, CharacterData rightCharacterData)
+	{
+		// Wait one frame for camera to be ready (same pattern as BattleStage.Start)
+		yield return null;
+
+		// Resolve player CharacterData from RunState if not explicitly provided
+		CharacterData leftCharacterData = leftOverride;
+		if (leftCharacterData == null && RunManager.Instance != null && RunManager.Instance.State != null)
+		{
+			PatronData patron = RunManager.Instance.State.patronData;
+			if (patron != null)
+				leftCharacterData = patron.characterData;
+		}
+
 		_leftData = leftCharacterData;
 		_rightData = rightCharacterData;
 
@@ -129,7 +133,7 @@ public class EncounterStage : MonoBehaviour
 		if (cam == null)
 		{
 			Debug.LogWarning("EncounterStage: No main camera found.");
-			return;
+			yield break;
 		}
 
 		// Calculate world positions from viewport (same math as BattleStage)
@@ -162,9 +166,8 @@ public class EncounterStage : MonoBehaviour
 		if (_rightData != null)
 			UpdateBackground(_rightData);
 
-		// Start off-screen and slide in
-		StopAllCoroutines();
-		StartCoroutine(SlideIn());
+		// Slide in
+		yield return StartCoroutine(SlideIn());
 	}
 
 	private void SetupSprite(SpriteRenderer sr, CharacterData data, bool isRightSide)

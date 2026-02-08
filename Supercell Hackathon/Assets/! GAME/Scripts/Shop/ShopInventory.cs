@@ -34,7 +34,7 @@ public static class ShopInventory
 		}
 
 		// 2. Neutral cards (only shop-eligible)
-		CardData[] neutralPool = FilterShopEligible(shopData.neutralCards);
+		CardData[] neutralPool = FilterShopEligible(shopData.GetNeutralCards());
 		if (neutralPool != null && neutralPool.Length > 0)
 		{
 			CardData[] picked = PickRandom(rng, neutralPool, shopData.neutralCardCount);
@@ -52,7 +52,7 @@ public static class ShopInventory
 		}
 
 		// 3. Item cards (only shop-eligible)
-		CardData[] itemPool = FilterShopEligible(shopData.itemCards);
+		CardData[] itemPool = FilterShopEligible(shopData.GetItemCards());
 		if (itemPool != null && itemPool.Length > 0)
 		{
 			CardData[] picked = PickRandom(rng, itemPool, shopData.itemCardCount);
