@@ -884,9 +884,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 909354073}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e9442999a59a3f4e9cdbad5dc9e61d6, type: 3}
+  m_Script: {fileID: 11500000, guid: f45feb94e86de3f4081b13b5617bcef5, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DontDestroy
+  m_EditorClassIdentifier: Assembly-CSharp::MusicPlayer
+  startingTrack: {fileID: 8300000, guid: 13a84bc230fbef54b9a05a297be81e28, type: 3}
+  volume: 0.1
+  crossfadeDuration: 0
 --- !u!1 &1073567086
 GameObject:
   m_ObjectHideFlags: 0

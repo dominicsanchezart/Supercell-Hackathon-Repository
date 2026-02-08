@@ -56,7 +56,6 @@ public class GameOverUI : MonoBehaviour
 
 	private void OnMainMenuClicked()
 	{
-		Debug.Log("Returning to main menu (placeholder).");
 		onMainMenuPressed?.Invoke();
 	}
 
