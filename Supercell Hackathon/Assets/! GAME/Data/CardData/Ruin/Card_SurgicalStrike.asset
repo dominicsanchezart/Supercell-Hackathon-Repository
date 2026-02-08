@@ -18,8 +18,8 @@ MonoBehaviour:
   cardFaction2: 3
   layer0: {fileID: 21300000, guid: 356c3948cf5658b4589a6b8da281cf18, type: 3}
   layer1: {fileID: 21300000, guid: 62458f08444dc194bbe9a507ff75998f, type: 3}
-  layer2: {fileID: 0}
-  layer3: {fileID: 0}
+  layer2: {fileID: 21300000, guid: 4a1b787d803c29646ac02d8679e18e45, type: 3}
+  layer3: {fileID: 21300000, guid: cd57034059233d646996ae51d227dba6, type: 3}
   baseEnergyCost: 2
   actionDescription: "Deal {action1Value} Damage.\nIf an enemy has Weakened, deal
     15 \nadditional Damage."

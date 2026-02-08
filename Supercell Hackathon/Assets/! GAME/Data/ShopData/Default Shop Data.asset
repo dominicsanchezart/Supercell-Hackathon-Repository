@@ -15,7 +15,7 @@ MonoBehaviour:
   wrathDeck: {fileID: 11400000, guid: b74ea9cbc3a61e948a5a570db34840b5, type: 2}
   prideDeck: {fileID: 11400000, guid: 57b2c6239cac68b47974ab9c65d2f8d3, type: 2}
   ruinDeck: {fileID: 11400000, guid: 996b6b5dbd654744397df65b8f9bbdbc, type: 2}
-  neutralDeck: {fileID: 0}
+  neutralDeck: {fileID: 11400000, guid: 06dbb093b7f1ab84fb23107fbd150370, type: 2}
   itemDeck: {fileID: 0}
   patronCardCount: 4
   neutralCardCount: 2

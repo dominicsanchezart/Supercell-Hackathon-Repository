@@ -37,6 +37,8 @@ public class BattleStage : MonoBehaviour
 
 	[Header("Slide Animation")]
 	[SerializeField] private float slideDistance = 8f;
+	[SerializeField] private float enemySlideOutDistance = 14f;
+	[SerializeField] private float playerSlideOutDistance = 14f;
 	[SerializeField] private float slideDuration = 0.6f;
 	[SerializeField] private AnimationCurve slideCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 	[Tooltip("Delay before the patron portrait slides in after the player/enemy.")]
@@ -162,6 +164,7 @@ public class BattleStage : MonoBehaviour
 		if (enemyData.battleBackground != null)
 		{
 			backgroundRenderer.sprite = enemyData.battleBackground;
+			backgroundRenderer.color = new Color(0.5f, 0.5f, 0.5f, 1f);
 			backgroundRenderer.gameObject.SetActive(true);
 		}
 	}
@@ -292,7 +295,7 @@ public class BattleStage : MonoBehaviour
 
 	private IEnumerator SlideOutEnemyOnlyRoutine()
 	{
-		Vector3 rightEnd = _rightTarget + Vector3.right * slideDistance;
+		Vector3 rightEnd = _rightTarget + Vector3.right * enemySlideOutDistance;
 		Vector3 rightStart = rightSpriteRenderer.transform.position;
 
 		float elapsed = 0f;
@@ -318,8 +321,8 @@ public class BattleStage : MonoBehaviour
 
 	private IEnumerator SlideOutPlayerAndPatronRoutine()
 	{
-		Vector3 leftEnd = _leftTarget + Vector3.left * slideDistance;
-		Vector3 patronEnd = _patronTarget + Vector3.left * slideDistance;
+		Vector3 leftEnd = _leftTarget + Vector3.left * playerSlideOutDistance;
+		Vector3 patronEnd = _patronTarget + Vector3.left * playerSlideOutDistance;
 
 		Vector3 leftStart = leftSpriteRenderer.transform.position;
 		Vector3 patronStart = patronSpriteRenderer != null ? patronSpriteRenderer.transform.position : Vector3.zero;
