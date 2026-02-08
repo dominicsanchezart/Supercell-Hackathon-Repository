@@ -15,16 +15,16 @@ MonoBehaviour:
   totalRows: 14
   columns: 6
   pathCount: 6
-  battleMinionWeight: 70
+  battleMinionWeight: 75
   eliteWeight: 0
-  eventWeight: 5
+  eventWeight: 0
   campWeight: 10
-  shopWeight: 100
+  shopWeight: 15
   guaranteedCampRows: 06000000
   campRowsBeforeBoss: 1
   minRowForAdvancedTypes: 4
-  maxConsecutiveBattles: 3
-  maxShopsPerRow: 3
+  maxConsecutiveBattles: 5
+  maxShopsPerRow: 5
   minionPresets:
   - {fileID: 11400000, guid: 75ac092373ffaa24088104a7d00952dd, type: 2}
   - {fileID: 11400000, guid: c0ff4a065f2497742b500639bd8e6005, type: 2}

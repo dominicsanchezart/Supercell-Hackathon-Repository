@@ -243,6 +243,13 @@ public class RunManager : MonoBehaviour
 					"Your warlock has stumbled into a strange encounter. " +
 					"Something lurks in the shadows here. The outcome is uncertain.");
 				break;
+
+			case EncounterType.Treasure:
+				PatronDialogueManager.Instance.PrefetchLine(
+					DialogueTriggerType.EventNodeEntered,
+					"Your warlock has discovered a hidden treasure cache. " +
+					"Gold glimmers and mysterious cards await.");
+				break;
 		}
 	}
 

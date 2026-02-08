@@ -19,6 +19,7 @@ public class MapConfig : ScriptableObject
 	public float eventWeight = 22f;
 	public float campWeight = 12f;
 	public float shopWeight = 10f;
+	public float treasureWeight = 5f;
 
 	[Header("Floor Rules")]
 	[Tooltip("Rows where encounter type is forced to Camp (e.g. mid-run rest)")]

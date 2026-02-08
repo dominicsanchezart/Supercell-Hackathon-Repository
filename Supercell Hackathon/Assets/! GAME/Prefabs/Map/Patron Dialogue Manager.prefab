@@ -607,9 +607,9 @@ MonoBehaviour:
   boxBorderFrame: {fileID: 7240092651981154827}
   dialogueText: {fileID: 5297147994549076115}
   charDelay: 0.03
-  fontSizeShort: 4
-  fontSizeMedium: 3
-  fontSizeLong: 2
+  fontSizeShort: 3
+  fontSizeMedium: 2
+  fontSizeLong: 1
   autoDismissTime: 3.5
   fadeSpeed: 5
   usePatronColor: 1

@@ -47,15 +47,24 @@ public class PatronSelectController : MonoBehaviour
 
 	void Start()
 	{
-		// Set up each slot with patron data
-		for (int i = 0; i < patronSlots.Length && i < patrons.Length; i++)
+		// Set up each slot — real patrons get wired, extras show as locked
+		for (int i = 0; i < patronSlots.Length; i++)
 		{
-			patronSlots[i].Setup(patrons[i], i, OnSlotSelected);
+			if (i < patrons.Length && patrons[i] != null)
+				patronSlots[i].Setup(patrons[i], i, OnSlotSelected);
+			else
+				patronSlots[i].SetupLocked(i);
 		}
 
-		// Auto-select the first patron
-		if (patrons.Length > 0)
-			SelectPatron(0);
+		// Auto-select the first available patron
+		for (int i = 0; i < patrons.Length; i++)
+		{
+			if (patrons[i] != null)
+			{
+				SelectPatron(i);
+				break;
+			}
+		}
 	}
 
 	void Update()
@@ -87,6 +96,7 @@ public class PatronSelectController : MonoBehaviour
 	private void SelectPatron(int index)
 	{
 		if (index < 0 || index >= patrons.Length) return;
+		if (patrons[index] == null) return; // Locked slot
 		if (index == _selectedIndex) return;
 
 		_selectedIndex = index;

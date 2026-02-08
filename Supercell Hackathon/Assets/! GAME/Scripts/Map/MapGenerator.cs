@@ -376,8 +376,9 @@ public static class MapGenerator
 		float campW = isEarlyFloor ? 0f : config.campWeight;
 		float shopW = (isEarlyFloor || !shopAllowed) ? 0f : config.shopWeight;
 		float eliteW = isEarlyFloor ? 0f : config.eliteWeight;
+		float treasureW = isEarlyFloor ? 0f : config.treasureWeight;
 
-		float total = battleW + eventW + campW + shopW + eliteW;
+		float total = battleW + eventW + campW + shopW + eliteW + treasureW;
 		float roll = (float)(rng.NextDouble() * total);
 
 		roll -= battleW;
@@ -391,6 +392,9 @@ public static class MapGenerator
 
 		roll -= shopW;
 		if (roll <= 0) return EncounterType.Shop;
+
+		roll -= treasureW;
+		if (roll <= 0) return EncounterType.Treasure;
 
 		roll -= eliteW;
 		if (roll <= 0) return EncounterType.BattleMinion; // elite mapped to BattleMinion for now (no Elite enum)
@@ -586,6 +590,7 @@ public static class MapGenerator
 		{
 			options.Add(EncounterType.Camp);
 			options.Add(EncounterType.Shop);
+			options.Add(EncounterType.Treasure);
 		}
 
 		// Remove the type we want to avoid

@@ -46,6 +46,8 @@ public class PatronData : ScriptableObject
 	public Color patronColor = Color.white;
 	[Tooltip("9-sliced border frame sprite for this patron's dialogue box.")]
 	public Sprite dialogueFrameSprite;
+	[Tooltip("Background art for this pact (used in patron select slot, masked inside frame).")]
+	public Sprite pactBackground;
 	[Tooltip("Short gameplay keywords shown on patron select (e.g. 'Damage - Fury - Burn').")]
 	public string selectKeywords;
 

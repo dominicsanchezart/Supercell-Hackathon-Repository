@@ -9,6 +9,7 @@ public class MapIconSet : ScriptableObject
 	public Sprite shopIcon;
 	public Sprite campIcon;
 	public Sprite eventIcon;
+	public Sprite treasureIcon;
 
 	[Header("Node Background")]
 	public Sprite nodeBackground;
@@ -22,6 +23,7 @@ public class MapIconSet : ScriptableObject
 			EncounterType.Shop => shopIcon,
 			EncounterType.Camp => campIcon,
 			EncounterType.Event => eventIcon,
+			EncounterType.Treasure => treasureIcon,
 			_ => null
 		};
 	}
