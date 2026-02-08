@@ -59,6 +59,23 @@ public class CharacterInfo : MonoBehaviour
 	{
 		_health = _data.baseHealth;
 		_energy = _data.baseEnergy;
+
+		// Assign the deck to the inventory using the appropriate source
+		if (_inventory != null)
+		{
+			// Player: prefer the run state deck, then CharacterData deck
+			if (_isPlayer && RunManager.Instance != null && RunManager.Instance.State != null
+				&& RunManager.Instance.State.deck.Count > 0)
+			{
+				_inventory.AssignDeck(RunManager.Instance.State.deck);
+			}
+			// Both player and enemy: fall back to CharacterData deck
+			else if (_data.deck != null && _data.deck.cards != null && _data.deck.cards.Count > 0)
+			{
+				_inventory.AssignDeck(_data.deck.cards);
+			}
+		}
+
 		NotifyStatsChanged();
 	}
 
