@@ -23,6 +23,8 @@ MonoBehaviour:
     - 2bb7d7fd3edd2334baa8b7b3e03a3c70
     - 32e1ef9c6b409c64792c378252c1211b
     - 4603c7981f943024dabb4d040c418ede
+    - d396eb3f77ae5d340848fcaceef9cb19
+    - 8b804785e1f3f314da055f2ce141257d
     values:
     - iconNameOrGuid: 
       colorIndex: 1
@@ -57,6 +59,14 @@ MonoBehaviour:
       isIconRecursive: 0
       isColorRecursive: 0
     - iconNameOrGuid: Mesh Icon
+      colorIndex: 0
+      isIconRecursive: 0
+      isColorRecursive: 0
+    - iconNameOrGuid: AudioSource Icon
+      colorIndex: 0
+      isIconRecursive: 0
+      isColorRecursive: 0
+    - iconNameOrGuid: AudioEchoFilter Icon
       colorIndex: 0
       isIconRecursive: 0
       isColorRecursive: 0
