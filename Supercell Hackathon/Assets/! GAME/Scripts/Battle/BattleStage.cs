@@ -117,6 +117,10 @@ public class BattleStage : MonoBehaviour
 		SetupSprite(leftSpriteRenderer, leftCharacter._data, false);
 		SetupSprite(rightSpriteRenderer, rightCharacter._data, true);
 
+		// Apply per-character offset
+		_leftTarget += leftCharacter._data.spriteOffset;
+		_rightTarget += rightCharacter._data.spriteOffset;
+
 		// Set up patron portrait from RunState
 		SetupPatronPortrait();
 
@@ -134,6 +138,10 @@ public class BattleStage : MonoBehaviour
 			sr.sprite = data.characterSprite;
 
 		sr.sortingOrder = sortingOrder;
+
+		// Apply per-character scale
+		float scale = Mathf.Approximately(data.spriteScale, 0f) ? 1f : data.spriteScale;
+		sr.transform.localScale = Vector3.one * scale;
 
 		// Flip the right-side character so they face left (toward the player)
 		bool shouldFlip = isRightSide;

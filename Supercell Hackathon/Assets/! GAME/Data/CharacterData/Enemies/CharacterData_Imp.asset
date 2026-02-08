@@ -18,7 +18,9 @@ MonoBehaviour:
   <attackDelay>k__BackingField: 0.8
   <characterSprite>k__BackingField: {fileID: 21300000, guid: c9db427bf51fcac42b37911e5ee9041e, type: 3}
   <flipSpriteForRight>k__BackingField: 1
-  <battleBackground>k__BackingField: {fileID: 0}
+  <spriteOffset>k__BackingField: {x: 1.5, y: 1.5, z: 0}
+  <spriteScale>k__BackingField: 1.5
+  <battleBackground>k__BackingField: {fileID: 21300000, guid: d9b3a0ce2302a12449c36a8dd133aac8, type: 3}
   <idleSprite>k__BackingField: {fileID: 0}
   <activeActionSprite>k__BackingField: {fileID: 0}
   <passiveActionSprite>k__BackingField: {fileID: 0}
