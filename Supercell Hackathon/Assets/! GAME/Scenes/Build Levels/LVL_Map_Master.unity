@@ -370,7 +370,7 @@ MonoBehaviour:
   mapConfig: {fileID: 11400000, guid: 3d489766a86d3cd438a26e8b19b2d0f3, type: 2}
   mainMenuSceneName: LVL_Main_Menu
   mapSceneName: LVL_Map_Master
-  battleSceneName: LVL_Testing_Dominic
+  battleSceneName: LVL_Battle
   shopSceneName: LVL_Shop
   campSceneName: LVL_Camp
   eventSceneName: LVL_Event
