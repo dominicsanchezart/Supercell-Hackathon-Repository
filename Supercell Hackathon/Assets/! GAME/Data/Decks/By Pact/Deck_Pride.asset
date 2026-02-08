@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86309f2b2f3bc3446aefb90b8b01852b, type: 3}
+  m_Name: Deck_Pride
+  m_EditorClassIdentifier: Assembly-CSharp::Deck
+  cards:
+  - {fileID: 11400000, guid: d4d9d8b59d564764cab6c60393567564, type: 2}
+  - {fileID: 11400000, guid: ee986a1514e98c34aba76fdf41b59fc7, type: 2}
+  - {fileID: 11400000, guid: 75e7a13d29fedbf41a2d2deb9881b6d0, type: 2}
+  - {fileID: 11400000, guid: 105cff6a1b2a8af40a96d46f4adc43c2, type: 2}
+  - {fileID: 11400000, guid: e5913db07981dbd4093c7f68d563a17d, type: 2}
+  - {fileID: 11400000, guid: db6c4ef1c17e7d348a23d2bb492da9a1, type: 2}
+  - {fileID: 11400000, guid: 577b7a7476befbd47ab8a92b2d27a62f, type: 2}
+  - {fileID: 11400000, guid: 22d140ed6664eab408cb26d80e657bea, type: 2}
+  - {fileID: 11400000, guid: dec639a54469dbc4e86ee0efe8e05d50, type: 2}
+  - {fileID: 11400000, guid: 7a0a3dd43ecb1fa4da41e3736101041d, type: 2}
+  - {fileID: 11400000, guid: 8fbc956c24d67094bbf169e9eabff9c4, type: 2}
+  - {fileID: 11400000, guid: af2be06816b4ed44280a30f3fc881b89, type: 2}
+  - {fileID: 11400000, guid: bc198bce55c4dce45bde4fd072931fdb, type: 2}

@@ -19,7 +19,7 @@ MonoBehaviour:
   eliteWeight: 0
   eventWeight: 5
   campWeight: 10
-  shopWeight: 15
+  shopWeight: 100
   guaranteedCampRows: 06000000
   campRowsBeforeBoss: 1
   minRowForAdvancedTypes: 4

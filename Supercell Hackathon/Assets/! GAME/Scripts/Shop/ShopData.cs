@@ -1,17 +1,18 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "New Shop Data", menuName = "Scriptable Objects/Shop Data")]
 public class ShopData : ScriptableObject
 {
-	[Header("Card Pools (assign all available cards here)")]
-	[Tooltip("All patron-specific cards that can appear in shops")]
-	public CardData[] wrathCards;
-	public CardData[] prideCards;
-	public CardData[] ruinCards;
+	[Header("Card Pools (Deck SOs — drag Deck assets here)")]
+	[Tooltip("Patron-specific card pools")]
+	public Deck wrathDeck;
+	public Deck prideDeck;
+	public Deck ruinDeck;
 	[Tooltip("Neutral cards available to all patrons")]
-	public CardData[] neutralCards;
+	public Deck neutralDeck;
 	[Tooltip("Item cards")]
-	public CardData[] itemCards;
+	public Deck itemDeck;
 
 	[Header("Shop Layout")]
 	[Tooltip("Number of patron-specific cards offered")]
@@ -52,14 +53,43 @@ public class ShopData : ScriptableObject
 		return min + rng.Next(max - min + 1);
 	}
 
+	/// <summary>
+	/// Returns the card list for the given patron faction from the corresponding Deck SO.
+	/// </summary>
 	public CardData[] GetPatronCards(CardFaction faction)
 	{
-		return faction switch
+		Deck deck = faction switch
 		{
-			CardFaction.Wrath => wrathCards ?? new CardData[0],
-			CardFaction.Pride => prideCards ?? new CardData[0],
-			CardFaction.Ruin => ruinCards ?? new CardData[0],
-			_ => neutralCards ?? new CardData[0]
+			CardFaction.Wrath => wrathDeck,
+			CardFaction.Pride => prideDeck,
+			CardFaction.Ruin => ruinDeck,
+			_ => neutralDeck
 		};
+
+		return GetCardsFromDeck(deck);
+	}
+
+	/// <summary>
+	/// Returns the neutral card pool.
+	/// </summary>
+	public CardData[] GetNeutralCards()
+	{
+		return GetCardsFromDeck(neutralDeck);
+	}
+
+	/// <summary>
+	/// Returns the item card pool.
+	/// </summary>
+	public CardData[] GetItemCards()
+	{
+		return GetCardsFromDeck(itemDeck);
+	}
+
+	private CardData[] GetCardsFromDeck(Deck deck)
+	{
+		if (deck == null || deck.cards == null || deck.cards.Count == 0)
+			return new CardData[0];
+
+		return deck.cards.ToArray();
 	}
 }

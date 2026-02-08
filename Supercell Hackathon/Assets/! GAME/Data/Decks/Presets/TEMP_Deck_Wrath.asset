@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TEMP_Deck_Wrath
   m_EditorClassIdentifier: Assembly-CSharp::Deck
   cards:
-  - {fileID: 11400000, guid: 697277dddc2cc284caca1eedb45265e5, type: 2}
+  - {fileID: 11400000, guid: acbac9c795bed09478ce406cc99dab70, type: 2}
   - {fileID: 11400000, guid: 058d256b706826f4fb884797d40962c4, type: 2}
   - {fileID: 11400000, guid: 52a9958b6f8d6f04eb37b65e2c63abaa, type: 2}
   - {fileID: 11400000, guid: 697277dddc2cc284caca1eedb45265e5, type: 2}
