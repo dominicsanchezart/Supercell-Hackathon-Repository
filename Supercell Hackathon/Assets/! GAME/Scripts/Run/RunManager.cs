@@ -11,6 +11,7 @@ public class RunManager : MonoBehaviour
 	public MapConfig mapConfig;
 
 	[Header("Scene Names")]
+	public string mainMenuSceneName = "LVL_Main_Menu";
 	public string mapSceneName = "LVL_Map_Master";
 	public string battleSceneName = "LVL_Battle";
 	public string shopSceneName = "LVL_Shop";
@@ -211,15 +212,14 @@ public class RunManager : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Ends the current run (e.g. player died). Placeholder: returns to main menu.
+	/// Ends the current run (e.g. player died). Resets state and returns to main menu.
 	/// </summary>
 	public void EndRun()
 	{
-		Debug.Log("Run ended. Returning to main menu (placeholder).");
+		Debug.Log("Run ended. Returning to main menu.");
 		State = null;
 
-		// TODO: Replace with actual main menu scene name once it exists.
-		// For now, reload the map scene as a placeholder.
-		SceneManager.LoadScene(mapSceneName);
+		SceneManager.LoadScene(mainMenuSceneName);
+		Destroy(gameObject);
 	}
 }

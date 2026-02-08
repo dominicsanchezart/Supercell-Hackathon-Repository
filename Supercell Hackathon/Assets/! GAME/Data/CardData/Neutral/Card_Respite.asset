@@ -18,8 +18,8 @@ MonoBehaviour:
   cardFaction2: 0
   layer0: {fileID: 21300000, guid: d129bb1f4d089aa43928f7bcd4825ad2, type: 3}
   layer1: {fileID: 21300000, guid: 13d84d3810cdf8147b2cbfa09cd73d5a, type: 3}
-  layer2: {fileID: 0}
-  layer3: {fileID: 0}
+  layer2: {fileID: 21300000, guid: 78bd2b2e631d33f49974523428f2cfc5, type: 3}
+  layer3: {fileID: 21300000, guid: f0dc4454053bd2f4990601ba5183c589, type: 3}
   baseEnergyCost: 1
   actionDescription: Draw {action1Value} card(s).
   actionType1: 6

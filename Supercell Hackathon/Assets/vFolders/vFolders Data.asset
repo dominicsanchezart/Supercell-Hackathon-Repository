@@ -25,6 +25,7 @@ MonoBehaviour:
     - 4603c7981f943024dabb4d040c418ede
     - d396eb3f77ae5d340848fcaceef9cb19
     - 8b804785e1f3f314da055f2ce141257d
+    - cce0b753b981d8743b91e9dbaa706e44
     values:
     - iconNameOrGuid: 
       colorIndex: 1
@@ -70,10 +71,15 @@ MonoBehaviour:
       colorIndex: 0
       isIconRecursive: 0
       isColorRecursive: 0
+    - iconNameOrGuid: AudioClip Icon
+      colorIndex: 0
+      isIconRecursive: 0
+      isColorRecursive: 0
   bookmarks:
   - guid: d4b65ad6a45ba9345b4e9d6cea067e74
   - guid: d542deb494be469458218f4e723d8a7c
   - guid: 3259387da6f637b4099531e3839e780f
   - guid: 6ac0f82b2727bd94d9bd635650decfef
   - guid: 3dc2cec363e5cd641a49bff5892e200c
+  - guid: d396eb3f77ae5d340848fcaceef9cb19
   - guid: 2bb7d7fd3edd2334baa8b7b3e03a3c70

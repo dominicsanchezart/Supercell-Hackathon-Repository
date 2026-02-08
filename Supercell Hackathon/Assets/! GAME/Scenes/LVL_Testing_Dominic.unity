@@ -4756,7 +4756,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 2464
+  m_SortingOrder: 32767
   m_TargetDisplay: 0
 --- !u!1 &1117344991
 GameObject:
@@ -6619,7 +6619,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22555ad55d99e744594de5169039a6f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameOverUI
-  gameOverPanel: {fileID: 1103962674}
+  gameOverPanel: {fileID: 1733193733}
   titleText: {fileID: 781054898}
   subtitleText: {fileID: 1412167029}
   mainMenuButton: {fileID: 157444795}
