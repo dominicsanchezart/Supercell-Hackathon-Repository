@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 86309f2b2f3bc3446aefb90b8b01852b, type: 3}
-  m_Name: Deck_Wrath
+  m_Name: TEMP_Deck_Wrath
   m_EditorClassIdentifier: Assembly-CSharp::Deck
   cards:
   - {fileID: 11400000, guid: 697277dddc2cc284caca1eedb45265e5, type: 2}

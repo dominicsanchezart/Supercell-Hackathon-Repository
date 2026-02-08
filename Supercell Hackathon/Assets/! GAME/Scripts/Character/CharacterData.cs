@@ -11,6 +11,8 @@ public class CharacterData : ScriptableObject
 	[field: Header("Battle Settings")]
 	[field: Tooltip("Delay in seconds between each action this character takes. Used by enemy AI.")]
 	[field: SerializeField] public float attackDelay { get; private set; } = 0.8f;
+	[field: Tooltip("Default deck used by this character in battle. Leave null to use the Inventory's test deck instead.")]
+	[field: SerializeField] public Deck deck { get; private set; }
 
 	[field: Header("Visuals")]
 	[field: SerializeField] public Sprite characterSprite { get; private set; }
