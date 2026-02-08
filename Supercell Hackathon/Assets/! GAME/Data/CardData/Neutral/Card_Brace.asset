@@ -24,7 +24,7 @@ MonoBehaviour:
   actionDescription: Gain {action1Value} guard.
   actionType1: 4
   actionTarget1: 0
-  action1Value: 15
+  action1Value: 16
   action1StatusEffect: 0
   action1Condition:
     condition: 0

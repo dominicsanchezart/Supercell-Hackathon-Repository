@@ -552,8 +552,16 @@ public class Arena : MonoBehaviour
 			yield return WaitForDialogueToFinish();
 		}
 
+		// Check if this was a boss fight — if so, go to victory screen instead of rewards
+		bool isBoss = RunManager.Instance != null && RunManager.Instance.IsCurrentEncounterBoss();
+
+		if (isBoss)
+		{
+			// Boss defeated — slide out and go to victory screen
+			StartCoroutine(SlideOutAndGoToVictory());
+		}
 		// Show card reward UI (player + patron + background still visible behind it)
-		if (battleRewardUI != null)
+		else if (battleRewardUI != null)
 		{
 			battleRewardUI.ShowRewards(
 				chosenCard =>
@@ -614,6 +622,18 @@ public class Arena : MonoBehaviour
 			if (patronDialogue.DialogueBox != null)
 				patronDialogue.DialogueBox.onDialogueFinished -= onFinished;
 		}
+	}
+
+	/// <summary>
+	/// Slides the player and patron off screen, then loads the victory scene.
+	/// </summary>
+	private IEnumerator SlideOutAndGoToVictory()
+	{
+		if (battleStage != null)
+			yield return battleStage.SlideOutPlayerAndPatron();
+
+		if (RunManager.Instance != null)
+			RunManager.Instance.WinRun();
 	}
 
 	/// <summary>

@@ -723,7 +723,7 @@ public class Hand : MonoBehaviour
         // Release - play card if dragged high enough
         if (_isDragging && Input.GetMouseButtonUp(0))
         {
-            float dragDelta = _draggedCard.transform.position.y - _dragStartWorldPos.y;
+            float dragDelta = Vector3.Distance(_draggedCard.transform.position, _dragStartWorldPos);
 
             if (dragDelta >= dragPlayThreshold)
             {

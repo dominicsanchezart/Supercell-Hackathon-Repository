@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2047a44e41cc8844b92eecf778e07fb0, type: 3}
-  m_Name: Card_SerpentsTihte
+  m_Name: Card_SerpentsTithe
   m_EditorClassIdentifier: Assembly-CSharp::CardData
   cardName: Serpent's Tithe
   cardType: 4

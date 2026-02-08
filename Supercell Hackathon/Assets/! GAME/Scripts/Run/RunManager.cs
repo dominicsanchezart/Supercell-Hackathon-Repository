@@ -18,6 +18,7 @@ public class RunManager : MonoBehaviour
 	public string campSceneName = "LVL_Camp";
 	public string eventSceneName = "LVL_Event";
 	public string treasureSceneName = "LVL_Treasure";
+	public string victorySceneName = "LVL_Victory";
 
 	public RunState State { get; private set; }
 
@@ -256,6 +257,62 @@ public class RunManager : MonoBehaviour
 	void LoadMapScene()
 	{
 		SceneManager.LoadScene(mapSceneName);
+	}
+
+	/// <summary>
+	/// Returns true if the current encounter is a boss fight.
+	/// </summary>
+	public bool IsCurrentEncounterBoss()
+	{
+		if (State == null || State.mapData == null) return false;
+
+		string currentId = State.mapData.currentNodeId;
+		if (string.IsNullOrEmpty(currentId)) return false;
+
+		foreach (var node in State.mapData.nodes)
+		{
+			if (node.nodeId == currentId)
+				return node.encounterType == EncounterType.BattleBoss;
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	/// Called after defeating the final boss. Loads the victory scene.
+	/// </summary>
+	public void WinRun()
+	{
+		Debug.Log("Boss defeated! Loading victory screen.");
+
+		// Unload the encounter scene first, then load victory
+		StartCoroutine(LoadVictoryScene());
+	}
+
+	IEnumerator LoadVictoryScene()
+	{
+		// Unload the battle encounter if it's loaded
+		if (!string.IsNullOrEmpty(loadedEncounterScene))
+		{
+			Scene scene = SceneManager.GetSceneByName(loadedEncounterScene);
+			if (scene.IsValid() && scene.isLoaded)
+			{
+				AsyncOperation unload = SceneManager.UnloadSceneAsync(loadedEncounterScene);
+				yield return unload;
+			}
+			loadedEncounterScene = null;
+		}
+
+		// Unload the map scene too — we're done with it
+		Scene mapScene = SceneManager.GetSceneByName(mapSceneName);
+		if (mapScene.IsValid() && mapScene.isLoaded)
+		{
+			AsyncOperation unloadMap = SceneManager.UnloadSceneAsync(mapSceneName);
+			yield return unloadMap;
+		}
+
+		// Load the victory scene as a fresh standalone scene
+		SceneManager.LoadScene(victorySceneName);
 	}
 
 	/// <summary>

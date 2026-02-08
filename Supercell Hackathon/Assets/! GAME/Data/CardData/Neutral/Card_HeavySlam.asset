@@ -24,7 +24,7 @@ MonoBehaviour:
   actionDescription: Deal {action1Value} damage.
   actionType1: 1
   actionTarget1: 1
-  action1Value: 20
+  action1Value: 25
   action1StatusEffect: 0
   action1Condition:
     condition: 0
