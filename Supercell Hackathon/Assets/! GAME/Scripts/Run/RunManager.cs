@@ -86,6 +86,16 @@ public class RunManager : MonoBehaviour
 		node.isCompleted = true;
 		State.mapData.UpdateAvailability();
 
+		// Pick an enemy preset for combat encounters
+		if (node.encounterType == EncounterType.BattleMinion || node.encounterType == EncounterType.BattleBoss)
+		{
+			State.currentEnemyPreset = PickEnemyPreset(node.encounterType);
+		}
+		else
+		{
+			State.currentEnemyPreset = null;
+		}
+
 		string sceneName = node.encounterType switch
 		{
 			EncounterType.BattleMinion => battleSceneName,
@@ -97,6 +107,23 @@ public class RunManager : MonoBehaviour
 		};
 
 		StartCoroutine(LoadEncounterAdditive(sceneName));
+	}
+
+	/// <summary>
+	/// Picks a random enemy preset from the appropriate pool in MapConfig.
+	/// Returns null if no presets are configured.
+	/// </summary>
+	private EnemyPreset PickEnemyPreset(EncounterType type)
+	{
+		if (mapConfig == null) return null;
+
+		EnemyPreset[] pool = type == EncounterType.BattleBoss
+			? mapConfig.bossPresets
+			: mapConfig.minionPresets;
+
+		if (pool == null || pool.Length == 0) return null;
+
+		return pool[Random.Range(0, pool.Length)];
 	}
 
 	public void OnEncounterComplete()

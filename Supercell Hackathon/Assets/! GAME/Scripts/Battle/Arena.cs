@@ -43,6 +43,9 @@ public class Arena : MonoBehaviour
 		// Find the persistent patron dialogue singleton
 		patronDialogue = PatronDialogueManager.Instance;
 
+		// Apply enemy preset from RunState (if available)
+		ApplyEnemyPreset();
+
 		// Sync run HP into battle (player may not be at max HP)
 		if (RunManager.Instance != null && RunManager.Instance.State != null)
 		{
@@ -72,6 +75,34 @@ public class Arena : MonoBehaviour
 		}
 
 		StartPlayerTurn();
+	}
+
+	/// <summary>
+	/// Applies the enemy preset from RunState to the enemy's CharacterInfo and Inventory.
+	/// Falls back to whatever is baked into the scene if no preset is set.
+	/// </summary>
+	private void ApplyEnemyPreset()
+	{
+		if (RunManager.Instance == null || RunManager.Instance.State == null) return;
+
+		EnemyPreset preset = RunManager.Instance.State.currentEnemyPreset;
+		if (preset == null) return;
+
+		// Swap enemy CharacterData (stats, sprites, etc.)
+		if (preset.characterData != null)
+		{
+			_character2.characterInfo._data = preset.characterData;
+			_character2.characterInfo.SetupCharacter(); // Re-init HP/energy from new data
+		}
+
+		// Swap enemy deck
+		if (preset.deck != null && preset.deck.cards != null)
+		{
+			_character2.characterInfo.GetInventory().AssignDeck(preset.deck.cards);
+		}
+
+		Debug.Log($"[Arena] Applied enemy preset: {preset.enemyName} " +
+			$"(HP: {preset.characterData?.baseHealth}, Deck: {preset.deck?.cards?.Count ?? 0} cards)");
 	}
 
 	private void Update()
@@ -538,6 +569,10 @@ public class Arena : MonoBehaviour
 
 	private void ReturnToMap()
 	{
+		// Disable CardViewer before scene unload to prevent null ref errors
+		if (cardViewer != null)
+			cardViewer.enabled = false;
+
 		if (RunManager.Instance != null)
 		{
 			RunManager.Instance.OnEncounterComplete();
@@ -550,6 +585,10 @@ public class Arena : MonoBehaviour
 
 	private void ReturnToMainMenu()
 	{
+		// Disable CardViewer before scene unload to prevent null ref errors
+		if (cardViewer != null)
+			cardViewer.enabled = false;
+
 		if (RunManager.Instance != null)
 		{
 			RunManager.Instance.EndRun();

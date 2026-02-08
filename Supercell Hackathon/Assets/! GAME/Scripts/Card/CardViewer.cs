@@ -51,6 +51,13 @@ public class CardViewer : MonoBehaviour
 
     private void Update()
     {
+        // Guard: if camera was destroyed (e.g. scene unloading), try to re-acquire
+        if (_cam == null)
+        {
+            _cam = Camera.main;
+            if (_cam == null) return; // No camera — skip this frame
+        }
+
         ScrollCards();
         HandleHover();
         HandleClick();
@@ -123,10 +130,16 @@ public class CardViewer : MonoBehaviour
         EndHover();
 
         foreach (var card in spawnedCards)
-            Destroy(card);
+        {
+            if (card != null)
+                Destroy(card);
+        }
 
         spawnedCards.Clear();
-        cardRoot.localPosition = Vector3.zero;
+
+        if (cardRoot != null)
+            cardRoot.localPosition = Vector3.zero;
+
         verticalScroll = 0f;
     }
 

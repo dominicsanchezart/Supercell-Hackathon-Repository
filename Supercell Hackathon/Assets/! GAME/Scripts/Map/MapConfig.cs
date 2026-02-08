@@ -34,6 +34,12 @@ public class MapConfig : ScriptableObject
 	[Tooltip("Max shops per row")]
 	public int maxShopsPerRow = 1;
 
+	[Header("Enemy Presets")]
+	[Tooltip("Pool of enemy presets for regular (minion) combat encounters. One is picked randomly per node.")]
+	public EnemyPreset[] minionPresets;
+	[Tooltip("Pool of enemy presets for boss encounters. One is picked randomly for the boss node.")]
+	public EnemyPreset[] bossPresets;
+
 	// --- Legacy compatibility (baseLanes used by MapView for centering) ---
 	[HideInInspector] public int baseLanes => columns;
 }

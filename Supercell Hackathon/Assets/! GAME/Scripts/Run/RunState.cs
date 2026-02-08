@@ -22,6 +22,9 @@ public class RunState
 	[Header("Affinity")]
 	public Dictionary<CardFaction, int> affinityPoints = new();
 
+	[Header("Current Encounter")]
+	public EnemyPreset currentEnemyPreset;
+
 	[Header("Meta")]
 	public int seed;
 	public int shopVisitCount;

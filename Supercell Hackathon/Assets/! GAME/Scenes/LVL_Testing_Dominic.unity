@@ -6560,7 +6560,6 @@ GameObject:
   - component: {fileID: 2068168977}
   - component: {fileID: 2068168980}
   - component: {fileID: 2068168979}
-  - component: {fileID: 2068168981}
   m_Layer: 0
   m_Name: Arena
   m_TagString: Untagged
@@ -6702,23 +6701,6 @@ MonoBehaviour:
   skipButton: {fileID: 0}
   rewardPool: {fileID: 11400000, guid: ef724edaac614464fb616a97afa82e51, type: 2}
   cardsToOffer: 3
---- !u!114 &2068168981
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2068168974}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2e0c7b6132facf40b16482070ab6343, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PatronDialogueManager
-  dialogueBox: {fileID: 0}
-  wrathDialogue: {fileID: 0}
-  prideDialogue: {fileID: 0}
-  ruinDialogue: {fileID: 0}
-  neoCortexProvider: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

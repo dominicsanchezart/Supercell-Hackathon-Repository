@@ -51,6 +51,7 @@ public class PatronDialogueBox : MonoBehaviour
 	private bool _isShowing;
 	private bool _typewriterDone;
 	private bool _patronColorApplied;
+	private float _dismissCooldown; // Prevents accidental dismiss from card clicks
 
 	private void Awake()
 	{
@@ -126,6 +127,7 @@ public class PatronDialogueBox : MonoBehaviour
 	{
 		_isShowing = true;
 		_typewriterDone = false;
+		_dismissCooldown = 0.5f; // Prevent accidental dismiss from clicks that triggered the dialogue
 
 		// Fade in
 		yield return FadeIn();
@@ -224,10 +226,34 @@ public class PatronDialogueBox : MonoBehaviour
 		if (_isShowing)
 			SnapToCamera();
 
-		// Click-to-dismiss only after typewriter is done (to avoid card click conflicts)
-		if (_isShowing && _typewriterDone && Input.GetMouseButtonDown(0))
+		// Tick down dismiss cooldown so card clicks right before/during dialogue don't insta-dismiss
+		if (_dismissCooldown > 0f)
+			_dismissCooldown -= Time.deltaTime;
+
+		// Click-to-dismiss only after typewriter is done AND cooldown has elapsed.
+		// Uses a box overlap check so only clicks ON the dialogue box dismiss it,
+		// preventing card drag/selection clicks from accidentally closing the dialogue.
+		if (_isShowing && _typewriterDone && _dismissCooldown <= 0f && Input.GetMouseButtonDown(0))
 		{
-			Dismiss();
+			if (IsClickOnDialogueBox())
+				Dismiss();
 		}
+	}
+
+	/// <summary>
+	/// Checks if the current mouse click is over the dialogue box background.
+	/// Falls back to always-dismiss if no background renderer is assigned.
+	/// </summary>
+	private bool IsClickOnDialogueBox()
+	{
+		if (boxBackground == null) return true; // No background — fallback to dismiss anywhere
+
+		Camera cam = Camera.main;
+		if (cam == null) return true;
+
+		Vector3 mouseWorld = cam.ScreenToWorldPoint(Input.mousePosition);
+		mouseWorld.z = boxBackground.transform.position.z;
+
+		return boxBackground.bounds.Contains(mouseWorld);
 	}
 }
