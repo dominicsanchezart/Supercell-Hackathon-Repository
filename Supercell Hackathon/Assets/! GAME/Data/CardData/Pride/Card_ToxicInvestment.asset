@@ -21,12 +21,8 @@ MonoBehaviour:
   layer2: {fileID: 0}
   layer3: {fileID: 0}
   baseEnergyCost: 2
-  actionDescription: 'Apply {action1Value} Poison.
-
-    Discard a random card.
-
-    If
-    the discarded card is a PRIDE card, apply 12 Poison.'
+  actionDescription: "Apply {action1Value} Poison.\nDiscard a random card.\nIf the
+    discarded card is a PRIDE card, \napply 12 Poison."
   actionType1: 11
   actionTarget1: 1
   action1Value: 5

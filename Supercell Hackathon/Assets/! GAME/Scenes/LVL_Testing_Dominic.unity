@@ -2570,7 +2570,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -1.5}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -573, y: -115}
+  m_AnchoredPosition: {x: 573, y: -115}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &549888874
@@ -2598,7 +2598,7 @@ MonoBehaviour:
   m_ChildControlHeight: 0
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
-  m_ReverseArrangement: 1
+  m_ReverseArrangement: 0
 --- !u!1 &625378878
 GameObject:
   m_ObjectHideFlags: 0
@@ -6491,7 +6491,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
   deck: []
-  testDeck: {fileID: 11400000, guid: ef724edaac614464fb616a97afa82e51, type: 2}
+  testDeck: {fileID: 11400000, guid: 9ec490a11da42874d81f59b44f3c53e9, type: 2}
 --- !u!114 &1950661064
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6643,7 +6643,6 @@ MonoBehaviour:
   _character1: {fileID: 492984036}
   _character2: {fileID: 1855899004}
   _isPlayerTurn: 1
-  enemyActionDelay: 0.8
   battleStage: {fileID: 2068168977}
   cardViewer: {fileID: 819569703}
   battleRewardUI: {fileID: 2068168980}
@@ -6714,11 +6713,9 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  spriteScale: 3
   sortingOrder: -10
   shakeDuration: 0.3
   shakeMagnitude: 0.15
-  spriteStateDuration: 0.4
 --- !u!114 &2068168979
 MonoBehaviour:
   m_ObjectHideFlags: 0

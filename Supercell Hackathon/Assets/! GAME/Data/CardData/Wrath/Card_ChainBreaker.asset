@@ -21,10 +21,8 @@ MonoBehaviour:
   layer2: {fileID: 0}
   layer3: {fileID: 0}
   baseEnergyCost: 2
-  actionDescription: 'Deal damage equal to the HP you''ve lost this combat.
-
-    Card
-    can only be used once per combat.'
+  actionDescription: "Deal damage equal to the HP you've \nlost this combat.\nCard
+    can only be used once per combat."
   actionType1: 18
   actionTarget1: 1
   action1Value: 0

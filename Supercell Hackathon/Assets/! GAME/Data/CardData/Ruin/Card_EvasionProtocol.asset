@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2047a44e41cc8844b92eecf778e07fb0, type: 3}
-  m_Name: Card_AdaptiveHarvest
+  m_Name: Card_EvasionProtocol
   m_EditorClassIdentifier: Assembly-CSharp::CardData
-  cardName: Adaptive Harvest
+  cardName: Evasion Protocol
   cardType: 4
   cardFaction1: 3
   cardFaction2: 3
@@ -21,10 +21,13 @@ MonoBehaviour:
   layer2: {fileID: 0}
   layer3: {fileID: 0}
   baseEnergyCost: 2
-  actionDescription: 
-  actionType1: 0
+  actionDescription: 'Gain {action1Value} Dodge.
+
+    Card can only be used once
+    per combat.'
+  actionType1: 15
   actionTarget1: 0
-  action1Value: 0
+  action1Value: 4
   action1StatusEffect: 0
   action1Condition:
     condition: 0

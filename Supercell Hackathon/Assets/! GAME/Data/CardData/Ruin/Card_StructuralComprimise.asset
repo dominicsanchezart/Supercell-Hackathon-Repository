@@ -20,7 +20,7 @@ MonoBehaviour:
   layer1: {fileID: 0}
   layer2: {fileID: 0}
   layer3: {fileID: 0}
-  baseEnergyCost: 0
+  baseEnergyCost: 1
   actionDescription: 'Apply {action1Value} Weakened.
 
     Gain {action2Value} Guard'
