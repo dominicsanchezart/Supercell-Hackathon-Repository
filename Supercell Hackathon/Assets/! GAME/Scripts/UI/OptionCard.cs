@@ -27,6 +27,8 @@ public class OptionCard : MonoBehaviour
 {
 	[Header("Display")]
 	public SpriteRenderer backgroundSprite;
+	[Tooltip("Optional 9-sliced frame border rendered on top of the background. Does not affect interaction.")]
+	public SpriteRenderer frameSprite;
 	public SpriteRenderer iconSprite;
 	public TextMeshPro titleText;
 	public TextMeshPro descriptionText;
@@ -52,6 +54,7 @@ public class OptionCard : MonoBehaviour
 	bool isHovered;
 	Vector3 baseScale;
 	Color originalTint;
+	Color originalFrameTint;
 
 	void Awake()
 	{
@@ -59,6 +62,9 @@ public class OptionCard : MonoBehaviour
 
 		if (backgroundSprite != null)
 			originalTint = backgroundSprite.color;
+
+		if (frameSprite != null)
+			originalFrameTint = frameSprite.color;
 	}
 
 	// ─── Skinning ─────────────────────────────────────────────────
@@ -114,6 +120,13 @@ public class OptionCard : MonoBehaviour
 			if (backgroundSprite != null)
 				backgroundSprite.color = disabledTint;
 
+			if (frameSprite != null)
+			{
+				Color c = originalFrameTint;
+				c.a = 0.4f;
+				frameSprite.color = c;
+			}
+
 			if (iconSprite != null)
 			{
 				Color c = iconSprite.color;
@@ -139,6 +152,9 @@ public class OptionCard : MonoBehaviour
 		{
 			if (backgroundSprite != null)
 				backgroundSprite.color = originalTint;
+
+			if (frameSprite != null)
+				frameSprite.color = originalFrameTint;
 
 			if (iconSprite != null)
 			{

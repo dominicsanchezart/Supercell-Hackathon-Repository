@@ -17,4 +17,5 @@ MonoBehaviour:
   shopIcon: {fileID: 21300000, guid: 3234d14d06a988b48abdb542a2ebe599, type: 3}
   campIcon: {fileID: 21300000, guid: 9e238648d638c214abf6c0a1e5d5a889, type: 3}
   eventIcon: {fileID: 21300000, guid: 4e7b4b2e7d9322a49a933b610fb51538, type: 3}
+  treasureIcon: {fileID: 21300000, guid: 84d9688f1ffda334aa6d2f8c50808876, type: 3}
   nodeBackground: {fileID: 21300000, guid: ac9a213e254a9d64783df4630631c3f3, type: 3}

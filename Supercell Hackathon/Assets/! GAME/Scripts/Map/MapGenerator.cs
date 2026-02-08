@@ -318,6 +318,14 @@ public static class MapGenerator
 		for (int r = lastRow - config.campRowsBeforeBoss; r < lastRow; r++)
 			campRows.Add(r);
 
+		// Build set of guaranteed treasure rows
+		HashSet<int> treasureRows = new();
+		if (config.guaranteedTreasureRows != null)
+		{
+			for (int i = 0; i < config.guaranteedTreasureRows.Length; i++)
+				treasureRows.Add(config.guaranteedTreasureRows[i]);
+		}
+
 		// Assign per-row
 		for (int row = 0; row <= lastRow; row++)
 		{
@@ -341,15 +349,17 @@ public static class MapGenerator
 				for (int i = 0; i < rowNodes.Count; i++)
 					rowNodes[i].encounterType = EncounterType.Camp;
 			}
+			else if (treasureRows.Contains(row))
+			{
+				// Guaranteed treasure floors
+				for (int i = 0; i < rowNodes.Count; i++)
+					rowNodes[i].encounterType = EncounterType.Treasure;
+			}
 			else if (row <= 1)
 			{
-				// Early floors: only BattleMinion or Event
+				// Early floors: BattleMinion only
 				for (int i = 0; i < rowNodes.Count; i++)
-				{
-					rowNodes[i].encounterType = rng.NextDouble() < 0.7
-						? EncounterType.BattleMinion
-						: EncounterType.Event;
-				}
+					rowNodes[i].encounterType = EncounterType.BattleMinion;
 			}
 			else
 			{
@@ -416,7 +426,7 @@ public static class MapGenerator
 		DiversifyBranches(map, rng, config);
 
 		// Constraint 3: No camp→camp connections (extra safety beyond same-type rule)
-		FixConsecutiveCamps(map, rng);
+		FixConsecutiveCamps(map, config, rng);
 	}
 
 	static void FixConsecutiveSameType(MapData map, MapConfig config, System.Random rng)
@@ -472,7 +482,7 @@ public static class MapGenerator
 
 		if (newStreak >= config.maxConsecutiveBattles && !IsGuaranteedRow(node.row, config, lastRow))
 		{
-			node.encounterType = rng.NextDouble() < 0.6 ? EncounterType.Event : EncounterType.Shop;
+			node.encounterType = rng.NextDouble() < 0.5 ? EncounterType.Shop : EncounterType.Treasure;
 			newStreak = 0;
 		}
 
@@ -529,8 +539,10 @@ public static class MapGenerator
 		}
 	}
 
-	static void FixConsecutiveCamps(MapData map, System.Random rng)
+	static void FixConsecutiveCamps(MapData map, MapConfig config, System.Random rng)
 	{
+		int lastRow = map.totalRows - 1;
+
 		for (int row = 0; row < map.totalRows; row++)
 		{
 			List<MapNodeData> rowNodes = map.GetNodesInRow(row);
@@ -545,11 +557,12 @@ public static class MapGenerator
 					if (child == null) continue;
 					if (child.encounterType == EncounterType.BattleBoss) continue;
 
+					// Never overwrite guaranteed camp rows
+					if (IsGuaranteedRow(child.row, config, lastRow)) continue;
+
 					if (child.encounterType == EncounterType.Camp)
 					{
-						child.encounterType = rng.NextDouble() < 0.5
-							? EncounterType.Event
-							: EncounterType.BattleMinion;
+						child.encounterType = EncounterType.BattleMinion;
 					}
 				}
 			}
@@ -577,6 +590,15 @@ public static class MapGenerator
 			}
 		}
 
+		// Guaranteed treasure rows
+		if (config.guaranteedTreasureRows != null)
+		{
+			for (int i = 0; i < config.guaranteedTreasureRows.Length; i++)
+			{
+				if (config.guaranteedTreasureRows[i] == row) return true;
+			}
+		}
+
 		return false;
 	}
 
@@ -584,7 +606,7 @@ public static class MapGenerator
 	{
 		bool isEarly = row < config.minRowForAdvancedTypes;
 
-		List<EncounterType> options = new() { EncounterType.BattleMinion, EncounterType.Event };
+		List<EncounterType> options = new() { EncounterType.BattleMinion };
 
 		if (!isEarly)
 		{

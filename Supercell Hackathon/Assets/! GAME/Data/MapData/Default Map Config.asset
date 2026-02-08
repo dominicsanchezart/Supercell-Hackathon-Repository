@@ -13,17 +13,19 @@ MonoBehaviour:
   m_Name: Default Map Config
   m_EditorClassIdentifier: Assembly-CSharp::MapConfig
   totalRows: 14
-  columns: 6
-  pathCount: 6
+  columns: 5
+  pathCount: 5
   battleMinionWeight: 75
   eliteWeight: 0
   eventWeight: 0
   campWeight: 10
-  shopWeight: 15
-  guaranteedCampRows: 06000000
+  shopWeight: 10
+  treasureWeight: 5
+  guaranteedCampRows: 050000000a000000
+  guaranteedTreasureRows: 04000000
   campRowsBeforeBoss: 1
   minRowForAdvancedTypes: 4
-  maxConsecutiveBattles: 5
+  maxConsecutiveBattles: 3
   maxShopsPerRow: 5
   minionPresets:
   - {fileID: 11400000, guid: 75ac092373ffaa24088104a7d00952dd, type: 2}

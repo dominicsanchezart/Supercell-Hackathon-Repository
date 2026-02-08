@@ -16,12 +16,15 @@ MonoBehaviour:
   faction: 3
   pactTitle: Pact of Ruin
   passive: 3
-  passiveDescription: Pact of Ruin placeholder
+  passiveDescription: The first time you drop below 50% HP, gain 5 Guard, 2 Dodge,
+    and draw 2 cards. Ruin prepares for the worst.
   portrait: {fileID: 21300000, guid: e0a05b029498aff4ab636b85edd842ef, type: 3}
+  combatPortrait: {fileID: 21300000, guid: 1b02302514ac0d840af65094013993c5, type: 3}
   patronColor: {r: 0.4627451, g: 0.13725491, b: 0.9254902, a: 1}
   dialogueFrameSprite: {fileID: 21300000, guid: a7616ae3981d1b54abfb97bec9c0a518, type: 3}
   pactBackground: {fileID: 21300000, guid: 2592ec2a6563c804eb33f536e3cc89f5, type: 3}
   selectKeywords: Guard - Dodge - Weaken
   characterData: {fileID: 11400000, guid: 267a18bd39a2aa741a76a0e4e857706c, type: 2}
   starterDeck: {fileID: 11400000, guid: 5ace3dff59fbf5e459f78f8de5e8683b, type: 2}
+  combatOffset: {x: -2.5, y: -1, z: 0}
   startingGold: 50

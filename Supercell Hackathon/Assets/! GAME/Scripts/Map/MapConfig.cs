@@ -24,6 +24,8 @@ public class MapConfig : ScriptableObject
 	[Header("Floor Rules")]
 	[Tooltip("Rows where encounter type is forced to Camp (e.g. mid-run rest)")]
 	public int[] guaranteedCampRows = { 7 };
+	[Tooltip("Rows where encounter type is forced to Treasure")]
+	public int[] guaranteedTreasureRows = { 4 };
 	[Tooltip("Number of rows before boss forced to Camp")]
 	public int campRowsBeforeBoss = 1;
 	[Tooltip("Minimum row before elites/camps/shops can appear")]

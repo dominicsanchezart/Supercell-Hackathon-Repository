@@ -16,12 +16,15 @@ MonoBehaviour:
   faction: 1
   pactTitle: Pact of Wrath
   passive: 1
-  passiveDescription: Pact of Wrath placeholder
+  passiveDescription: Gain 2 Fury whenever you take card damage. Pain fuels your
+    wrath.
   portrait: {fileID: 21300000, guid: 4ea3a37ff61917641a7e072d8ff6d664, type: 3}
+  combatPortrait: {fileID: 21300000, guid: 7e64cd580a56c864d8d9bce0029466b5, type: 3}
   patronColor: {r: 1, g: 0.44705883, b: 0.5568628, a: 1}
   dialogueFrameSprite: {fileID: 21300000, guid: 9ca89b781f0471e42b95c5170affd009, type: 3}
   pactBackground: {fileID: 21300000, guid: d9b3a0ce2302a12449c36a8dd133aac8, type: 3}
   selectKeywords: Damage - Fury - Burn
   characterData: {fileID: 11400000, guid: 267a18bd39a2aa741a76a0e4e857706c, type: 2}
   starterDeck: {fileID: 11400000, guid: 8868150fa298f014895004190e7dafee, type: 2}
+  combatOffset: {x: -4, y: 0, z: 0}
   startingGold: 50

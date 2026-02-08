@@ -213,19 +213,21 @@ public class BattleStage : MonoBehaviour
 		if (RunManager.Instance != null && RunManager.Instance.State != null)
 			patron = RunManager.Instance.State.patronData;
 
-		if (patron == null || patron.portrait == null)
+		Sprite combatSprite = patron != null ? (patron.combatPortrait != null ? patron.combatPortrait : patron.portrait) : null;
+		if (combatSprite == null)
 		{
 			patronSpriteRenderer.gameObject.SetActive(false);
 			return;
 		}
 
-		patronSpriteRenderer.sprite = patron.portrait;
+		patronSpriteRenderer.sprite = combatSprite;
 		patronSpriteRenderer.sortingLayerName = characterSortingLayer;
 		patronSpriteRenderer.sortingOrder = sortingOrder - 1; // behind player sprite
 		patronSpriteRenderer.transform.localScale = Vector3.one * patronScale;
 
-		// Position relative to player
-		_patronTarget = _leftTarget + patronOffset;
+		// Position relative to player (base offset + per-patron offset)
+		Vector3 perPatronOffset = patron != null ? patron.combatOffset : Vector3.zero;
+		_patronTarget = _leftTarget + patronOffset + perPatronOffset;
 	}
 
 	private IEnumerator SlideIn()

@@ -47,8 +47,8 @@ public class BattleRewardUI : MonoBehaviour
 	[SerializeField] private TextMeshProUGUI goldRewardText;
 
 	[Header("Skip")]
-	[Tooltip("Optional button to skip the reward and go straight to the map.")]
-	[SerializeField] private OptionCard skipButton;
+	[Tooltip("Optional collider trigger to skip the reward and take no card.")]
+	[SerializeField] private Collider2D skipCollider;
 
 	[Header("Card Pool")]
 	[Tooltip("Deck ScriptableObject containing all cards that can appear as rewards.")]
@@ -94,6 +94,7 @@ public class BattleRewardUI : MonoBehaviour
 
 		HandleHover();
 		HandleClick();
+		HandleSkipClick();
 	}
 
 	/// <summary>
@@ -144,12 +145,8 @@ public class BattleRewardUI : MonoBehaviour
 		offeredCards = PickRandomCards(cardsToOffer);
 		SpawnCards(offeredCards);
 
-		if (skipButton != null)
-		{
-			skipButton.gameObject.SetActive(true);
-			skipButton.Setup("Skip", "Take no card");
-			skipButton.onClicked = _ => OnSkip();
-		}
+		if (skipCollider != null)
+			skipCollider.enabled = true;
 	}
 
 	/// <summary>
@@ -204,7 +201,7 @@ public class BattleRewardUI : MonoBehaviour
 			if (cardView != null)
 			{
 				cardView.SetSortingLayer(rewardSortingLayer);
-				cardView.SetSortingOrder(baseSortingOrder + i * 50);
+				cardView.SetSortingOrder(baseSortingOrder + i * 100);
 				cardView.enabled = false; // disable Hand-based interaction
 			}
 
@@ -348,8 +345,8 @@ public class BattleRewardUI : MonoBehaviour
 			GreyOutCard(spawnedCards[i]);
 		}
 
-		if (skipButton != null)
-			skipButton.SetInteractable(false);
+		if (skipCollider != null)
+			skipCollider.enabled = false;
 
 		Debug.Log($"Player chose reward card: {chosen.cardName}");
 		onCardChosen?.Invoke(chosen);
@@ -366,11 +363,23 @@ public class BattleRewardUI : MonoBehaviour
 		for (int i = 0; i < spawnedCards.Count; i++)
 			GreyOutCard(spawnedCards[i]);
 
-		if (skipButton != null)
-			skipButton.SetInteractable(false);
+		if (skipCollider != null)
+			skipCollider.enabled = false;
 
 		Debug.Log("Player skipped card reward.");
 		StartCoroutine(ProceedAfterDelay(0.3f));
+	}
+
+	private void HandleSkipClick()
+	{
+		if (IsLocked) return;
+		if (skipCollider == null || !skipCollider.enabled) return;
+		if (!Input.GetMouseButtonDown(0)) return;
+		if (_cam == null) return;
+
+		Vector2 mouseWorld = _cam.ScreenToWorldPoint(Input.mousePosition);
+		if (skipCollider.OverlapPoint(mouseWorld))
+			OnSkip();
 	}
 
 	private void GreyOutCard(GameObject cardObj)

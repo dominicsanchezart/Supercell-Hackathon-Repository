@@ -40,8 +40,10 @@ public class PatronData : ScriptableObject
 	public string passiveDescription;
 
 	[Header("Visuals")]
-	[Tooltip("Portrait sprite for patron select screen.")]
+	[Tooltip("Portrait sprite for patron select screen and non-combat use.")]
 	public Sprite portrait;
+	[Tooltip("Lighter/low-contrast portrait used only in combat for visibility.")]
+	public Sprite combatPortrait;
 	[Tooltip("Color associated with this patron (for UI tinting).")]
 	public Color patronColor = Color.white;
 	[Tooltip("9-sliced border frame sprite for this patron's dialogue box.")]
@@ -58,6 +60,10 @@ public class PatronData : ScriptableObject
 	[Header("Starter Deck")]
 	[Tooltip("Deck asset containing this patron's starting cards.")]
 	public Deck starterDeck;
+
+	[Header("Combat")]
+	[Tooltip("Extra offset added to the patron portrait position in combat (on top of BattleStage's base patronOffset).")]
+	public Vector3 combatOffset = Vector3.zero;
 
 	[Header("Starting Resources")]
 	[Tooltip("Gold the player starts with.")]
