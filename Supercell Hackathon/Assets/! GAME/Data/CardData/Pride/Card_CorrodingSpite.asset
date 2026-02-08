@@ -18,8 +18,8 @@ MonoBehaviour:
   cardFaction2: 2
   layer0: {fileID: 21300000, guid: ad11a68de8cbdde4c80ae9f62fb126cc, type: 3}
   layer1: {fileID: 21300000, guid: b635fc197916d494ca95061b04f69c9b, type: 3}
-  layer2: {fileID: 0}
-  layer3: {fileID: 0}
+  layer2: {fileID: 21300000, guid: 79f952af796e6ce4d8607ef54f6e7542, type: 3}
+  layer3: {fileID: 21300000, guid: d0c4524a8d1950943b17114b1faa28ed, type: 3}
   baseEnergyCost: 1
   actionDescription: "Gain {action1Value} Guard. \nDiscard a random card. If that
     card is\na PRIDE card, apply {action3Value} Poison."

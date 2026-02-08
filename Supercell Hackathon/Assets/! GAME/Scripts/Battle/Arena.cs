@@ -44,6 +44,10 @@ public class Arena : MonoBehaviour
 	private bool _perfectFormActive;         // Pride: grants bonus at start of next turn
 	private bool _emergencyProtocolTriggered; // Ruin: one-time trigger per combat
 
+	// True from the moment the player ends their turn until the player's next turn begins.
+	// Prevents any re-entry from spamming the end-turn button or UI callbacks.
+	private bool _turnTransitioning;
+
 	private IEnumerator Start()
 	{
 		yield return null;
@@ -124,6 +128,11 @@ public class Arena : MonoBehaviour
 			_character2.characterInfo.GetInventory().AssignDeck(preset.deck.cards);
 		}
 
+		// Re-initialize the enemy hand's draw pile so it uses the newly assigned deck.
+		// Hand.Start() already ran (before this coroutine resumed), so its drawPile
+		// still contains the old default deck — this call re-syncs it.
+		_character2.StartBattle();
+
 		// Debug.Log($"[Arena] Applied enemy preset: {preset.enemyName} " +
 		// 	$"(HP: {preset.characterData?.baseHealth}, Deck: {preset.deck?.cards?.Count ?? 0} cards)");
 	}
@@ -131,11 +140,12 @@ public class Arena : MonoBehaviour
 	private void Update()
 	{
 		if (_battleOver || !_isPlayerTurn || IsViewingCards) return;
+		if (_character1.IsDrawing || _turnTransitioning) return;
 
-		if (Input.GetKeyDown(KeyCode.E))
-		{
-			EndPlayerTurn();
-		}
+		// if (Input.GetKeyDown(KeyCode.E))
+		// {
+		// 	EndPlayerTurn();
+		// }
 	}
 
 	public void StartPlayerTurn()
@@ -171,12 +181,20 @@ public class Arena : MonoBehaviour
 		if (enemyIntentDisplay != null)
 			enemyIntentDisplay.Refresh();
 
+		// Unlock end-turn only after drawing is queued
+		// (IsDrawing guard still blocks until the coroutine finishes)
+		_turnTransitioning = false;
+
 		// Debug.Log($"=== PLAYER TURN === HP: {_character1.characterInfo.GetHealth()} | Energy: {_character1.characterInfo.GetEnergy()}");
 	}
 
 	public void EndPlayerTurn()
 	{
-		if (!_isPlayerTurn || _battleOver) return;
+		if (!_isPlayerTurn || _battleOver || _character1.IsDrawing || _turnTransitioning) return;
+
+		// Immediately lock out further calls so spamming can't trigger this twice
+		_isPlayerTurn = false;
+		_turnTransitioning = true;
 
 		// Patron passive: Perfect Form (Pride) — if no damage taken, set bonus for next turn
 		if (_activePassive == PatronPassive.PerfectForm)
@@ -195,7 +213,7 @@ public class Arena : MonoBehaviour
 
 	public void StartEnemyTurn()
 	{
-		if (_battleOver) return;
+		if (_battleOver || !_turnTransitioning) return;
 
 		_isPlayerTurn = false;
 

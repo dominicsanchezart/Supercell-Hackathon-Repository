@@ -18,8 +18,8 @@ MonoBehaviour:
   cardFaction2: 2
   layer0: {fileID: 21300000, guid: ad11a68de8cbdde4c80ae9f62fb126cc, type: 3}
   layer1: {fileID: 21300000, guid: b635fc197916d494ca95061b04f69c9b, type: 3}
-  layer2: {fileID: 0}
-  layer3: {fileID: 0}
+  layer2: {fileID: 21300000, guid: 09c099bb8b7cb7e478f4f7cd102d78d7, type: 3}
+  layer3: {fileID: 21300000, guid: 1f6953de27f45e649ad34ba9cd41fd67, type: 3}
   baseEnergyCost: 2
   actionDescription: "Apply {action1Value} Poison.\nDiscard a random card.\nIf the
     discarded card is a PRIDE card, \napply 12 Poison."
