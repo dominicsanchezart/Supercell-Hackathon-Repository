@@ -26,5 +26,5 @@ MonoBehaviour:
   selectKeywords: Guard - Dodge - Weaken
   characterData: {fileID: 11400000, guid: 267a18bd39a2aa741a76a0e4e857706c, type: 2}
   starterDeck: {fileID: 11400000, guid: 5ace3dff59fbf5e459f78f8de5e8683b, type: 2}
-  combatOffset: {x: -2.5, y: -1, z: 0}
+  combatOffset: {x: -1, y: -0.25, z: 0}
   startingGold: 50

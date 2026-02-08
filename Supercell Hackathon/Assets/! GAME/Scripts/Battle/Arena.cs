@@ -755,4 +755,5 @@ public class Arena : MonoBehaviour
 		if (cardViewer != null)
 			cardViewer.ClearCallbacks();
 	}
+
 }

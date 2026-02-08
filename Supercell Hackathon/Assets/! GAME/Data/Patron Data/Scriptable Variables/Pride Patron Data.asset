@@ -26,5 +26,5 @@ MonoBehaviour:
   selectKeywords: Heal - Poison - Gold
   characterData: {fileID: 11400000, guid: 267a18bd39a2aa741a76a0e4e857706c, type: 2}
   starterDeck: {fileID: 11400000, guid: 63d0eef16060e4c4884470ef9dcc8b6f, type: 2}
-  combatOffset: {x: -2.5, y: -2, z: 0}
+  combatOffset: {x: -1, y: -0.25, z: 0}
   startingGold: 50

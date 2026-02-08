@@ -179,6 +179,11 @@ public class RunManager : MonoBehaviour
 		Scene encounterScene = SceneManager.GetSceneByName(sceneName);
 		if (encounterScene.IsValid())
 			SceneManager.SetActiveScene(encounterScene);
+
+		// Fade the map transition overlay back in (black → clear)
+		MapTransition mapTransition = Object.FindAnyObjectByType<MapTransition>();
+		if (mapTransition != null)
+			mapTransition.FadeIn();
 	}
 
 	IEnumerator UnloadEncounterScene()

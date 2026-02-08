@@ -217,7 +217,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5edd9b0c8b200e24abd0732000e9e54d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NeoCortexProvider
-  liveTimeout: 3
+  liveTimeout: 4
   prefetchTimeout: 15
   wrathAgent: {fileID: 7543097515519324568}
   prideAgent: {fileID: 6479734487046605678}
