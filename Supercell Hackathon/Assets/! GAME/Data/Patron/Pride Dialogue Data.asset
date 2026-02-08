@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6f16563972d8a64485230248755bddd, type: 3}
+  m_Name: Pride Dialogue Data
+  m_EditorClassIdentifier: Assembly-CSharp::PatronDialogueData
+  combatStartLines:
+  - Ah, a performance awaits.
+  - Do try to make this entertaining, darling.
+  - The stage is set. Dazzle me.
+  - Another opponent? How quaint.
+  - Let us see if they deserve our attention.
+  bigDamageLines:
+  - ...lovely.
+  - Now THAT had flair.
+  - Exquisite. Do it again.
+  - A masterpiece in violence.
+  - Beauty and brutality, intertwined.
+  highStatusLines:
+  - They are unraveling. Delightful.
+  - Like watching a flower wilt. Gorgeous.
+  - The venom takes hold. Patience rewarded.
+  - How poetic. They poison themselves.
+  lowHPLines:
+  - Careful, darling. Scars are unbecoming.
+  - This is beneath you. Rally.
+  - I did not invest in a corpse.
+  - Composure. Always composure.
+  victoryLines:
+  - Naturally.
+  - Was there ever any doubt?
+  - A flawless performance.
+  - Take your bow, champion.
+  closeCallVictoryLines:
+  - Graceless, but... you survived.
+  - That lacked elegance. We must practice.
+  - A win is a win, I suppose. Barely.
+  - Do not make a habit of such close calls.
+  approvalLines:
+  - A card of distinction. Well chosen.
+  - Refined taste. I approve.
+  - Yes, that suits us perfectly.
+  - Now you are learning.
+  disapprovalLines:
+  - How... pedestrian.
+  - That card lacks... je ne sais quoi.
+  - Are you certain? It seems rather common.
+  - I expected better judgment.
+  bossStartFallbackLines:
+  - The main act begins. Do not disappoint.
+  - A worthy adversary at last. How exciting.
+  - All eyes on us now, darling.
+  eventFallbackLines:
+  - An opportunity to shine. Or not.
+  - Every choice is a reflection. Choose well.
+  - How delightfully unexpected.

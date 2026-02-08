@@ -27,18 +27,30 @@ public class Arena : MonoBehaviour
 	[SerializeField] private float victoryDelay = 1.0f;
 	[SerializeField] private float defeatDelay = 1.5f;
 
+	// Patron dialogue (found at runtime from persistent singleton)
+	private PatronDialogueManager patronDialogue;
+
 	// Patron passive tracking
-	// Used by Pride passive (Perfect Form) to check if player took damage this turn
-	private bool _tookDamageThisTurn;
+	private PatronPassive _activePassive = PatronPassive.None;
+	private bool _tookDamageThisTurn;       // Pride: tracks if player took damage this turn
+	private bool _perfectFormActive;         // Pride: grants bonus at start of next turn
+	private bool _emergencyProtocolTriggered; // Ruin: one-time trigger per combat
 
 	private IEnumerator Start()
 	{
 		yield return null;
 
+		// Find the persistent patron dialogue singleton
+		patronDialogue = PatronDialogueManager.Instance;
+
 		// Sync run HP into battle (player may not be at max HP)
 		if (RunManager.Instance != null && RunManager.Instance.State != null)
 		{
 			_character1.characterInfo.SetHealth(RunManager.Instance.State.currentHP);
+
+			// Initialize patron passive from run state
+			if (RunManager.Instance.State.patronData != null)
+				_activePassive = RunManager.Instance.State.patronData.passive;
 		}
 
 		if (battleStage != null)
@@ -50,6 +62,14 @@ public class Arena : MonoBehaviour
 		// Enable battle UI at the start of battle
 		if (battleUI != null)
 			battleUI.SetActive(true);
+
+		// Fire combat start dialogue
+		if (patronDialogue != null)
+		{
+			string enemyName = _character2.characterInfo._data != null
+				? _character2.characterInfo._data.name : "Enemy";
+			patronDialogue.OnCombatStart(enemyName);
+		}
 
 		StartPlayerTurn();
 	}
@@ -78,8 +98,18 @@ public class Arena : MonoBehaviour
 		_character1.characterInfo.ProcessStartOfTurnEffects();
 		if (CheckBattleOver()) return;
 
-		// TODO: Patron passives — Ruin (Adaptive Biology): check enemy conditions, grant buff
-		// TODO: Patron passives — Pride (Perfect Form): if _perfectFormActive, grant +1 energy + heal 2
+		// Patron passive: Perfect Form (Pride) — bonus from last turn's clean play
+		if (_activePassive == PatronPassive.PerfectForm && _perfectFormActive)
+		{
+			_character1.characterInfo.GainEnergy(1);
+			_character1.characterInfo.Heal(2);
+			_perfectFormActive = false;
+			Debug.Log("[Passive] Perfect Form: +1 Energy, Heal 2 (no damage taken last turn)");
+		}
+
+		// Reset dialogue per-turn tracking
+		if (patronDialogue != null)
+			patronDialogue.OnTurnStart();
 
 		_character1.StartTurn();
 
@@ -90,7 +120,13 @@ public class Arena : MonoBehaviour
 	{
 		if (!_isPlayerTurn || _battleOver) return;
 
-		// TODO: Patron passives — Pride (Perfect Form): if !_tookDamageThisTurn, set flag for next turn
+		// Patron passive: Perfect Form (Pride) — if no damage taken, set bonus for next turn
+		if (_activePassive == PatronPassive.PerfectForm)
+		{
+			_perfectFormActive = !_tookDamageThisTurn;
+			if (_perfectFormActive)
+				Debug.Log("[Passive] Perfect Form: No damage taken — bonus queued for next turn.");
+		}
 
 		// Decay weaken, reset empower at end of turn
 		_character1.characterInfo.ProcessEndOfTurnEffects();
@@ -204,12 +240,14 @@ public class Arena : MonoBehaviour
 			case CardActionType.Damage:
 			case CardActionType.DamageAll:
 				target.TakeDamage(value);
-				// Track damage for patron passives
 				if (target == _character1.characterInfo)
 				{
 					_tookDamageThisTurn = true;
-					// TODO: Wrath passive (Bleed Out) — gain 2 Fury when taking card damage
+					ApplyDamagePassives();
 				}
+				// Player dealing damage to enemy — notify dialogue
+				if (source == _character1.characterInfo && target == _character2.characterInfo)
+					NotifyPlayerDealtDamage(value);
 				break;
 
 			case CardActionType.Heal:
@@ -278,14 +316,24 @@ public class Arena : MonoBehaviour
 				// value already includes lostHP + base + modifiers (computed by CardModifiers)
 				target.TakeDamage(value);
 				if (target == _character1.characterInfo)
+				{
 					_tookDamageThisTurn = true;
+					ApplyDamagePassives();
+				}
+				if (source == _character1.characterInfo && target == _character2.characterInfo)
+					NotifyPlayerDealtDamage(value);
 				break;
 
 			case CardActionType.DamagePerStack:
 				// value already includes (stacks * base) + modifiers (computed by CardModifiers)
 				target.TakeDamage(value);
 				if (target == _character1.characterInfo)
+				{
 					_tookDamageThisTurn = true;
+					ApplyDamagePassives();
+				}
+				if (source == _character1.characterInfo && target == _character2.characterInfo)
+					NotifyPlayerDealtDamage(value);
 				break;
 
 			case CardActionType.GainGold:
@@ -301,6 +349,69 @@ public class Arena : MonoBehaviour
 				Debug.LogWarning("Unhandled card action type: " + type);
 				break;
 		}
+	}
+
+	/// <summary>
+	/// Called whenever the player takes card damage. Applies relevant patron passives
+	/// and notifies the dialogue manager.
+	/// </summary>
+	private void ApplyDamagePassives()
+	{
+		// Bleed Out (Wrath): gain 2 Fury when taking card damage
+		if (_activePassive == PatronPassive.BleedOut)
+		{
+			_character1.characterInfo.ApplyFury(2);
+			Debug.Log("[Passive] Bleed Out: +2 Fury from taking card damage.");
+		}
+
+		// Emergency Protocol (Ruin): first time dropping below 50% HP, gain defensive surge
+		if (_activePassive == PatronPassive.EmergencyProtocol && !_emergencyProtocolTriggered)
+		{
+			int currentHP = _character1.characterInfo.GetHealth();
+			int maxHP = _character1.characterInfo._data.baseHealth;
+			if (currentHP > 0 && currentHP < maxHP / 2)
+			{
+				_emergencyProtocolTriggered = true;
+				_character1.characterInfo.GainBlock(5);
+				_character1.characterInfo.ApplyDodge(2);
+				_character1.DrawCardFromDeck();
+				_character1.DrawCardFromDeck();
+				Debug.Log("[Passive] Emergency Protocol: +5 Guard, +2 Dodge, Draw 2 (dropped below 50% HP)");
+			}
+		}
+
+		// Notify dialogue manager: player took damage (low HP quip check)
+		if (patronDialogue != null)
+		{
+			patronDialogue.OnPlayerHPChanged(
+				_character1.characterInfo.GetHealth(),
+				_character1.characterInfo._data.baseHealth);
+		}
+	}
+
+	/// <summary>
+	/// Called after player deals damage to the enemy. Notifies dialogue for quip triggers.
+	/// </summary>
+	private void NotifyPlayerDealtDamage(int value)
+	{
+		if (patronDialogue != null)
+		{
+			patronDialogue.OnPlayerDealtDamage(value);
+			CheckEnemyStatusForDialogue();
+		}
+	}
+
+	private void CheckEnemyStatusForDialogue()
+	{
+		if (patronDialogue == null) return;
+		CharacterInfo enemy = _character2.characterInfo;
+
+		if (enemy.GetPoison() >= 5)
+			patronDialogue.OnHighStatusStacks("Poison", enemy.GetPoison());
+		else if (enemy.GetBurn() >= 5)
+			patronDialogue.OnHighStatusStacks("Burn", enemy.GetBurn());
+		else if (enemy.GetWeaken() >= 5)
+			patronDialogue.OnHighStatusStacks("Weaken", enemy.GetWeaken());
 	}
 
 	public bool CheckBattleOver()
@@ -349,6 +460,15 @@ public class Arena : MonoBehaviour
 		// Sync HP back to the run state
 		SyncPlayerStateToRun();
 
+		// Fire combat end dialogue
+		if (patronDialogue != null)
+		{
+			float hpPercent = _character1.characterInfo._data.baseHealth > 0
+				? (float)_character1.characterInfo.GetHealth() / _character1.characterInfo._data.baseHealth
+				: 1f;
+			patronDialogue.OnCombatEnd(true, hpPercent);
+		}
+
 		// Show card reward UI
 		if (battleRewardUI != null)
 		{
@@ -362,6 +482,10 @@ public class Arena : MonoBehaviour
 						RunManager.Instance.State.deck.Add(chosenCard);
 
 					Debug.Log($"Added {chosenCard.cardName} to deck.");
+
+					// Fire reward card chosen dialogue
+					if (patronDialogue != null)
+						patronDialogue.OnRewardCardChosen(chosenCard);
 				},
 				() =>
 				{

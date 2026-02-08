@@ -19,6 +19,9 @@ public class RunState
 	public PatronData patronData;
 	public CardFaction patronFaction;
 
+	[Header("Affinity")]
+	public Dictionary<CardFaction, int> affinityPoints = new();
+
 	[Header("Meta")]
 	public int seed;
 	public int shopVisitCount;

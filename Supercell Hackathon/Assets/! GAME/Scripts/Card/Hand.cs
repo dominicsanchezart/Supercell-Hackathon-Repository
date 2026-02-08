@@ -185,6 +185,10 @@ public class Hand : MonoBehaviour
 
 		ResolveCardActions(data);
 
+		// Track patron affinity from played card factions
+		if (isPlayer)
+			PatronAffinityTracker.OnCardPlayed(data);
+
 		// Notify listeners which type of card was played (for sprite swaps)
 		characterInfo.NotifyCardPlayed(data.cardType);
 

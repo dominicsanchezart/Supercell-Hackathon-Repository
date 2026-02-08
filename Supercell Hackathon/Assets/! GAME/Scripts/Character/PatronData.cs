@@ -7,9 +7,9 @@ using UnityEngine;
 public enum PatronPassive
 {
 	None,
-	BleedOut,        // Wrath — gain 2 Fury when taking card damage
-	PerfectForm,     // Pride — +1 energy + heal 2 if no damage taken last turn
-	AdaptiveBiology  // Ruin — random buff based on enemy conditions at turn start
+	BleedOut,          // Wrath — gain 2 Fury when taking card damage
+	PerfectForm,       // Pride — +1 energy + heal 2 if no damage taken last turn
+	EmergencyProtocol  // Ruin — first time below 50% HP: gain 5 Guard + 2 Dodge + Draw 2
 }
 
 /// <summary>
@@ -21,7 +21,7 @@ public enum PatronPassive
 /// Design doc patrons:
 ///   Cinder King  (Wrath) — lower HP, Fury + Burn focus, passive: Bleed Out
 ///   Gilded Serpent (Pride) — Heal + Poison + Gold focus, passive: Perfect Form
-///   Stitch Prophet (Ruin) — Guard + Dodge + Weaken focus, passive: Adaptive Biology
+///   Stitch Prophet (Ruin) — Guard + Dodge + Weaken focus, passive: Emergency Protocol
 /// </summary>
 [CreateAssetMenu(fileName = "New Patron Data", menuName = "Scriptable Objects/Patron Data")]
 public class PatronData : ScriptableObject

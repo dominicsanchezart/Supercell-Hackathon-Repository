@@ -17,6 +17,14 @@ public class BattleStage : MonoBehaviour
 	[SerializeField] private SpriteRenderer leftSpriteRenderer;
 	[SerializeField] private SpriteRenderer rightSpriteRenderer;
 
+	[Header("Patron Portrait")]
+	[Tooltip("SpriteRenderer for the patron portrait, slides in behind the player.")]
+	[SerializeField] private SpriteRenderer patronSpriteRenderer;
+	[Tooltip("Offset from the player sprite position (local space).")]
+	[SerializeField] private Vector3 patronOffset = new Vector3(-1.5f, 1.5f, 0f);
+	[Tooltip("Scale of the patron portrait.")]
+	[SerializeField] private float patronScale = 2f;
+
 	[Header("Battle Background")]
 	[Tooltip("SpriteRenderer used to display per-enemy battle backgrounds.")]
 	[SerializeField] private SpriteRenderer backgroundRenderer;
@@ -41,6 +49,7 @@ public class BattleStage : MonoBehaviour
 
 	private Vector3 _leftTarget;
 	private Vector3 _rightTarget;
+	private Vector3 _patronTarget;
 
 
 
@@ -51,6 +60,9 @@ public class BattleStage : MonoBehaviour
 
 		if (rightSpriteRenderer == null)
 			rightSpriteRenderer = CreateSpriteHolder("NPC Sprite");
+
+		if (patronSpriteRenderer == null)
+			patronSpriteRenderer = CreateSpriteHolder("Patron Portrait");
 	}
 
 	/// <summary>
@@ -105,6 +117,9 @@ public class BattleStage : MonoBehaviour
 		SetupSprite(leftSpriteRenderer, leftCharacter._data, false);
 		SetupSprite(rightSpriteRenderer, rightCharacter._data, true);
 
+		// Set up patron portrait from RunState
+		SetupPatronPortrait();
+
 		// Update battle background from the right (enemy) character if available
 		UpdateBackground(rightCharacter._data);
 
@@ -139,16 +154,48 @@ public class BattleStage : MonoBehaviour
 		}
 	}
 
+	private void SetupPatronPortrait()
+	{
+		if (patronSpriteRenderer == null) return;
+
+		// Get patron data from run state
+		PatronData patron = null;
+		if (RunManager.Instance != null && RunManager.Instance.State != null)
+			patron = RunManager.Instance.State.patronData;
+
+		if (patron == null || patron.portrait == null)
+		{
+			patronSpriteRenderer.gameObject.SetActive(false);
+			return;
+		}
+
+		patronSpriteRenderer.sprite = patron.portrait;
+		patronSpriteRenderer.sortingOrder = sortingOrder - 1; // behind player sprite
+		patronSpriteRenderer.transform.localScale = Vector3.one * patronScale;
+
+		// Position relative to player
+		_patronTarget = _leftTarget + patronOffset;
+	}
+
 	private IEnumerator SlideIn()
 	{
 		Vector3 leftStart = _leftTarget + Vector3.left * slideDistance;
 		Vector3 rightStart = _rightTarget + Vector3.right * slideDistance;
+		Vector3 patronStart = _patronTarget + Vector3.left * slideDistance;
 
 		leftSpriteRenderer.transform.position = leftStart;
 		rightSpriteRenderer.transform.position = rightStart;
 
 		leftSpriteRenderer.gameObject.SetActive(true);
 		rightSpriteRenderer.gameObject.SetActive(true);
+
+		// Only show patron portrait if it has a sprite assigned
+		bool showPatron = patronSpriteRenderer != null && patronSpriteRenderer.sprite != null;
+		if (showPatron)
+		{
+			patronSpriteRenderer.transform.position = patronStart;
+			patronSpriteRenderer.gameObject.SetActive(true);
+		}
 
 		float elapsed = 0f;
 		while (elapsed < slideDuration)
@@ -159,11 +206,16 @@ public class BattleStage : MonoBehaviour
 			leftSpriteRenderer.transform.position = Vector3.Lerp(leftStart, _leftTarget, t);
 			rightSpriteRenderer.transform.position = Vector3.Lerp(rightStart, _rightTarget, t);
 
+			if (showPatron)
+				patronSpriteRenderer.transform.position = Vector3.Lerp(patronStart, _patronTarget, t);
+
 			yield return null;
 		}
 
 		leftSpriteRenderer.transform.position = _leftTarget;
 		rightSpriteRenderer.transform.position = _rightTarget;
+		if (showPatron)
+			patronSpriteRenderer.transform.position = _patronTarget;
 	}
 
 	/// <summary>
@@ -178,9 +230,12 @@ public class BattleStage : MonoBehaviour
 	{
 		Vector3 leftEnd = _leftTarget + Vector3.left * slideDistance;
 		Vector3 rightEnd = _rightTarget + Vector3.right * slideDistance;
+		Vector3 patronEnd = _patronTarget + Vector3.left * slideDistance;
 
 		Vector3 leftStart = leftSpriteRenderer.transform.position;
 		Vector3 rightStart = rightSpriteRenderer.transform.position;
+		Vector3 patronStart = patronSpriteRenderer != null ? patronSpriteRenderer.transform.position : Vector3.zero;
+		bool hasPatron = patronSpriteRenderer != null && patronSpriteRenderer.gameObject.activeSelf;
 
 		float elapsed = 0f;
 		while (elapsed < slideDuration)
@@ -191,11 +246,16 @@ public class BattleStage : MonoBehaviour
 			leftSpriteRenderer.transform.position = Vector3.Lerp(leftStart, leftEnd, t);
 			rightSpriteRenderer.transform.position = Vector3.Lerp(rightStart, rightEnd, t);
 
+			if (hasPatron)
+				patronSpriteRenderer.transform.position = Vector3.Lerp(patronStart, patronEnd, t);
+
 			yield return null;
 		}
 
 		leftSpriteRenderer.gameObject.SetActive(false);
 		rightSpriteRenderer.gameObject.SetActive(false);
+		if (hasPatron)
+			patronSpriteRenderer.gameObject.SetActive(false);
 	}
 
 	/// <summary>

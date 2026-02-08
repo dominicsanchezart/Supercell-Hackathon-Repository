@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6f16563972d8a64485230248755bddd, type: 3}
+  m_Name: Ruin Dialogue Data
+  m_EditorClassIdentifier: Assembly-CSharp::PatronDialogueData
+  combatStartLines:
+  - Oh! A new specimen. Let's begin.
+  - The plating HOLDS! ...Probably.
+  - Systems online. Deploying countermeasures.
+  - Another stress test! How wonderful.
+  - Let's see what breaks first.
+  bigDamageLines:
+  - MAGNIFICENT impact force!
+  - The readings are off the charts!
+  - Yes yes yes! More of THAT!
+  - 'Structural damage: critical. Theirs, not ours!'
+  - Beautiful destruction. Just beautiful.
+  highStatusLines:
+  - Cascading system failure! In THEM!
+  - The ailments compound. Fascinating data.
+  - Their defenses are compromised. Perfect.
+  - Stack overflow! Haha! No, the OTHER kind.
+  lowHPLines:
+  - Hull integrity failing! Reroute! REROUTE!
+  - Fascinating. We're dying. Stop dying.
+  - Emergency protocols standing by...
+  - The stitches strain. Hold together!
+  victoryLines:
+  - 'Test complete! Subject: dismantled.'
+  - All readings nominal. We survive. AGAIN!
+  - Another successful field test!
+  - The patchwork holds! I told you!
+  closeCallVictoryLines:
+  - HA! By the THINNEST margin!
+  - Warning levels critical but we LIVE!
+  - That was... educational. Let's not repeat it.
+  - Barely functional! My favorite state of being!
+  approvalLines:
+  - Ooh, that one has POTENTIAL!
+  - Adding to the arsenal. Smart!
+  - This fits the design. The grand design!
+  - Perfect component. Slot it in!
+  disapprovalLines:
+  - That's... not in the blueprint.
+  - Incompatible components. Tsk.
+  - Why would you... never mind.
+  - Square peg, round hole, dear.
+  bossStartFallbackLines:
+  - BOSS-CLASS specimen! Maximum output!
+  - This one is built different. Like us!
+  - All systems to combat mode! GO GO GO!
+  eventFallbackLines:
+  - Uncharted data! How thrilling!
+  - A variable! I love variables!
+  - Recalculating optimal path...

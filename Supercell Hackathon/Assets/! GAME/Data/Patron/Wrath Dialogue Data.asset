@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6f16563972d8a64485230248755bddd, type: 3}
+  m_Name: Wrath Dialogue Data
+  m_EditorClassIdentifier: Assembly-CSharp::PatronDialogueData
+  combatStartLines:
+  - Another one. Begin.
+  - Burn them down.
+  - Show me what my pact bought.
+  - No mercy. No hesitation.
+  - Let the flames judge.
+  bigDamageLines:
+  - Acceptable.
+  - More. Always more.
+  - That is the fury I demand.
+  - Good. Again.
+  - The fire answers.
+  highStatusLines:
+  - They crumble.
+  - Watch them wither.
+  - The affliction spreads. Good.
+  - Suffering is the purest fuel.
+  lowHPLines:
+  - Bleed, but do not break.
+  - Pain sharpens. Use it.
+  - You are not permitted to fall.
+  - Wrath does not kneel.
+  victoryLines:
+  - As expected.
+  - Adequate.
+  - The pyre claims another.
+  - Onward. We are not finished.
+  closeCallVictoryLines:
+  - Sloppy. But alive.
+  - That was too close. Sharpen yourself.
+  - Victory through stubbornness. I allow it.
+  - A pyrrhic win. We will do better.
+  approvalLines:
+  - A worthy addition to the arsenal.
+  - Fire recognizes fire.
+  - Yes. Feed the flames.
+  - That card burns with purpose.
+  disapprovalLines:
+  - That is not our way.
+  - A distraction. Nothing more.
+  - You stray from the pact.
+  - Weakness dressed as strategy.
+  bossStartFallbackLines:
+  - A true challenge. Finally.
+  - This one has teeth. Good.
+  - Prove yourself against real fire.
+  eventFallbackLines:
+  - Choose wisely. Or don't.
+  - Even rest serves the war.
+  - Make your decision. I grow impatient.

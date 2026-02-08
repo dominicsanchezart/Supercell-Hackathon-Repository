@@ -54,11 +54,21 @@ public class RunManager : MonoBehaviour
 			currentHP = startingHP,
 			maxHP = startingHP,
 			deck = new List<CardData>(starterDeck),
-			gold = 0
+			gold = 0,
+			affinityPoints = new Dictionary<CardFaction, int>
+			{
+				{ CardFaction.Wrath, 0 },
+				{ CardFaction.Pride, 0 },
+				{ CardFaction.Ruin, 0 }
+			}
 		};
 
 		if (mapConfig != null)
 			State.mapData = MapGenerator.Generate(mapConfig, seed);
+
+		// Reset patron dialogue state for the new run
+		if (PatronDialogueManager.Instance != null)
+			PatronDialogueManager.Instance.ResetForNewRun();
 
 		if (loadScene)
 			LoadMapScene();
