@@ -143,7 +143,7 @@ public class CharacterInfo : MonoBehaviour
 
 	public void GainEnergy(int amount)
 	{
-		_energy = Mathf.Min(_energy + amount, _data.baseEnergy);
+		_energy += amount;
 		NotifyStatsChanged();
 	}
 

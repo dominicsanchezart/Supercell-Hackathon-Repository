@@ -13,26 +13,31 @@ public static class CardModifiers
 	/// <summary>
 	/// Returns the final modified value for a single action slot,
 	/// based on the action type and the caster's current buffs.
+	/// When the target is Self, fury/empower/weaken modifiers are skipped for damage
+	/// so that self-damage cards aren't accidentally boosted or reduced.
 	/// </summary>
 	public static int GetModifiedValue(CardActionType type, int baseValue, CharacterInfo caster,
-		StatusEffectType statusEffect = default)
+		StatusEffectType statusEffect = default, ActionTarget target = ActionTarget.Enemy)
 	{
 		if (caster == null)
 			return baseValue;
+
+		bool isSelfTarget = (target == ActionTarget.Self);
 
 		switch (type)
 		{
 			case CardActionType.Damage:
 			case CardActionType.DamageAll:
-				return caster.GetModifiedDamage(baseValue);
+				return isSelfTarget ? baseValue : caster.GetModifiedDamage(baseValue);
 
 			case CardActionType.DamageLostHP:
-				// Lost HP + base value, then run through damage modifiers (empower/weaken)
-				return caster.GetModifiedDamage(caster.GetLostHP() + baseValue);
+				int lostHPBase = caster.GetLostHP() + baseValue;
+				return isSelfTarget ? lostHPBase : caster.GetModifiedDamage(lostHPBase);
 
 			case CardActionType.DamagePerStack:
 				int stacks = caster.GetStatusEffectStacks(statusEffect);
-				return caster.GetModifiedDamage(stacks * baseValue);
+				int stackBase = stacks * baseValue;
+				return isSelfTarget ? stackBase : caster.GetModifiedDamage(stackBase);
 
 			case CardActionType.HealPerStack:
 				int healStacks = caster.GetStatusEffectStacks(statusEffect);
@@ -48,13 +53,14 @@ public static class CardModifiers
 
 	/// <summary>
 	/// Builds the full set of three modified values for a card.
+	/// Each action's target is considered so self-damage isn't boosted by fury/weaken.
 	/// </summary>
 	public static void GetModifiedValues(CardData data, CharacterInfo caster,
 		out int mod1, out int mod2, out int mod3)
 	{
-		mod1 = GetModifiedValue(data.actionType1, data.action1Value, caster, data.action1StatusEffect);
-		mod2 = GetModifiedValue(data.actionType2, data.action2Value, caster, data.action2StatusEffect);
-		mod3 = GetModifiedValue(data.actionType3, data.action3Value, caster, data.action3StatusEffect);
+		mod1 = GetModifiedValue(data.actionType1, data.action1Value, caster, data.action1StatusEffect, data.actionTarget1);
+		mod2 = GetModifiedValue(data.actionType2, data.action2Value, caster, data.action2StatusEffect, data.actionTarget2);
+		mod3 = GetModifiedValue(data.actionType3, data.action3Value, caster, data.action3StatusEffect, data.actionTarget3);
 	}
 
 	/// <summary>

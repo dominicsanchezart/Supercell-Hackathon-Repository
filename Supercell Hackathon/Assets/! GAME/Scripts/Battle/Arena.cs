@@ -24,6 +24,10 @@ public class Arena : MonoBehaviour
 	[Tooltip("UI text that shows the enemy's predicted intent for their next turn.")]
 	[SerializeField] private EnemyIntentDisplay enemyIntentDisplay;
 
+	[Header("Enemy Card Display")]
+	[Tooltip("Shows the card the enemy just played with a brief animation.")]
+	[SerializeField] private EnemyCardDisplay enemyCardDisplay;
+
 	[Header("Victory Delay")]
 	[SerializeField] private float victoryDelay = 1.0f;
 	[SerializeField] private float defeatDelay = 1.5f;
@@ -85,7 +89,13 @@ public class Arena : MonoBehaviour
 			string enemyName = _character2.characterInfo._data != null
 				? _character2.characterInfo._data.name : "Enemy";
 			patronDialogue.OnCombatStart(enemyName);
+
+			// Wait for the dialogue to finish before showing the hand
+			yield return WaitForDialogueToFinish();
 		}
+
+		// Slide the player's hand up from below
+		yield return _character1.SlideInFromBelow();
 
 		StartPlayerTurn();
 	}
@@ -114,8 +124,8 @@ public class Arena : MonoBehaviour
 			_character2.characterInfo.GetInventory().AssignDeck(preset.deck.cards);
 		}
 
-		Debug.Log($"[Arena] Applied enemy preset: {preset.enemyName} " +
-			$"(HP: {preset.characterData?.baseHealth}, Deck: {preset.deck?.cards?.Count ?? 0} cards)");
+		// Debug.Log($"[Arena] Applied enemy preset: {preset.enemyName} " +
+		// 	$"(HP: {preset.characterData?.baseHealth}, Deck: {preset.deck?.cards?.Count ?? 0} cards)");
 	}
 
 	private void Update()
@@ -148,7 +158,7 @@ public class Arena : MonoBehaviour
 			_character1.characterInfo.GainEnergy(1);
 			_character1.characterInfo.Heal(2);
 			_perfectFormActive = false;
-			Debug.Log("[Passive] Perfect Form: +1 Energy, Heal 2 (no damage taken last turn)");
+			// Debug.Log("[Passive] Perfect Form: +1 Energy, Heal 2 (no damage taken last turn)");
 		}
 
 		// Reset dialogue per-turn tracking
@@ -161,7 +171,7 @@ public class Arena : MonoBehaviour
 		if (enemyIntentDisplay != null)
 			enemyIntentDisplay.Refresh();
 
-		Debug.Log($"=== PLAYER TURN === HP: {_character1.characterInfo.GetHealth()} | Energy: {_character1.characterInfo.GetEnergy()}");
+		// Debug.Log($"=== PLAYER TURN === HP: {_character1.characterInfo.GetHealth()} | Energy: {_character1.characterInfo.GetEnergy()}");
 	}
 
 	public void EndPlayerTurn()
@@ -172,8 +182,8 @@ public class Arena : MonoBehaviour
 		if (_activePassive == PatronPassive.PerfectForm)
 		{
 			_perfectFormActive = !_tookDamageThisTurn;
-			if (_perfectFormActive)
-				Debug.Log("[Passive] Perfect Form: No damage taken — bonus queued for next turn.");
+			// if (_perfectFormActive)
+				// Debug.Log("[Passive] Perfect Form: No damage taken — bonus queued for next turn.");
 		}
 
 		// Decay weaken, reset empower at end of turn
@@ -199,7 +209,7 @@ public class Arena : MonoBehaviour
 
 		_character2.StartTurn();
 
-		Debug.Log($"=== ENEMY TURN === HP: {_character2.characterInfo.GetHealth()} | Energy: {_character2.characterInfo.GetEnergy()}");
+		// Debug.Log($"=== ENEMY TURN === HP: {_character2.characterInfo.GetHealth()} | Energy: {_character2.characterInfo.GetEnergy()}");
 
 		StartCoroutine(RunEnemyAI());
 	}
@@ -209,15 +219,17 @@ public class Arena : MonoBehaviour
 		float delay = _character2.characterInfo._data.attackDelay;
 		yield return new WaitForSeconds(delay);
 
-		bool playedCard = true;
-		while (playedCard && !_battleOver)
+		CardData playedCard = _character2.TryPlayRandomCard();
+		while (playedCard != null && !_battleOver)
 		{
+			// Show the card the enemy just played
+			if (enemyCardDisplay != null)
+				yield return enemyCardDisplay.Show(playedCard);
+
+			if (CheckBattleOver()) yield break;
+			yield return new WaitForSeconds(delay);
+
 			playedCard = _character2.TryPlayRandomCard();
-			if (playedCard)
-			{
-				if (CheckBattleOver()) yield break;
-				yield return new WaitForSeconds(delay);
-			}
 		}
 
 		if (!_battleOver)
@@ -413,7 +425,7 @@ public class Arena : MonoBehaviour
 		if (_activePassive == PatronPassive.BleedOut)
 		{
 			_character1.characterInfo.ApplyFury(2);
-			Debug.Log("[Passive] Bleed Out: +2 Fury from taking card damage.");
+			// Debug.Log("[Passive] Bleed Out: +2 Fury from taking card damage.");
 		}
 
 		// Emergency Protocol (Ruin): first time dropping below 50% HP, gain defensive surge
@@ -428,7 +440,7 @@ public class Arena : MonoBehaviour
 				_character1.characterInfo.ApplyDodge(2);
 				_character1.DrawCardFromDeck();
 				_character1.DrawCardFromDeck();
-				Debug.Log("[Passive] Emergency Protocol: +5 Guard, +2 Dodge, Draw 2 (dropped below 50% HP)");
+				// Debug.Log("[Passive] Emergency Protocol: +5 Guard, +2 Dodge, Draw 2 (dropped below 50% HP)");
 			}
 		}
 
@@ -495,15 +507,13 @@ public class Arena : MonoBehaviour
 
 	private IEnumerator HandleVictory()
 	{
-		// Brief pause so the player sees the killing blow land
-		yield return new WaitForSeconds(victoryDelay);
-
-		// Hide the player's hand
+		// Immediately hide battle UI and hand so the screen feels responsive
 		_character1.ClearHand();
-
-		// Disable battle UI
 		if (battleUI != null)
 			battleUI.SetActive(false);
+
+		// Brief pause so the player sees the killing blow land
+		yield return new WaitForSeconds(victoryDelay);
 
 		// Slide ONLY the enemy off screen — keep player, patron, and background visible
 		if (battleStage != null)
@@ -536,7 +546,7 @@ public class Arena : MonoBehaviour
 					if (RunManager.Instance != null && RunManager.Instance.State != null)
 						RunManager.Instance.State.deck.Add(chosenCard);
 
-					Debug.Log($"Added {chosenCard.cardName} to deck.");
+					// Debug.Log($"Added {chosenCard.cardName} to deck.");
 
 					// Fire reward card chosen dialogue
 					if (patronDialogue != null)
@@ -552,7 +562,7 @@ public class Arena : MonoBehaviour
 		else
 		{
 			// No reward UI assigned — slide out and go to map
-			Debug.LogWarning("Arena: No BattleRewardUI assigned. Returning to map immediately.");
+			// Debug.LogWarning("Arena: No BattleRewardUI assigned. Returning to map immediately.");
 			StartCoroutine(SlideOutAndReturnToMap());
 		}
 	}
@@ -645,7 +655,7 @@ public class Arena : MonoBehaviour
 		}
 		else
 		{
-			Debug.LogWarning("Arena: No RunManager found. Cannot return to map.");
+			// Debug.LogWarning("Arena: No RunManager found. Cannot return to map.");
 		}
 	}
 
@@ -662,7 +672,7 @@ public class Arena : MonoBehaviour
 		else
 		{
 			// Fallback: just load a scene by name
-			Debug.Log("No RunManager — loading main menu scene directly (placeholder).");
+			// Debug.Log("No RunManager — loading main menu scene directly (placeholder).");
 			UnityEngine.SceneManagement.SceneManager.LoadScene(0);
 		}
 	}

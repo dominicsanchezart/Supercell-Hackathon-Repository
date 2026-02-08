@@ -48,6 +48,10 @@ public class Hand : MonoBehaviour
 
     [Header("Sorting")]
     public int selectedSortingBoost = 1000;
+
+    [Header("Slide In")]
+    [SerializeField] private float slideInDistance = 6f;
+    [SerializeField] private float slideInDuration = 0.5f;
     private const int SORTING_STRIDE = 100;
 
     // Drag state
@@ -59,6 +63,10 @@ public class Hand : MonoBehaviour
     // so it doesn't accidentally discard/exhaust/destroy itself mid-resolution.
     private CardData _cardBeingPlayed;
 
+    // Tracks how many of the enemy's cards in hand are "on fire" this turn
+    // (mirrors the player's visual isBurning flag without needing CardViews).
+    private int _burningCardsRemaining;
+
     // Card collections
     public List<CardData> cardsInHand = new();
     public List<CardData> drawPile = new();
@@ -69,12 +77,22 @@ public class Hand : MonoBehaviour
     private readonly List<CardView> cards = new();
     private int selectedIndex;
     private float scrollIndex;
+    private Vector3 _slideTarget;
 
     #region Unity Methods
 
     private void Awake()
     {
         if (!handRoot) handRoot = transform;
+
+        // Start off-screen below so we can slide in later
+        if (isPlayer)
+        {
+            Vector3 pos = handRoot.position;
+            _slideTarget = pos;
+            pos.y -= slideInDistance;
+            handRoot.position = pos;
+        }
 
         cards.Clear();
         foreach (Transform child in handRoot)
@@ -91,6 +109,29 @@ public class Hand : MonoBehaviour
     }
 
     private void Start() => StartBattle();
+
+    /// <summary>
+    /// Slides the hand up from below into its target position.
+    /// Yield on the returned Coroutine to wait for it to finish.
+    /// </summary>
+    public Coroutine SlideInFromBelow()
+    {
+        return StartCoroutine(SlideInRoutine());
+    }
+
+    private IEnumerator SlideInRoutine()
+    {
+        Vector3 startPos = handRoot.position;
+        float elapsed = 0f;
+        while (elapsed < slideInDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / slideInDuration));
+            handRoot.position = Vector3.Lerp(startPos, _slideTarget, t);
+            yield return null;
+        }
+        handRoot.position = _slideTarget;
+    }
 
 	private void Update()
 	{
@@ -189,6 +230,17 @@ public class Hand : MonoBehaviour
             DrawCardFromDeck();
             cardsToDraw--;
         }
+
+        // For non-visual hands (enemy): consume burn stacks up front,
+        // same as the player's ApplyBurnToCards.
+        if (!showCardVisuals)
+        {
+            int burnStacks = characterInfo.GetBurn();
+            int toIgnite = Mathf.Min(burnStacks, maxBurnCards, cardsInHand.Count);
+            _burningCardsRemaining = toIgnite;
+            if (toIgnite > 0)
+                characterInfo.ConsumeBurn(toIgnite);
+        }
     }
 
     private IEnumerator DrawNewHandRoutine()
@@ -204,6 +256,21 @@ public class Hand : MonoBehaviour
 
             if (cardsToDraw > 0)
                 yield return new WaitForSeconds(drawCardDelay);
+        }
+
+        // Centre the selection on the middle card after drawing
+        selectedIndex = cards.Count > 0 ? cards.Count / 2 : 0;
+        scrollIndex = selectedIndex;
+
+        // For non-visual hands (enemy): consume burn stacks up front,
+        // same as the player's ApplyBurnToCards.
+        if (!showCardVisuals)
+        {
+            int burnStacks = characterInfo.GetBurn();
+            int toIgnite = Mathf.Min(burnStacks, maxBurnCards, cardsInHand.Count);
+            _burningCardsRemaining = toIgnite;
+            if (toIgnite > 0)
+                characterInfo.ConsumeBurn(toIgnite);
         }
 
         ApplyBurnToCards();
@@ -470,9 +537,12 @@ public class Hand : MonoBehaviour
         characterInfo.ConsumeBurn(actualIgnited);
     }
 
-    public bool TryPlayRandomCard()
+    /// <summary>
+    /// Tries to play a random affordable card. Returns the CardData that was played, or null if nothing was playable.
+    /// </summary>
+    public CardData TryPlayRandomCard()
     {
-        if (cardsInHand.Count == 0) return false;
+        if (cardsInHand.Count == 0) return null;
 
         List<int> playable = new();
         for (int i = 0; i < cardsInHand.Count; i++)
@@ -481,7 +551,7 @@ public class Hand : MonoBehaviour
                 playable.Add(i);
         }
 
-        if (playable.Count == 0) return false;
+        if (playable.Count == 0) return null;
 
         int index = playable[Random.Range(0, playable.Count)];
         CardData data = cardsInHand[index];
@@ -490,6 +560,15 @@ public class Hand : MonoBehaviour
         PlaySound(data.cardType == CardType.Attack ? playAttackCardSound : playNonAttackCardSound);
 
         characterInfo.SpendEnergy(data.baseEnergyCost);
+
+        // Burn: enemy doesn't have visual CardViews, so use the pre-calculated
+        // burning card count (consumed at draw time, same as the player).
+        if (_burningCardsRemaining > 0)
+        {
+            _burningCardsRemaining--;
+            characterInfo.TakeDamage(burnDamagePerCard);
+            Debug.Log($"Burned card played! {characterInfo._data.name} takes {burnDamagePerCard} burn damage.");
+        }
 
         _cardBeingPlayed = data;
         ResolveCardActions(data);
@@ -507,7 +586,7 @@ public class Hand : MonoBehaviour
         }
 
         Debug.Log($"Enemy played: {data.cardName}");
-        return true;
+        return data;
     }
 
     private void ReshuffleDiscardIntoDraw()
@@ -656,14 +735,16 @@ public class Hand : MonoBehaviour
         card.transform.SetParent(handRoot);
         card.owner = this;
         cards.Add(card);
-        selectedIndex = cards.Count - 1;
+        selectedIndex = cards.Count / 2;
+        scrollIndex = selectedIndex;
     }
 
     public void RemoveCard(CardView card)
     {
         if (!cards.Remove(card)) return;
         Destroy(card.gameObject);
-        selectedIndex = Mathf.Clamp(selectedIndex, 0, cards.Count - 1);
+        selectedIndex = Mathf.Clamp(selectedIndex, 0, Mathf.Max(0, cards.Count - 1));
+        scrollIndex = selectedIndex;
     }
 
     private bool IsValidSelection() => selectedIndex >= 0 && selectedIndex < cards.Count;
