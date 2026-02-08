@@ -78,6 +78,10 @@ public class Hand : MonoBehaviour
     private int selectedIndex;
     private float scrollIndex;
     private Vector3 _slideTarget;
+    private Coroutine _drawCoroutine;
+
+    /// <summary>True while the draw-card animation coroutine is running.</summary>
+    public bool IsDrawing { get; private set; }
 
     #region Unity Methods
 
@@ -143,6 +147,14 @@ public class Hand : MonoBehaviour
 			return;
 		}
 
+		// Block card interaction while the draw animation is playing
+		if (IsDrawing)
+		{
+			DisableAllCardColliders();
+			RefreshLayout();
+			return;
+		}
+
 		HandleDragInput();
 
 		if (!_isDragging)
@@ -179,12 +191,33 @@ public class Hand : MonoBehaviour
     [ContextMenu("Test Draw Hand")]
     public void StartTurn()
     {
+        // Kill any lingering draw coroutine from a previous turn
+        StopDrawCoroutine();
+
         characterInfo.ResetEnergy();
-        StartCoroutine(DrawNewHandRoutine());
+        _drawCoroutine = StartCoroutine(DrawNewHandRoutine());
     }
 
     [ContextMenu("Test Discard Hand")]
-    public void EndTurn() => DiscardHand();
+    public void EndTurn()
+    {
+        // Stop the draw coroutine first so it can't keep spawning cards
+        StopDrawCoroutine();
+        DiscardHand();
+    }
+
+    /// <summary>
+    /// Safely stops the draw coroutine if one is running and resets the IsDrawing flag.
+    /// </summary>
+    private void StopDrawCoroutine()
+    {
+        if (_drawCoroutine != null)
+        {
+            StopCoroutine(_drawCoroutine);
+            _drawCoroutine = null;
+        }
+        IsDrawing = false;
+    }
 
     #endregion
 
@@ -245,6 +278,7 @@ public class Hand : MonoBehaviour
 
     private IEnumerator DrawNewHandRoutine()
     {
+        IsDrawing = true;
         int cardsToDraw = characterInfo._data.baseDrawSize;
 
         while (cardsToDraw > 0)
@@ -257,6 +291,9 @@ public class Hand : MonoBehaviour
             if (cardsToDraw > 0)
                 yield return new WaitForSeconds(drawCardDelay);
         }
+
+        IsDrawing = false;
+        _drawCoroutine = null;
 
         // Centre the selection on the middle card after drawing
         selectedIndex = cards.Count > 0 ? cards.Count / 2 : 0;

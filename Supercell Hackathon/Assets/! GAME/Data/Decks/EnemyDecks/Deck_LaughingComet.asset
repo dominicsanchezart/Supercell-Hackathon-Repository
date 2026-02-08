@@ -12,4 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86309f2b2f3bc3446aefb90b8b01852b, type: 3}
   m_Name: Deck_LaughingComet
   m_EditorClassIdentifier: Assembly-CSharp::Deck
-  cards: []
+  cards:
+  - {fileID: 11400000, guid: 4640fb517f7755c498f2fddaf5a1f1a4, type: 2}
+  - {fileID: 11400000, guid: ac8a08a3292fe534e885c9223e1b7ca0, type: 2}
+  - {fileID: 11400000, guid: cc747b855d4a6e943aad663ee2bf6e27, type: 2}
+  - {fileID: 11400000, guid: 66c858dd9b9238042b480daf36758a4e, type: 2}
+  - {fileID: 11400000, guid: 3e7b8b5ec968f6e4f9b3359bac301263, type: 2}
+  - {fileID: 11400000, guid: acbac9c795bed09478ce406cc99dab70, type: 2}
+  - {fileID: 11400000, guid: 61198bb7ad6379543ab775f75c54376a, type: 2}
+  - {fileID: 11400000, guid: 31150c781b7bc7e4ca2feaac8af7dfc5, type: 2}
+  - {fileID: 11400000, guid: 76a35ea3889d08045aad3927ae8bb92a, type: 2}
+  - {fileID: 11400000, guid: 28ad80588e99758458c911dd21f1a466, type: 2}
+  - {fileID: 11400000, guid: 7c56e1e6023f6de40bfddafba54b9f37, type: 2}
+  - {fileID: 11400000, guid: 8729d32017a648145aa11a9a18d7a204, type: 2}
+  - {fileID: 11400000, guid: 38b42bb9b4908f440930cbb5bd87bacc, type: 2}
+  - {fileID: 11400000, guid: 997a16f8f154a4147ae4ce3c7f8c33ca, type: 2}
+  - {fileID: 11400000, guid: b492ea17e7e32ed488d10672fe333fd3, type: 2}
+  - {fileID: 11400000, guid: 420a334a552128e4c845ee7862ad6630, type: 2}
+  - {fileID: 11400000, guid: c2365d7beb4574543b8f7b966330809a, type: 2}
+  - {fileID: 11400000, guid: caba315cb1a081b42b881427f3ec3f7e, type: 2}
+  - {fileID: 11400000, guid: 2d165145d34a1e947ad744270b5d169c, type: 2}
+  - {fileID: 11400000, guid: fe81ec38a69896c47b1b0db30ce4e177, type: 2}
+  - {fileID: 11400000, guid: e334b58aa543cdb4d9a715c6bb6c50ed, type: 2}
+  - {fileID: 11400000, guid: 5263a0e83cf547b409b39e7f631e429a, type: 2}
