@@ -2130,6 +2130,7 @@ GameObject:
   m_Component:
   - component: {fileID: 492984035}
   - component: {fileID: 492984036}
+  - component: {fileID: 492984037}
   m_Layer: 0
   m_Name: Hand_Player
   m_TagString: Untagged
@@ -2182,6 +2183,13 @@ MonoBehaviour:
   lookRotationSmooth: 12
   dragPlayThreshold: 2
   dragReturnSpeed: 20
+  drawCardSound: {fileID: 8300000, guid: 17e35318f7141694b8e79cd99d757fac, type: 3}
+  pickupCardSound: {fileID: 8300000, guid: 17e35318f7141694b8e79cd99d757fac, type: 3}
+  playAttackCardSound: {fileID: 8300000, guid: a01c94fbe21696b4380d5c470efc3304, type: 3}
+  playNonAttackCardSound: {fileID: 8300000, guid: 19b6b95d832459d45b2d17537d90fb62, type: 3}
+  audioSource: {fileID: 492984037}
+  drawCardDelay: 0.15
+  drawPitchRange: {x: 0.95, y: 1.05}
   burnDamagePerCard: 2
   maxBurnCards: 5
   selectedSortingBoost: 1000
@@ -2189,6 +2197,103 @@ MonoBehaviour:
   drawPile: []
   discardPile: []
   exhaustPile: []
+--- !u!82 &492984037
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 492984033}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 0.5
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &505096793
 GameObject:
   m_ObjectHideFlags: 0
@@ -6105,6 +6210,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1855899005}
   - component: {fileID: 1855899004}
+  - component: {fileID: 1855899006}
   m_Layer: 0
   m_Name: Hand_Enemy
   m_TagString: Untagged
@@ -6142,6 +6248,13 @@ MonoBehaviour:
   lookRotationSmooth: 12
   dragPlayThreshold: 2
   dragReturnSpeed: 20
+  drawCardSound: {fileID: 0}
+  pickupCardSound: {fileID: 0}
+  playAttackCardSound: {fileID: 8300000, guid: a01c94fbe21696b4380d5c470efc3304, type: 3}
+  playNonAttackCardSound: {fileID: 8300000, guid: 19b6b95d832459d45b2d17537d90fb62, type: 3}
+  audioSource: {fileID: 1855899006}
+  drawCardDelay: 0.15
+  drawPitchRange: {x: 0.9, y: 1.1}
   burnDamagePerCard: 2
   maxBurnCards: 5
   selectedSortingBoost: 1000
@@ -6164,6 +6277,103 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1117344994}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!82 &1855899006
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1855899003}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 0.5
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &1939152216
 GameObject:
   m_ObjectHideFlags: 0
@@ -6425,6 +6635,7 @@ MonoBehaviour:
   _isPlayerTurn: 1
   battleStage: {fileID: 2068168977}
   cardViewer: {fileID: 819569703}
+  cardViewerBackdrop: {fileID: 0}
   battleRewardUI: {fileID: 2068168980}
   gameOverUI: {fileID: 2068168979}
   battleUI: {fileID: 89842795}
@@ -6496,6 +6707,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  patronSlideDelay: 0.3
   sortingOrder: -10
   shakeDuration: 0.3
   shakeMagnitude: 0.15
@@ -6539,9 +6751,12 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   titleText: {fileID: 0}
+  goldRewardText: {fileID: 0}
   skipButton: {fileID: 0}
   rewardPool: {fileID: 11400000, guid: ef724edaac614464fb616a97afa82e51, type: 2}
   cardsToOffer: 3
+  goldRewardMin: 10
+  goldRewardMax: 25
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

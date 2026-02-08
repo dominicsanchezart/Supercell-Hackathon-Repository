@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -31,6 +32,15 @@ public class Hand : MonoBehaviour
     [Header("Drag to Play")]
     public float dragPlayThreshold = 2.0f;
     public float dragReturnSpeed = 20f;
+
+    [Header("Audio")]
+    [SerializeField] private AudioClip drawCardSound;
+    [SerializeField] private AudioClip pickupCardSound;
+    [SerializeField] private AudioClip playAttackCardSound;
+    [SerializeField] private AudioClip playNonAttackCardSound;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private float drawCardDelay = 0.15f;
+    [SerializeField] private Vector2 drawPitchRange = new(0.9f, 1.1f);
 
     [Header("Burn")]
     [SerializeField] private int burnDamagePerCard = 2;
@@ -125,9 +135,7 @@ public class Hand : MonoBehaviour
     public void StartTurn()
     {
         characterInfo.ResetEnergy();
-        DrawNewHand();
-        ApplyBurnToCards();
-        RefreshCardDescriptions();
+        StartCoroutine(DrawNewHandRoutine());
     }
 
     [ContextMenu("Test Discard Hand")]
@@ -149,6 +157,21 @@ public class Hand : MonoBehaviour
         drawPile.RemoveAt(0);
         cardsInHand.Add(data);
         SpawnCardView(data);
+
+        if (drawCardSound != null && audioSource != null)
+        {
+            audioSource.pitch = Random.Range(drawPitchRange.x, drawPitchRange.y);
+            audioSource.PlayOneShot(drawCardSound);
+        }
+    }
+
+    private void PlaySound(AudioClip clip)
+    {
+        if (clip != null && audioSource != null)
+        {
+            audioSource.pitch = 1f;
+            audioSource.PlayOneShot(clip);
+        }
     }
 
     public void DrawNewHand()
@@ -164,6 +187,25 @@ public class Hand : MonoBehaviour
         }
     }
 
+    private IEnumerator DrawNewHandRoutine()
+    {
+        int cardsToDraw = characterInfo._data.baseDrawSize;
+
+        while (cardsToDraw > 0)
+        {
+            if (drawPile.Count == 0 && discardPile.Count == 0) break;
+
+            DrawCardFromDeck();
+            cardsToDraw--;
+
+            if (cardsToDraw > 0)
+                yield return new WaitForSeconds(drawCardDelay);
+        }
+
+        ApplyBurnToCards();
+        RefreshCardDescriptions();
+    }
+
 	public void UseCard()
 	{
 		if (!showCardVisuals || !IsValidSelection())
@@ -173,6 +215,9 @@ public class Hand : MonoBehaviour
 		CardData data = view.GetComponent<Card>().cardData;
 
 		if (characterInfo.GetEnergy() < data.baseEnergyCost) return;
+
+		// Play appropriate sound based on card type
+		PlaySound(data.cardType == CardType.Attack ? playAttackCardSound : playNonAttackCardSound);
 
 		characterInfo.SpendEnergy(data.baseEnergyCost);
 
@@ -400,6 +445,9 @@ public class Hand : MonoBehaviour
 
         int index = playable[Random.Range(0, playable.Count - 1)];
         CardData data = cardsInHand[index];
+
+        // Play appropriate sound based on card type
+        PlaySound(data.cardType == CardType.Attack ? playAttackCardSound : playNonAttackCardSound);
 
         characterInfo.SpendEnergy(data.baseEnergyCost);
         ResolveCardActions(data);

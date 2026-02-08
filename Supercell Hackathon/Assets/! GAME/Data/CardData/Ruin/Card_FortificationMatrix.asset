@@ -16,8 +16,8 @@ MonoBehaviour:
   cardType: 1
   cardFaction1: 3
   cardFaction2: 3
-  layer0: {fileID: 0}
-  layer1: {fileID: 0}
+  layer0: {fileID: 21300000, guid: 356c3948cf5658b4589a6b8da281cf18, type: 3}
+  layer1: {fileID: 21300000, guid: 62458f08444dc194bbe9a507ff75998f, type: 3}
   layer2: {fileID: 0}
   layer3: {fileID: 0}
   baseEnergyCost: 3
@@ -54,5 +54,6 @@ MonoBehaviour:
     threshold: 0
     statusEffect: 0
     cardFaction: 0
+  shopEligible: 1
   canUpgrade: 0
   upgradedCard: {fileID: 0}

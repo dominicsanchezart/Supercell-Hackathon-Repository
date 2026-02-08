@@ -16,8 +16,8 @@ MonoBehaviour:
   cardType: 0
   cardFaction1: 0
   cardFaction2: 0
-  layer0: {fileID: 0}
-  layer1: {fileID: 0}
+  layer0: {fileID: 21300000, guid: d129bb1f4d089aa43928f7bcd4825ad2, type: 3}
+  layer1: {fileID: 21300000, guid: 13d84d3810cdf8147b2cbfa09cd73d5a, type: 3}
   layer2: {fileID: 0}
   layer3: {fileID: 0}
   baseEnergyCost: 2
@@ -25,11 +25,30 @@ MonoBehaviour:
   actionType1: 1
   actionTarget1: 1
   action1Value: 20
+  action1StatusEffect: 0
+  action1Condition:
+    condition: 0
+    threshold: 0
+    statusEffect: 0
+    cardFaction: 0
   actionType2: 0
   actionTarget2: 0
   action2Value: 0
+  action2StatusEffect: 0
+  action2Condition:
+    condition: 0
+    threshold: 0
+    statusEffect: 0
+    cardFaction: 0
   actionType3: 0
   actionTarget3: 0
   action3Value: 0
+  action3StatusEffect: 0
+  action3Condition:
+    condition: 0
+    threshold: 0
+    statusEffect: 0
+    cardFaction: 0
+  shopEligible: 1
   canUpgrade: 0
   upgradedCard: {fileID: 0}
