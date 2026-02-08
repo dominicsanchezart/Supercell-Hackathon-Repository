@@ -12,4 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86309f2b2f3bc3446aefb90b8b01852b, type: 3}
   m_Name: Deck_FogIdol
   m_EditorClassIdentifier: Assembly-CSharp::Deck
-  cards: []
+  cards:
+  - {fileID: 11400000, guid: 4640fb517f7755c498f2fddaf5a1f1a4, type: 2}
+  - {fileID: 11400000, guid: ac8a08a3292fe534e885c9223e1b7ca0, type: 2}
+  - {fileID: 11400000, guid: cc747b855d4a6e943aad663ee2bf6e27, type: 2}
+  - {fileID: 11400000, guid: 66c858dd9b9238042b480daf36758a4e, type: 2}
+  - {fileID: 11400000, guid: 3e7b8b5ec968f6e4f9b3359bac301263, type: 2}
+  - {fileID: 11400000, guid: 2262f724394a4dd4883ff09d0807d8a7, type: 2}
+  - {fileID: 11400000, guid: 119488c0d7fc46f4e9f1c068348d8923, type: 2}
+  - {fileID: 11400000, guid: bb01837b113a85140bdfdd9100bd7e6b, type: 2}
+  - {fileID: 11400000, guid: d723af047d514544f9aa6b5253a9368d, type: 2}
+  - {fileID: 11400000, guid: d7f7677f1258d164699a96189787bf71, type: 2}
+  - {fileID: 11400000, guid: 4fbf66818b1e6bc4aa6787e20e8a50a7, type: 2}
+  - {fileID: 11400000, guid: cf8e6a3beb1308b48a6cd74aae207ed2, type: 2}
+  - {fileID: 11400000, guid: 3b9c7c7e9465155408ddef98dd1771e6, type: 2}
+  - {fileID: 11400000, guid: 12cfb45b584c0d641a8060343a4d6d71, type: 2}
+  - {fileID: 11400000, guid: ef2bc0f1e2343204fac1966b905f1c78, type: 2}
+  - {fileID: 11400000, guid: c67a76c4d5b81fd4a897c679e3423cfa, type: 2}
+  - {fileID: 11400000, guid: 6bad49bcee116794d8431cc93d8c675d, type: 2}
