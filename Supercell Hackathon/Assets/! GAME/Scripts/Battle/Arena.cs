@@ -12,11 +12,6 @@ public class Arena : MonoBehaviour
 	[Header("Stage")]
 	[SerializeField] private BattleStage battleStage;
 
-	[Header("Card Viewer")]
-	[SerializeField] private CardViewer cardViewer;
-	[Tooltip("Dark overlay behind the card viewer. Toggled on/off with the viewer.")]
-	[SerializeField] private GameObject cardViewerBackdrop;
-
 	[Header("Battle Result UI")]
 	[SerializeField] private BattleRewardUI battleRewardUI;
 	[SerializeField] private GameOverUI gameOverUI;
@@ -28,6 +23,9 @@ public class Arena : MonoBehaviour
 	[Header("Victory Delay")]
 	[SerializeField] private float victoryDelay = 1.0f;
 	[SerializeField] private float defeatDelay = 1.5f;
+
+	// Card viewer (found at runtime from Main Camera child)
+	private CardViewer cardViewer;
 
 	// Patron dialogue (found at runtime from persistent singleton)
 	private PatronDialogueManager patronDialogue;
@@ -41,6 +39,9 @@ public class Arena : MonoBehaviour
 	private IEnumerator Start()
 	{
 		yield return null;
+
+		// Find the CardViewer on the Main Camera
+		cardViewer = CardViewer.Instance;
 
 		// Find the persistent patron dialogue singleton
 		patronDialogue = PatronDialogueManager.Instance;
@@ -63,16 +64,8 @@ public class Arena : MonoBehaviour
 
 		if (cardViewer != null)
 		{
-			cardViewer.onHideCards += () =>
-			{
-				IsViewingCards = false;
-				if (cardViewerBackdrop != null)
-					cardViewerBackdrop.SetActive(false);
-			};
+			cardViewer.onHideCards += () => IsViewingCards = false;
 		}
-
-		if (cardViewerBackdrop != null)
-			cardViewerBackdrop.SetActive(false);
 
 		// Enable battle UI at the start of battle
 		if (battleUI != null)
@@ -626,9 +619,9 @@ public class Arena : MonoBehaviour
 
 	private void ReturnToMap()
 	{
-		// Disable CardViewer before scene unload to prevent null ref errors
+		// Hide card viewer before leaving (it lives on the camera, not the scene)
 		if (cardViewer != null)
-			cardViewer.enabled = false;
+			cardViewer.HideCards();
 
 		if (RunManager.Instance != null)
 		{
@@ -642,9 +635,9 @@ public class Arena : MonoBehaviour
 
 	private void ReturnToMainMenu()
 	{
-		// Disable CardViewer before scene unload to prevent null ref errors
+		// Hide card viewer before leaving (it lives on the camera, not the scene)
 		if (cardViewer != null)
-			cardViewer.enabled = false;
+			cardViewer.HideCards();
 
 		if (RunManager.Instance != null)
 		{
@@ -666,8 +659,6 @@ public class Arena : MonoBehaviour
 	{
 		if (cardViewer == null) return;
 		IsViewingCards = true;
-		if (cardViewerBackdrop != null)
-			cardViewerBackdrop.SetActive(true);
 		cardViewer.DisplayCards(_character1.characterInfo.GetInventory().deck.ToArray());
 	}
 
@@ -675,8 +666,6 @@ public class Arena : MonoBehaviour
 	{
 		if (cardViewer == null) return;
 		IsViewingCards = true;
-		if (cardViewerBackdrop != null)
-			cardViewerBackdrop.SetActive(true);
 		cardViewer.DisplayCards(_character1.discardPile.ToArray());
 	}
 
@@ -684,8 +673,6 @@ public class Arena : MonoBehaviour
 	{
 		if (cardViewer == null) return;
 		IsViewingCards = true;
-		if (cardViewerBackdrop != null)
-			cardViewerBackdrop.SetActive(true);
 		cardViewer.DisplayCards(_character1.exhaustPile.ToArray());
 	}
 
@@ -697,4 +684,11 @@ public class Arena : MonoBehaviour
 	}
 
 	#endregion
+
+	private void OnDestroy()
+	{
+		// Clear callbacks so the persistent CardViewer doesn't hold stale delegates
+		if (cardViewer != null)
+			cardViewer.ClearCallbacks();
+	}
 }

@@ -42,6 +42,21 @@ public class CardView : MonoBehaviour
 		canvas.sortingOrder = canvasSortingLayer + baseOrder;
     }
 
+    /// <summary>
+    /// Moves all sprite renderers and the canvas to the specified sorting layer.
+    /// Use this to place cards on a different rendering layer (e.g. "Deck View" for the CardViewer).
+    /// </summary>
+    public void SetSortingLayer(string layerName)
+    {
+        for (int i = 0; i < sprites.Length; i++)
+        {
+            sprites[i].sortingLayerName = layerName;
+        }
+
+        if (canvas != null)
+            canvas.sortingLayerName = layerName;
+    }
+
 	public void SetMasked(bool enabled)
 	{
 		foreach (var sprite in masedSprites)

@@ -35,7 +35,8 @@ public class BattleRewardUI : MonoBehaviour
 	[SerializeField] private int hoverSortingBoost = 500;
 
 	[Header("Sorting")]
-	[SerializeField] private int baseSortingOrder = 5000;
+	[SerializeField] private string rewardSortingLayer = "Card";
+	[SerializeField] private int baseSortingOrder = 100;
 
 	[Header("Raycasting")]
 	[SerializeField] private LayerMask cardLayer;
@@ -198,10 +199,11 @@ public class BattleRewardUI : MonoBehaviour
 			if (card != null)
 				card.SetCardData(cards[i]);
 
-			// Set high sorting order so reward cards render on top of battle scene
+			// Place reward cards on the Card sorting layer above battle sprites
 			CardView cardView = cardObj.GetComponent<CardView>();
 			if (cardView != null)
 			{
+				cardView.SetSortingLayer(rewardSortingLayer);
 				cardView.SetSortingOrder(baseSortingOrder + i);
 				cardView.enabled = false; // disable Hand-based interaction
 			}

@@ -42,8 +42,9 @@ public class BattleStage : MonoBehaviour
 	[Tooltip("Delay before the patron portrait slides in after the player/enemy.")]
 	[SerializeField] private float patronSlideDelay = 0.3f;
 
-	[Header("Scale")]
-	[SerializeField] private int sortingOrder = -10;
+	[Header("Sorting")]
+	[SerializeField] private string characterSortingLayer = "Character";
+	[SerializeField] private int sortingOrder = 0;
 
 	[Header("Damage Shake")]
 	[SerializeField] private float shakeDuration = 0.3f;
@@ -139,6 +140,7 @@ public class BattleStage : MonoBehaviour
 		if (data.characterSprite != null)
 			sr.sprite = data.characterSprite;
 
+		sr.sortingLayerName = characterSortingLayer;
 		sr.sortingOrder = sortingOrder;
 
 		// Apply per-character scale
@@ -180,6 +182,7 @@ public class BattleStage : MonoBehaviour
 		}
 
 		patronSpriteRenderer.sprite = patron.portrait;
+		patronSpriteRenderer.sortingLayerName = characterSortingLayer;
 		patronSpriteRenderer.sortingOrder = sortingOrder - 1; // behind player sprite
 		patronSpriteRenderer.transform.localScale = Vector3.one * patronScale;
 

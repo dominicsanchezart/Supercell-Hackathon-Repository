@@ -19,18 +19,13 @@ public class CampView : MonoBehaviour
 	[Tooltip("The Upgrade option card (placed in scene, wired in inspector).")]
 	public OptionCard upgradeOption;
 
-	[Header("Card Viewer (for upgrade selection)")]
-	[Tooltip("CardViewer component — must be on an always-active GameObject.")]
-	public CardViewer cardViewer;
-	[Tooltip("Dark backdrop behind the card viewer (toggled on/off).")]
-	public GameObject cardViewerBackdrop;
-
-	[Header("Overlay Canvas")]
-	[Tooltip("GraphicRaycaster on the overlay canvas. Disabled while CardViewer is open.")]
-	public GraphicRaycaster overlayRaycaster;
+	[Header("UI")]
 	public TextMeshProUGUI hpDisplay;
 	public TextMeshProUGUI feedbackText;
 	public Button leaveButton;
+
+	// Card viewer (found at runtime from Main Camera child)
+	private CardViewer cardViewer;
 
 	float healPercent;
 	bool hasActed;
@@ -46,6 +41,9 @@ public class CampView : MonoBehaviour
 
 	public void Initialize(CampData campData)
 	{
+		// Find the CardViewer on the Main Camera
+		cardViewer = CardViewer.Instance;
+
 		healPercent = campData != null ? campData.healPercent : 0.30f;
 		hasActed = false;
 		isUpgradeOpen = false;
@@ -89,9 +87,6 @@ public class CampView : MonoBehaviour
 			cardViewer.onCardSelected += OnUpgradeCardSelected;
 			cardViewer.onHideCards += OnUpgradeViewerClosed;
 		}
-
-		if (cardViewerBackdrop != null)
-			cardViewerBackdrop.SetActive(false);
 
 		// Wire Leave button
 		if (leaveButton != null)
@@ -174,17 +169,11 @@ public class CampView : MonoBehaviour
 
 		isUpgradeOpen = true;
 
-		if (cardViewerBackdrop != null)
-			cardViewerBackdrop.SetActive(true);
-
-		// Disable overlay raycaster so Physics2D can reach CardViewer cards
-		if (overlayRaycaster != null)
-			overlayRaycaster.enabled = false;
-
 		// Disable option card interaction while viewer is open
 		if (restOption != null) restOption.SetInteractable(false);
 		if (upgradeOption != null) upgradeOption.SetInteractable(false);
 
+		// CardViewer manages its own backdrop and raycaster toggling
 		cardViewer.DisplayCards(cards);
 	}
 
@@ -243,13 +232,7 @@ public class CampView : MonoBehaviour
 	void CloseUpgradeViewer()
 	{
 		isUpgradeOpen = false;
-
-		if (cardViewerBackdrop != null)
-			cardViewerBackdrop.SetActive(false);
-
-		// Re-enable overlay raycaster
-		if (overlayRaycaster != null)
-			overlayRaycaster.enabled = true;
+		// Backdrop and raycaster are managed by CardViewer itself
 	}
 
 	// ─── UI Helpers ───────────────────────────────────────────────
@@ -276,5 +259,12 @@ public class CampView : MonoBehaviour
 
 		if (RunManager.Instance != null)
 			RunManager.Instance.OnEncounterComplete();
+	}
+
+	private void OnDestroy()
+	{
+		// Clear callbacks so the persistent CardViewer doesn't hold stale delegates
+		if (cardViewer != null)
+			cardViewer.ClearCallbacks();
 	}
 }

@@ -35,24 +35,14 @@ public class ShopView : MonoBehaviour
 	[Tooltip("Y position of the bottom row (items + card removal).")]
 	public float bottomRowY = -2.5f;
 
-	[Header("Card Removal (uses CardViewer)")]
-	[Tooltip("The same CardViewer component used in battle to show deck contents. " +
-	         "Clicking a card in the viewer removes it from the deck.")]
-	public CardViewer cardViewer;
-	[Tooltip("Backdrop sprite behind the card viewer (dark overlay). " +
-	         "Toggled on/off — do NOT put CardViewer on this object.")]
-	public GameObject cardViewerBackdrop;
-
-	[Header("Overlay Canvas")]
-	[Tooltip("The Screen Space - Overlay canvas. Its GraphicRaycaster is disabled " +
-	         "while the CardViewer is open so Physics2D raycasts can reach the cards.")]
-	public GraphicRaycaster overlayRaycaster;
-
 	[Header("Confirmation")]
 	public GameObject confirmPanel;
 	public TextMeshProUGUI confirmText;
 	public Button confirmYesButton;
 	public Button confirmNoButton;
+
+	// Card viewer (found at runtime from Main Camera child)
+	private CardViewer cardViewer;
 
 	List<ShopCardSlot> slots = new();
 	List<ShopItem> shopItems;
@@ -69,6 +59,9 @@ public class ShopView : MonoBehaviour
 
 	public void Initialize(List<ShopItem> items)
 	{
+		// Find the CardViewer on the Main Camera
+		cardViewer = CardViewer.Instance;
+
 		shopItems = items;
 		IsBlocked = false;
 		ClearSlots();
@@ -90,9 +83,6 @@ public class ShopView : MonoBehaviour
 			cardViewer.onHideCards += OnRemovalViewerClosed;
 			cardViewer.onCardSelected += OnRemovalCardClicked;
 		}
-
-		if (cardViewerBackdrop != null)
-			cardViewerBackdrop.SetActive(false);
 
 		if (confirmPanel != null)
 			confirmPanel.SetActive(false);
@@ -269,17 +259,10 @@ public class ShopView : MonoBehaviour
 		IsBlocked = true;
 		isRemovalOpen = true;
 
-		if (cardViewerBackdrop != null)
-			cardViewerBackdrop.SetActive(true);
-
-		// Disable overlay raycaster so Physics2D can reach CardViewer cards
-		if (overlayRaycaster != null)
-			overlayRaycaster.enabled = false;
-
 		RunState state = RunManager.Instance?.State;
 		if (state == null) return;
 
-		// Feed the player's deck into CardViewer — it handles layout, scroll, hover
+		// Feed the player's deck into CardViewer — it handles layout, scroll, hover, backdrop
 		cardViewer.DisplayCards(state.deck.ToArray());
 	}
 
@@ -339,13 +322,7 @@ public class ShopView : MonoBehaviour
 		if (!isRemovalOpen) return;
 		isRemovalOpen = false;
 
-		if (cardViewerBackdrop != null)
-			cardViewerBackdrop.SetActive(false);
-
-		// Re-enable overlay raycaster so UI buttons work again
-		if (overlayRaycaster != null)
-			overlayRaycaster.enabled = true;
-
+		// Backdrop and raycaster are managed by CardViewer itself
 		IsBlocked = false;
 	}
 
@@ -374,5 +351,12 @@ public class ShopView : MonoBehaviour
 
 		if (RunManager.Instance != null)
 			RunManager.Instance.OnEncounterComplete();
+	}
+
+	private void OnDestroy()
+	{
+		// Clear callbacks so the persistent CardViewer doesn't hold stale delegates
+		if (cardViewer != null)
+			cardViewer.ClearCallbacks();
 	}
 }

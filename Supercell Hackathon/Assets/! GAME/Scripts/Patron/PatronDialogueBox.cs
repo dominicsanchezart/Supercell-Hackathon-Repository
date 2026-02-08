@@ -43,8 +43,9 @@ public class PatronDialogueBox : MonoBehaviour
 	[Header("Screen Positioning")]
 	[Tooltip("Viewport position (0-1). X=0 left, Y=0 bottom.")]
 	[SerializeField] private Vector2 viewportAnchor = new Vector2(0.25f, 0.22f);
-	[Tooltip("Sorting order for the box (must be higher than all game content including reward cards at 5000 and card viewer at 10000).")]
-	[SerializeField] private int sortingOrder = 30000;
+	[Tooltip("Sorting layer for the dialogue box. 'Shop' sits above Card layer and below Deck View BG.")]
+	[SerializeField] private string dialogueSortingLayer = "Shop";
+	[SerializeField] private int sortingOrder = 0;
 
 	// State
 	private Coroutine _activeRoutine;
@@ -71,11 +72,20 @@ public class PatronDialogueBox : MonoBehaviour
 		if (dialogueText != null)
 			dialogueText.text = "";
 
-		// Set sorting order
+		// Set sorting layer and order
 		if (boxBackground != null)
+		{
+			boxBackground.sortingLayerName = dialogueSortingLayer;
 			boxBackground.sortingOrder = sortingOrder;
+		}
 		if (dialogueText != null)
+		{
 			dialogueText.sortingOrder = sortingOrder + 1;
+			// TextMeshPro renderer also needs the sorting layer
+			var textRenderer = dialogueText.GetComponent<MeshRenderer>();
+			if (textRenderer != null)
+				textRenderer.sortingLayerName = dialogueSortingLayer;
+		}
 	}
 
 	/// <summary>
