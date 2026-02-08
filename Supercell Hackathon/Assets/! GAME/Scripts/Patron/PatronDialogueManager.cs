@@ -144,6 +144,7 @@ public class PatronDialogueManager : MonoBehaviour
 		_midCombatQuipFired = false;
 		_turnDamageDealt = 0;
 		_initialized = false;
+		ClearPrefetch();
 		TryInitialize();
 
 		// Reset NeoCortex session so each run gets fresh AI context
@@ -404,13 +405,24 @@ public class PatronDialogueManager : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Tries NeoCortex AI first (if available), falls back to scripted pool.
+	/// Shows an AI line if one was prefetched, otherwise tries AI live with scripted fallback.
+	/// Prefetch cache is consumed on use (one-shot).
 	/// </summary>
 	private void TryShowQuip(string[] fallbackPool, DialogueTriggerType trigger, string description)
 	{
 		if (_activeDialogue == null) return;
 
-		// Try NeoCortex AI if provider exists
+		// Check if we have a prefetched AI line ready for this trigger
+		if (_prefetchedLine != null && _prefetchedTrigger == trigger)
+		{
+			string cached = _prefetchedLine;
+			ClearPrefetch();
+			Debug.Log($"[PatronDialogue] Using prefetched AI line for {trigger}");
+			ShowLine(cached);
+			return;
+		}
+
+		// No prefetch — try AI with scripted fallback
 		if (neoCortexProvider != null)
 		{
 			string context = neoCortexProvider.BuildContext(
@@ -423,12 +435,12 @@ public class PatronDialogueManager : MonoBehaviour
 			neoCortexProvider.RequestLine(context,
 				aiLine =>
 				{
-					// AI success — show the generated line
-					ShowLine(aiLine);
+					if (!string.IsNullOrEmpty(aiLine))
+						ShowLine(aiLine);
 				},
 				() =>
 				{
-					// AI failed/timeout — fall back to scripted
+					// AI failed — fall back to scripted
 					string line = PickUnusedLine(fallbackPool);
 					if (!string.IsNullOrEmpty(line))
 						ShowLine(line);
@@ -442,6 +454,56 @@ public class PatronDialogueManager : MonoBehaviour
 			if (!string.IsNullOrEmpty(line))
 				ShowLine(line);
 		}
+	}
+
+	#endregion
+
+	#region Prefetch System
+
+	private string _prefetchedLine;
+	private DialogueTriggerType _prefetchedTrigger;
+
+	/// <summary>
+	/// Call this BEFORE the trigger fires (e.g. when player clicks a map node)
+	/// to give the AI a head start. The response is cached and consumed by the
+	/// next TryShowQuip call for the matching trigger type.
+	/// </summary>
+	public void PrefetchLine(DialogueTriggerType trigger, string description)
+	{
+		if (neoCortexProvider == null) return;
+		TryInitialize();
+		if (_activeDialogue == null) return;
+
+		// Clear any stale prefetch
+		ClearPrefetch();
+
+		string context = neoCortexProvider.BuildContext(
+			trigger,
+			PatronAffinityTracker.GetActivePatronTier(),
+			_patronFaction,
+			description
+		);
+
+		Debug.Log($"[PatronDialogue] Prefetching AI line for {trigger}...");
+
+		neoCortexProvider.RequestLine(context,
+			aiLine =>
+			{
+				_prefetchedLine = aiLine;
+				_prefetchedTrigger = trigger;
+				Debug.Log($"[PatronDialogue] Prefetch READY for {trigger}: \"{aiLine}\"");
+			},
+			() =>
+			{
+				Debug.Log($"[PatronDialogue] Prefetch failed for {trigger} — will use scripted.");
+			},
+			isPrefetch: true
+		);
+	}
+
+	private void ClearPrefetch()
+	{
+		_prefetchedLine = null;
 	}
 
 	/// <summary>

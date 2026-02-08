@@ -18,7 +18,9 @@ MonoBehaviour:
   passive: 1
   passiveDescription: Pact of Wrath placeholder
   portrait: {fileID: 21300000, guid: 4ea3a37ff61917641a7e072d8ff6d664, type: 3}
-  patronColor: {r: 0.8396226, g: 0.25870875, b: 0.14653791, a: 1}
+  patronColor: {r: 1, g: 0.44705883, b: 0.5568628, a: 1}
+  dialogueFrameSprite: {fileID: 21300000, guid: 9ca89b781f0471e42b95c5170affd009, type: 3}
+  selectKeywords: Damage - Fury - Burn
   characterData: {fileID: 11400000, guid: 267a18bd39a2aa741a76a0e4e857706c, type: 2}
   starterDeck: {fileID: 11400000, guid: 8868150fa298f014895004190e7dafee, type: 2}
   startingGold: 50

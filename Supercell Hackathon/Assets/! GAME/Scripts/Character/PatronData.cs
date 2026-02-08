@@ -44,6 +44,10 @@ public class PatronData : ScriptableObject
 	public Sprite portrait;
 	[Tooltip("Color associated with this patron (for UI tinting).")]
 	public Color patronColor = Color.white;
+	[Tooltip("9-sliced border frame sprite for this patron's dialogue box.")]
+	public Sprite dialogueFrameSprite;
+	[Tooltip("Short gameplay keywords shown on patron select (e.g. 'Damage - Fury - Burn').")]
+	public string selectKeywords;
 
 	[Header("Character Stats")]
 	[Tooltip("CharacterData asset defining base HP, energy, draw size for this patron.")]

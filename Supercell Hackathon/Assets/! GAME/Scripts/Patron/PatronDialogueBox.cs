@@ -27,18 +27,32 @@ public class PatronDialogueBox : MonoBehaviour
 {
 	[Header("References")]
 	[SerializeField] private SpriteRenderer boxBackground;
+	[Tooltip("9-sliced border frame sprite. Tinted with the patron's color at runtime.")]
+	[SerializeField] private SpriteRenderer boxBorderFrame;
 	[SerializeField] private TextMeshPro dialogueText;
 
 	[Header("Typewriter")]
 	[SerializeField] private float charDelay = 0.03f;
 
+	[Header("Font Sizing")]
+	[Tooltip("Font size for short text (1 sentence).")]
+	[SerializeField] private float fontSizeShort = 4f;
+	[Tooltip("Font size for medium text (2 sentences).")]
+	[SerializeField] private float fontSizeMedium = 3f;
+	[Tooltip("Font size for long text (3+ sentences).")]
+	[SerializeField] private float fontSizeLong = 2f;
+
 	[Header("Timing")]
 	[SerializeField] private float autoDismissTime = 3.5f;
 	[SerializeField] private float fadeSpeed = 5f;
 
-	[Header("Patron Color")]
-	[Tooltip("If true, tints the box background with the patron's color.")]
+	[Header("Colors")]
+	[Tooltip("If true, tints the text outline with the patron's color.")]
 	[SerializeField] private bool usePatronColor = true;
+	[Tooltip("Background box color (default black for readability).")]
+	[SerializeField] private Color backgroundColor = new Color(0f, 0f, 0f, 0.9f);
+	[Tooltip("Thickness of the text outline (0-1).")]
+	[SerializeField] private float textOutlineWidth = 0.3f;
 
 	[Header("Screen Positioning")]
 	[Tooltip("Viewport position (0-1). X=0 left, Y=0 bottom.")]
@@ -77,28 +91,59 @@ public class PatronDialogueBox : MonoBehaviour
 		{
 			boxBackground.sortingLayerName = dialogueSortingLayer;
 			boxBackground.sortingOrder = sortingOrder;
+			// Black background for readability
+			boxBackground.color = new Color(backgroundColor.r, backgroundColor.g, backgroundColor.b, 0f);
+		}
+		if (boxBorderFrame != null)
+		{
+			boxBorderFrame.sortingLayerName = dialogueSortingLayer;
+			boxBorderFrame.sortingOrder = sortingOrder + 1;
+			// Start hidden, patron color applied lazily
+			boxBorderFrame.color = new Color(1f, 1f, 1f, 0f);
 		}
 		if (dialogueText != null)
 		{
-			dialogueText.sortingOrder = sortingOrder + 1;
-			// TextMeshPro renderer also needs the sorting layer
+			dialogueText.sortingOrder = sortingOrder + 2;
 			var textRenderer = dialogueText.GetComponent<MeshRenderer>();
 			if (textRenderer != null)
 				textRenderer.sortingLayerName = dialogueSortingLayer;
+
+			// White text, outline set to black initially (patron color applied lazily)
+			dialogueText.color = new Color(1f, 1f, 1f, 0f);
+			dialogueText.outlineColor = new Color32(0, 0, 0, 255);
+			dialogueText.outlineWidth = textOutlineWidth;
 		}
 	}
 
 	/// <summary>
-	/// Applies patron color tint. Called lazily since RunState may not exist at Awake.
+	/// Applies patron visuals: swaps the border frame sprite and tints it + text outline.
+	/// Background stays black, text stays white.
 	/// </summary>
 	private void ApplyPatronColor()
 	{
 		if (_patronColorApplied) return;
-		if (!usePatronColor || boxBackground == null) return;
+		if (!usePatronColor) return;
 		if (RunManager.Instance == null || RunManager.Instance.State?.patronData == null) return;
 
-		Color pc = RunManager.Instance.State.patronData.patronColor;
-		boxBackground.color = new Color(pc.r, pc.g, pc.b, boxBackground.color.a);
+		PatronData patron = RunManager.Instance.State.patronData;
+		Color pc = patron.patronColor;
+
+		// Swap border frame sprite per patron
+		if (boxBorderFrame != null && patron.dialogueFrameSprite != null)
+			boxBorderFrame.sprite = patron.dialogueFrameSprite;
+
+		// Tint border frame with patron color
+		if (boxBorderFrame != null)
+			boxBorderFrame.color = new Color(pc.r, pc.g, pc.b, boxBorderFrame.color.a);
+
+		// Tint text outline with patron color
+		if (dialogueText != null)
+			dialogueText.outlineColor = new Color32(
+				(byte)(pc.r * 255),
+				(byte)(pc.g * 255),
+				(byte)(pc.b * 255),
+				255);
+
 		_patronColorApplied = true;
 	}
 
@@ -156,6 +201,10 @@ public class PatronDialogueBox : MonoBehaviour
 		_typewriterDone = false;
 		_dismissCooldown = 0.5f; // Prevent accidental dismiss from clicks that triggered the dialogue
 
+		// Scale font size based on text length
+		if (dialogueText != null)
+			dialogueText.fontSize = GetFontSizeForText(text);
+
 		// Fade in
 		yield return FadeIn();
 
@@ -211,9 +260,17 @@ public class PatronDialogueBox : MonoBehaviour
 	{
 		if (boxBackground != null)
 		{
+			// Background uses its own configured alpha (e.g. 0.9) scaled by fade
 			Color c = boxBackground.color;
-			c.a = a;
+			c.a = backgroundColor.a * a;
 			boxBackground.color = c;
+		}
+
+		if (boxBorderFrame != null)
+		{
+			Color c = boxBorderFrame.color;
+			c.a = a;
+			boxBorderFrame.color = c;
 		}
 
 		if (dialogueText != null)
@@ -227,7 +284,7 @@ public class PatronDialogueBox : MonoBehaviour
 	private float GetAlpha()
 	{
 		if (boxBackground != null)
-			return boxBackground.color.a;
+			return boxBackground.color.a > 0 ? boxBackground.color.a / backgroundColor.a : 0f;
 		if (dialogueText != null)
 			return dialogueText.color.a;
 		return 0f;
@@ -283,5 +340,38 @@ public class PatronDialogueBox : MonoBehaviour
 		mouseWorld.z = boxBackground.transform.position.z;
 
 		return boxBackground.bounds.Contains(mouseWorld);
+	}
+
+	/// <summary>
+	/// Returns a font size based on sentence count.
+	/// Short lines get bigger text to fill the box.
+	/// </summary>
+	private float GetFontSizeForText(string text)
+	{
+		int sentences = CountSentences(text);
+		if (sentences <= 1) return fontSizeShort;
+		if (sentences <= 2) return fontSizeMedium;
+		return fontSizeLong;
+	}
+
+	private int CountSentences(string text)
+	{
+		if (string.IsNullOrEmpty(text)) return 0;
+
+		int count = 0;
+		for (int i = 0; i < text.Length; i++)
+		{
+			char c = text[i];
+			if (c == '.' || c == '!' || c == '?')
+			{
+				// Skip ellipsis
+				if (c == '.' && i + 1 < text.Length && text[i + 1] == '.')
+					continue;
+				count++;
+			}
+		}
+
+		// If no punctuation found, treat it as one sentence
+		return Mathf.Max(1, count);
 	}
 }

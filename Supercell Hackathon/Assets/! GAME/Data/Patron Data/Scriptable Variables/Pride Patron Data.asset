@@ -17,8 +17,10 @@ MonoBehaviour:
   pactTitle: Pact of Pride
   passive: 2
   passiveDescription: Pact of Pride placeholder
-  portrait: {fileID: 21300000, guid: 4ea3a37ff61917641a7e072d8ff6d664, type: 3}
-  patronColor: {r: 0.12001601, g: 0.8207547, b: 0.3616815, a: 1}
+  portrait: {fileID: 21300000, guid: 47f0a775f79d2c94cbd30bcdbc815173, type: 3}
+  patronColor: {r: 0.5921569, g: 0.9647059, b: 0.019607844, a: 1}
+  dialogueFrameSprite: {fileID: 21300000, guid: ec1797edf61c30e4299b3f2815aa8ce0, type: 3}
+  selectKeywords: Heal - Poison - Gold
   characterData: {fileID: 11400000, guid: 267a18bd39a2aa741a76a0e4e857706c, type: 2}
   starterDeck: {fileID: 11400000, guid: 63d0eef16060e4c4884470ef9dcc8b6f, type: 2}
   startingGold: 50

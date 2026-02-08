@@ -17,8 +17,10 @@ MonoBehaviour:
   pactTitle: Pact of Ruin
   passive: 3
   passiveDescription: Pact of Ruin placeholder
-  portrait: {fileID: 21300000, guid: 4ea3a37ff61917641a7e072d8ff6d664, type: 3}
-  patronColor: {r: 0.59255135, g: 0.14509802, b: 0.8392157, a: 1}
+  portrait: {fileID: 21300000, guid: e0a05b029498aff4ab636b85edd842ef, type: 3}
+  patronColor: {r: 0.4627451, g: 0.13725491, b: 0.9254902, a: 1}
+  dialogueFrameSprite: {fileID: 21300000, guid: a7616ae3981d1b54abfb97bec9c0a518, type: 3}
+  selectKeywords: Guard - Dodge - Weaken
   characterData: {fileID: 11400000, guid: 267a18bd39a2aa741a76a0e4e857706c, type: 2}
   starterDeck: {fileID: 11400000, guid: 5ace3dff59fbf5e459f78f8de5e8683b, type: 2}
   startingGold: 50

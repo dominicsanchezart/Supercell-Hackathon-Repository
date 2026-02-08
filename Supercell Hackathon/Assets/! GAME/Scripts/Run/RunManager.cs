@@ -98,6 +98,9 @@ public class RunManager : MonoBehaviour
 			State.currentEnemyPreset = null;
 		}
 
+		// Prefetch patron AI dialogue while the scene loads
+		PrefetchPatronDialogue(node);
+
 		string sceneName = node.encounterType switch
 		{
 			EncounterType.BattleMinion => battleSceneName,
@@ -204,6 +207,43 @@ public class RunManager : MonoBehaviour
 		}
 
 		SetMapInteractable(true);
+	}
+
+	/// <summary>
+	/// Fires an AI dialogue request BEFORE the encounter scene loads.
+	/// By the time the scene finishes loading and OnCombatStart/OnEventNodeEntered fires,
+	/// the AI response is already cached and displays instantly.
+	/// </summary>
+	void PrefetchPatronDialogue(MapNodeData node)
+	{
+		if (PatronDialogueManager.Instance == null) return;
+
+		string enemyName = State.currentEnemyPreset != null
+			? State.currentEnemyPreset.enemyName : "an unknown foe";
+
+		switch (node.encounterType)
+		{
+			case EncounterType.BattleMinion:
+				PatronDialogueManager.Instance.PrefetchLine(
+					DialogueTriggerType.CombatStart,
+					$"Your warlock enters combat against {enemyName}. " +
+					"They draw their opening hand and steel themselves for the fight.");
+				break;
+
+			case EncounterType.BattleBoss:
+				PatronDialogueManager.Instance.PrefetchLine(
+					DialogueTriggerType.BossEncounterStart,
+					$"Your warlock faces {enemyName}, " +
+					"the most dangerous foe they have encountered. This could be the end.");
+				break;
+
+			case EncounterType.Event:
+				PatronDialogueManager.Instance.PrefetchLine(
+					DialogueTriggerType.EventNodeEntered,
+					"Your warlock has stumbled into a strange encounter. " +
+					"Something lurks in the shadows here. The outcome is uncertain.");
+				break;
+		}
 	}
 
 	void LoadMapScene()
