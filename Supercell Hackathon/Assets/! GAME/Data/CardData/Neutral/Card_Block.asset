@@ -18,8 +18,8 @@ MonoBehaviour:
   cardFaction2: 0
   layer0: {fileID: 21300000, guid: d129bb1f4d089aa43928f7bcd4825ad2, type: 3}
   layer1: {fileID: 21300000, guid: 13d84d3810cdf8147b2cbfa09cd73d5a, type: 3}
-  layer2: {fileID: 0}
-  layer3: {fileID: 0}
+  layer2: {fileID: 21300000, guid: c1f66acca5f12794b96cfc09f7748633, type: 3}
+  layer3: {fileID: 21300000, guid: 2552205a15ab430409cd7503281a23cf, type: 3}
   baseEnergyCost: 1
   actionDescription: Gain {action1Value} guard.
   actionType1: 4
